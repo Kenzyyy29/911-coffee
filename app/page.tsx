@@ -1,4 +1,10 @@
+import { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "911 Coffee",
+  description: "Good Coffee Start From Here",
+}
 
 export default function Home() {
   return (
