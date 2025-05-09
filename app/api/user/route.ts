@@ -35,8 +35,9 @@ export async function GET(request: NextRequest) {
    );
   }
 
-  // Correct destructuring - explicitly ignore password and capture the rest
-  const {password: _, ...userData} = user;
+  const userData = Object.fromEntries(
+   Object.entries(user).filter(([key]) => key !== "password")
+  );
 
   return NextResponse.json({
    status: true,
