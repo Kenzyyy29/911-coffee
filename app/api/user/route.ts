@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
    );
   }
 
-  const {password: _, ...userData} = user;
+ const userData = (({password, ...rest}) => rest)(user);
 
   return NextResponse.json({
    status: true,
