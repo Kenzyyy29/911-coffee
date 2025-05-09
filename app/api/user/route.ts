@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
    );
   }
 
- const userData = (({password, ...rest}) => rest)(user);
+  // Correct destructuring - explicitly ignore password and capture the rest
+  const {password: _, ...userData} = user;
 
   return NextResponse.json({
    status: true,
