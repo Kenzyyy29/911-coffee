@@ -1,28 +1,23 @@
-// app/api/user/route.ts
 import {NextResponse} from "next/server";
 import {getToken} from "next-auth/jwt";
 import {retrieveDataById} from "@/lib/utils/service";
-import {headers} from "next/headers";
+import {NextRequest} from "next/server";
 
-export async function GET(request: Request) {
+interface UserResponse {
+ status: boolean;
+ data?: {
+  id: string;
+  fullname: string;
+  email: string;
+  phone: string;
+  role?: string;
+ };
+ message?: string;
+}
+
+export async function GET(request: NextRequest) {
  try {
-  const headersList = headers();
-  const headersObject = Object.fromEntries(
-   headersList as unknown as Iterable<readonly [string, string]>
-  );
-
-  const token = await getToken({
-   req: {
-    headers: headersObject,
-    url: request.url,
-    cookies: Object.fromEntries(
-     request.headers
-      .get("cookie")
-      ?.split(";")
-      .map((c) => c.trim().split("=")) || []
-    ),
-   } as any,
-  });
+  const token = await getToken({req: request});
 
   if (!token) {
    return NextResponse.json(
@@ -40,19 +35,19 @@ export async function GET(request: Request) {
    );
   }
 
-  const {password, ...userData} = user;
+  const {password: _, ...userData} = user;
 
   return NextResponse.json({
    status: true,
    data: userData,
-  });
- } catch (error: any) {
-  console.error("API Error:", error);
+  } as UserResponse);
+ } catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : "Unknown error";
+  console.error("API Error:", errorMessage);
   return NextResponse.json(
    {
     status: false,
     message: "Internal server error",
-    error: error.message,
    },
    {status: 500}
   );

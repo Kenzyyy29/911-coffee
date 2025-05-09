@@ -1,4 +1,3 @@
-// app/api/auth/register/route.ts
 import {register} from "@/lib/utils/service";
 import {NextResponse} from "next/server";
 
