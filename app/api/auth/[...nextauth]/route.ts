@@ -1,5 +1,4 @@
-// app/api/auth/[...nextauth]/route.ts
-import NextAuth, {NextAuthOptions} from "next-auth";
+import NextAuth, {NextAuthOptions, DefaultSession} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import {login} from "@/lib/utils/service";
 import bcrypt from "bcryptjs";
@@ -15,6 +14,20 @@ interface User {
  updated_at?: Date;
 }
 
+declare module "next-auth" {
+ interface Session extends DefaultSession {
+  user: {
+   id: string;
+   role?: string;
+  } & DefaultSession["user"];
+ }
+
+ interface JWT {
+  id?: string;
+  role?: string;
+ }
+}
+
 export const authOptions: NextAuthOptions = {
  providers: [
   CredentialsProvider({
@@ -23,7 +36,7 @@ export const authOptions: NextAuthOptions = {
     email: {label: "Email", type: "email"},
     password: {label: "Password", type: "password"},
    },
-   async authorize(credentials): Promise<any> {
+   async authorize(credentials): Promise<User | null> {
     if (!credentials?.email || !credentials?.password) {
      return null;
     }
@@ -34,39 +47,39 @@ export const authOptions: NextAuthOptions = {
     }
 
     const isValid = await bcrypt.compare(credentials.password, user.password);
-
     if (!isValid) {
      return null;
     }
 
     return {
      id: user.id,
-     name: user.fullname,
+     fullname: user.fullname,
      email: user.email,
+     password: user.password,
      role: user.role || "member",
     };
    },
   }),
  ],
  callbacks: {
-  async redirect({url, baseUrl}: {url: string; baseUrl: string}) {
-   if (url.startsWith("/")) return `${baseUrl}${url}`;
-   else if (new URL(url).origin === baseUrl) return url;
-   return baseUrl;
-  },
-  jwt: async ({token, user}: any) => {
+  async jwt({token, user}) {
    if (user) {
     token.id = user.id;
-    token.role = user.role;
+    token.role = (user as User).role;
    }
    return token;
   },
-  session: async ({session, token}: any) => {
-   if (token) {
-    session.user.id = token.id;
-    session.user.role = token.role;
+  async session({session, token}) {
+   if (token && session.user) {
+    session.user.id = token.id as string;
+    session.user.role = token.role as string;
    }
    return session;
+  },
+  async redirect({url, baseUrl}) {
+   if (url.startsWith("/")) return `${baseUrl}${url}`;
+   else if (new URL(url).origin === baseUrl) return url;
+   return baseUrl;
   },
  },
  pages: {

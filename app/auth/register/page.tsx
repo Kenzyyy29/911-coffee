@@ -1,4 +1,3 @@
-// app/auth/register/page.tsx
 "use client";
 
 import AuthFormContainer from "@/components/core/AuthFormContainer";
@@ -92,8 +91,10 @@ export default function RegisterPage() {
    }
 
    push("/auth/login?registered=true");
-  } catch (error: any) {
-   setApiError(error.message || "Something went wrong");
+  } catch (error: unknown) {
+   const message =
+    error instanceof Error ? error.message : "Something went wrong";
+   setApiError(message);
   } finally {
    setLoading(false);
   }
