@@ -110,7 +110,7 @@ const TaxesPageLayout = () => {
       initial="hidden"
       animate="visible"
       className="bg-white rounded-xl shadow overflow-hidden">
-      <div className="overflow-y-auto">
+      <div className="overflow-hidden">
        <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-800 text-white">
          <tr>

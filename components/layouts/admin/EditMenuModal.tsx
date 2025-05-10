@@ -1,37 +1,51 @@
 "use client";
 
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {motion} from "framer-motion";
 import {FiX, FiUpload} from "react-icons/fi";
 import {Tax} from "@/lib/types/tax";
 import {Menu} from "@/lib/types/menu";
 
-interface AddEditMenuDialogProps {
+interface EditMenuModalProps {
  isOpen: boolean;
  onClose: () => void;
  onSubmit: (menuData: Omit<Menu, "id" | "createdAt">) => void;
  taxes: Tax[];
- currentMenu: Menu | null;
+ currentMenu: Menu;
  outletId: string;
 }
 
-const AddEditMenuDialog = ({
+const EditMenuModal = ({
  isOpen,
  onClose,
  onSubmit,
  taxes,
  currentMenu,
  outletId,
-}: AddEditMenuDialogProps) => {
+}: EditMenuModalProps) => {
  const [formData, setFormData] = useState({
-  name: currentMenu?.name || "",
-  description: currentMenu?.description || "",
-  price: currentMenu?.price || 0,
-  taxId: currentMenu?.taxId || "",
-  outletId: outletId, // Always use the selected outlet
-  imageUrl: currentMenu?.imageUrl || "",
-  isAvailable: currentMenu?.isAvailable ?? true,
+  name: currentMenu.name,
+  description: currentMenu.description,
+  price: currentMenu.price,
+  taxId: currentMenu.taxId,
+  outletId: outletId,
+  imageUrl: currentMenu.imageUrl,
+  isAvailable: currentMenu.isAvailable,
  });
+
+ useEffect(() => {
+  if (currentMenu) {
+   setFormData({
+    name: currentMenu.name,
+    description: currentMenu.description,
+    price: currentMenu.price,
+    taxId: currentMenu.taxId,
+    outletId: outletId,
+    imageUrl: currentMenu.imageUrl,
+    isAvailable: currentMenu.isAvailable,
+   });
+  }
+ }, [currentMenu, outletId]);
 
  const handleChange = (
   e: React.ChangeEvent<
@@ -50,7 +64,6 @@ const AddEditMenuDialog = ({
  const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
 
-  // Validasi data sebelum submit
   if (!formData.name || !formData.price || !formData.taxId) {
    alert("Please fill all required fields");
    return;
@@ -59,12 +72,11 @@ const AddEditMenuDialog = ({
   const menuData = {
    name: formData.name,
    description: formData.description,
-   price: Number(formData.price), // Pastikan number
+   price: Number(formData.price),
    taxId: formData.taxId,
-   outletId: outletId, // Gunakan outletId dari prop
+   outletId: outletId,
    imageUrl: formData.imageUrl || "",
    isAvailable: Boolean(formData.isAvailable),
-   createdAt: currentMenu?.createdAt || new Date().toISOString(),
   };
 
   onSubmit(menuData);
@@ -83,9 +95,7 @@ const AddEditMenuDialog = ({
     animate={{scale: 1, y: 0}}
     className="bg-white rounded-xl shadow-xl w-full max-w-md">
     <div className="flex justify-between items-center border-b p-4">
-     <h2 className="text-xl font-semibold text-gray-800">
-      {currentMenu ? "Edit Menu" : "Add New Menu"}
-     </h2>
+     <h2 className="text-xl font-semibold text-gray-800">Edit Menu</h2>
      <button
       onClick={onClose}
       className="text-gray-500 hover:text-gray-700">
@@ -96,6 +106,7 @@ const AddEditMenuDialog = ({
      onSubmit={handleSubmit}
      className="p-6">
      <div className="space-y-4">
+      {/* Form fields remain the same as in original */}
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
         Menu Name *
@@ -208,7 +219,7 @@ const AddEditMenuDialog = ({
       <button
        type="submit"
        className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700">
-       {currentMenu ? "Update Menu" : "Add Menu"}
+       Update Menu
       </button>
      </div>
     </form>
@@ -217,4 +228,4 @@ const AddEditMenuDialog = ({
  );
 };
 
-export default AddEditMenuDialog;
+export default EditMenuModal;

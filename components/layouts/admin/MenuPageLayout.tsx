@@ -13,13 +13,19 @@ import {
 import {useOutlets} from "@/lib/hooks/useOutlets";
 import {useMenu} from "@/lib/hooks/useMenu";
 import {useTaxes} from "@/lib/hooks/useTaxes";
-import AddEditMenuDialog from "./AddEditMenuDialog";
 import {Menu} from "@/lib/types/menu";
 import Image from "next/image";
+import AddMenuModal from "./AddMenuModal";
+import EditMenuModal from "./EditMenuModal";
+import DeleteMenuModal from "./DeleteMenuModal";
+
 
 const MenuPageLayout = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<string>("");
- const [isDialogOpen, setIsDialogOpen] = useState(false);
+ const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+ const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+ const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+ const [menuToDelete, setMenuToDelete] = useState<string | null>(null);
  const [currentMenu, setCurrentMenu] = useState<Menu | null>(null);
  const {menus, loading, error} = useMenu(selectedOutlet);
  const {outlets} = useOutlets();
@@ -43,34 +49,49 @@ const MenuPageLayout = () => {
    alert("Please select an outlet first");
    return;
   }
-  setCurrentMenu(null);
-  setIsDialogOpen(true);
+  setIsAddModalOpen(true);
  };
 
+
+ 
  const handleEditMenu = (menu: Menu) => {
   setCurrentMenu(menu);
-  setIsDialogOpen(true);
+  setIsEditModalOpen(true);
  };
 
- const handleDeleteMenu = async (id: string) => {
-  if (confirm("Are you sure you want to delete this menu?")) {
-   await deleteMenu(id);
+const handleDeleteMenu = (id: string) => {
+ setMenuToDelete(id);
+ setIsDeleteModalOpen(true);
+};
+
+const handleConfirmDelete = async () => {
+ if (menuToDelete) {
+  await deleteMenu(menuToDelete);
+  setIsDeleteModalOpen(false);
+  setMenuToDelete(null);
+ }
+};
+
+ const handleAddSubmit = async (menuData: Omit<Menu, "id" | "createdAt">) => {
+  try {
+   await addMenu({
+    ...menuData,
+    outletId: selectedOutlet,
+   });
+   setIsAddModalOpen(false);
+  } catch (error) {
+   console.error("Error adding menu:", error);
   }
  };
 
- const handleSubmit = async (menuData: Omit<Menu, "id" | "createdAt">) => {
+ const handleEditSubmit = async (menuData: Omit<Menu, "id" | "createdAt">) => {
   try {
    if (currentMenu) {
     await updateMenu(currentMenu.id, menuData);
-   } else {
-    await addMenu({
-     ...menuData,
-     outletId: selectedOutlet, // Ensure outletId matches selection
-    });
+    setIsEditModalOpen(false);
    }
-   setIsDialogOpen(false);
   } catch (error) {
-   console.error("Error saving menu:", error);
+   console.error("Error updating menu:", error);
   }
  };
 
@@ -245,13 +266,29 @@ const MenuPageLayout = () => {
     </div>
    </motion.div>
 
-   <AddEditMenuDialog
-    isOpen={isDialogOpen}
-    onClose={() => setIsDialogOpen(false)}
-    onSubmit={handleSubmit}
+   <AddMenuModal
+    isOpen={isAddModalOpen}
+    onClose={() => setIsAddModalOpen(false)}
+    onSubmit={handleAddSubmit}
     taxes={taxes}
-    currentMenu={currentMenu}
     outletId={selectedOutlet}
+   />
+   {currentMenu && (
+    <EditMenuModal
+     isOpen={isEditModalOpen}
+     onClose={() => setIsEditModalOpen(false)}
+     onSubmit={handleEditSubmit}
+     taxes={taxes}
+     currentMenu={currentMenu}
+     outletId={selectedOutlet}
+    />
+   )}
+   <DeleteMenuModal
+    isOpen={isDeleteModalOpen}
+    onClose={() => setIsDeleteModalOpen(false)}
+    onConfirm={handleConfirmDelete}
+    menuName={menus.find((m) => m.id === menuToDelete)?.name}
+    isLoading={menusLoading}
    />
   </div>
  );
