@@ -18,17 +18,21 @@ interface SidebarProps {
 const adminLinks = [
  {name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard />},
  {
-  name: "Produk & Layanan",
-  path: "/admin/dashboard/products-services/menu",
+  name: "Produk",
+  path: "/admin/dashboard/products/menu",
   icon: <FaBox />,
   subItems: [
    {
     name: "Menu",
-    path: "/admin/dashboard/products-services/menu",
+    path: "/admin/dashboard/products/menu",
    },
    {
     name: "Bundling",
-    path: "/admin/dashboard/products-services/bundles",
+    path: "/admin/dashboard/products/bundles",
+   },
+   {
+    name: "Taxes",
+    path: "/admin/dashboard/products/taxes",
    },
   ],
  },
@@ -36,16 +40,6 @@ const adminLinks = [
   name: "Settings",
   path: "/admin/dashboard/settings/profile",
   icon: <FaGear />,
-  subItems: [
-   {
-    name: "Profile",
-    path: "/admin/dashboard/settings/profile",
-   },
-   {
-    name: "Menu",
-    path: "/admin/dashboard/products-services/menu",
-   },
-  ],
  },
  {name: "Outlets", path: "/admin/dashboard/outlets", icon: <FaStore />},
 ];
