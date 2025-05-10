@@ -10,7 +10,7 @@ export async function withAuth(req: NextRequest) {
  const protectedPaths = ["/dashboard", "/admin", "/admin/dashboard"];
 
  // Auth paths that should redirect to admin dashboard if already authenticated
- const authPaths = ["/auth/login", "/auth/register"];
+ const authPaths = ["/auth/login"];
 
  // Redirect authenticated users away from auth pages
  if (token && authPaths.some((path) => pathname.startsWith(path))) {
@@ -28,11 +28,17 @@ export async function withAuth(req: NextRequest) {
  }
 
  // Redirect all /dashboard and /admin access to /admin/dashboard
- if (pathname.startsWith("/dashboard") || pathname === "/admin") {
-  const url = req.nextUrl.clone();
-  url.pathname = "/admin/dashboard";
-  return NextResponse.redirect(url);
- }
+if (pathname.startsWith("/dashboard") || pathname === "/admin") {
+ const url = req.nextUrl.clone();
+ url.pathname = "/admin/dashboard";
+ return NextResponse.redirect(url);
+}
+
+if (pathname === "/auth/register") {
+ const url = req.nextUrl.clone();
+ url.pathname = "/auth/login";
+ return NextResponse.redirect(url);
+}
 
  return NextResponse.next();
 }

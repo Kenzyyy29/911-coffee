@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layouts/Navbar";
 import {SessionProvider} from "next-auth/react";
 import {usePathname} from "next/navigation";
+import Footer from "@/components/layouts/Footer";
 // import Footer from "@/components/layouts/Footer";
 
 const geistSans = Geist({
@@ -19,22 +20,16 @@ const geistMono = Geist_Mono({
 const disableNavbar = [
  "/auth/login",
  "/auth/register",
- "/admin/webmaster",
  "/admin/dashboard",
  "/unauthorized",
- "/forgot-password",
- "/reset-password",
- "/pricing/confirmation",
 ];
-// const disableFooter = [
-//  "/auth/login",
-//  "/auth/register",
-//  "/admin/webmaster",
-//  "/admin/dashboard",
-//  "/unauthorized",
-//  "/forgot-password",
-//  "/reset-password",
-// ];
+
+const disableFooter = [
+ "/auth/login",
+ "/auth/register",
+ "/admin/dashboard",
+ "/unauthorized",
+];
 
 export default function RootLayout({
  children,
@@ -47,9 +42,9 @@ export default function RootLayout({
   (path) => pathname === path || pathname.startsWith(`${path}/`)
  );
 
-//  const showFooter = !disableFooter.some(
-//   (path) => pathname === path || pathname.startsWith(`${path}/`)
-//  );
+ const showFooter = !disableFooter.some(
+  (path) => pathname === path || pathname.startsWith(`${path}/`)
+ );
 
  return (
   <html lang="en">
@@ -57,7 +52,7 @@ export default function RootLayout({
     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
      {showNavbar && <Navbar />}
      {children}
-     {/* {showFooter && <Footer />} */}
+     {showFooter && <Footer />}
     </body>
    </SessionProvider>
   </html>

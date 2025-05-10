@@ -6,13 +6,7 @@ import {useState, useEffect} from "react";
 import {
  FiMenu,
  FiX,
- FiBriefcase,
- FiMail,
- FiBook,
- FiDollarSign,
 } from "react-icons/fi";
-import {FaHandshake} from "react-icons/fa";
-import {BsFillLightningFill} from "react-icons/bs";
 import {GiCoffeeBeans} from "react-icons/gi";
 
 const itemVariants = {
@@ -45,32 +39,26 @@ export default function Navbar() {
   {
    name: "Tentang Kami",
    path: "/about",
-   icon: <FaHandshake className="text-lg" />,
   },
   {
-   name: "Fitur",
-   path: "/features",
-   icon: <BsFillLightningFill className="text-lg" />,
+   name: "Outlet",
+   path: "/outlet",
   },
   {
-   name: "Harga",
-   path: "/pricing",
-   icon: <FiDollarSign className="text-lg" />,
+   name: "Menu",
+   path: "/menu",
   },
   {
    name: "Blog",
    path: "/blog",
-   icon: <FiBook className="text-lg" />,
   },
   {
    name: "Karir",
    path: "/career",
-   icon: <FiBriefcase className="text-lg" />,
   },
   {
    name: "Kontak",
    path: "/contact",
-   icon: <FiMail className="text-lg" />,
   },
  ];
 
@@ -86,8 +74,8 @@ export default function Navbar() {
      },
     },
    }}
-   className={`fixed w-full z-50 py-3 ${
-    scrolled ? "bg-black" : "bg-black backdrop-blur-sm"
+   className={`fixed w-full z-50 py-3 transition-all duration-700 ease-in-out ${
+    scrolled ? "bg-black/80 py-3 backdrop-blur-sm" : "bg-transparent  py-5"
    }`}>
    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex items-center justify-between h-16">
@@ -136,7 +124,7 @@ export default function Navbar() {
 
      {/* Mobile Menu Button */}
      <motion.button
-      className="md:hidden text-white p-2 rounded-lg hover:bg-blue-700/50"
+      className="md:hidden text-white p-2 rounded-lg hover:bg-black"
       onClick={() => setIsOpen(!isOpen)}
       whileHover={{scale: 1.1}}
       whileTap={{scale: 0.95}}>
@@ -153,11 +141,11 @@ export default function Navbar() {
       animate={{opacity: 1, height: "auto"}}
       exit={{opacity: 0, height: 0}}
       transition={{duration: 0.3}}
-      className="md:hidden bg-gradient-to-b from-blue-700 to-blue-800 overflow-hidden">
+      className="md:hidden bg-black overflow-hidden">
       <div className="px-4 pt-2 pb-4 space-y-1">
        {navItems.map((item) => (
         <div key={item.path}>
-         <div className="flex items-center justify-between px-3 py-3 rounded-lg text-base font-medium text-blue-100 hover:bg-blue-700/50 hover:text-white">
+         <div className="flex items-center justify-between px-3 py-3 rounded-lg text-base font-medium text-white hover:bg-black hover:text-white">
           <Link
            href={item.path}
            className="flex items-center flex-1">
