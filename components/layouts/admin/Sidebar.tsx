@@ -3,7 +3,7 @@ import {signOut} from "next-auth/react";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {motion, AnimatePresence} from "framer-motion";
-import {FaSignOutAlt, FaBox} from "react-icons/fa";
+import {FaSignOutAlt, FaBox, FaStore} from "react-icons/fa";
 import {IoIosArrowDropright} from "react-icons/io";
 import {MdDashboard} from "react-icons/md";
 import {useState} from "react";
@@ -19,22 +19,22 @@ const adminLinks = [
  {name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard />},
  {
   name: "Produk & Layanan",
-  path: "/admin/dashboard/products-services",
+  path: "/admin/dashboard/products-services/menu",
   icon: <FaBox />,
   subItems: [
    {
-    name: "Bundling",
-    path: "/admin/dashboard/products-services/bundles",
-   },
-   {
     name: "Menu",
     path: "/admin/dashboard/products-services/menu",
+   },
+   {
+    name: "Bundling",
+    path: "/admin/dashboard/products-services/bundles",
    },
   ],
  },
  {
   name: "Settings",
-  path: "/admin/dashboard/settings",
+  path: "/admin/dashboard/settings/profile",
   icon: <FaGear />,
   subItems: [
    {
@@ -47,6 +47,7 @@ const adminLinks = [
    },
   ],
  },
+ {name: "Outlets", path: "/admin/dashboard/outlets", icon: <FaStore />},
 ];
 
 export default function Sidebar({
@@ -72,14 +73,13 @@ export default function Sidebar({
   });
  };
 
- const isActive = (path: string, exact: boolean = false) => {
-  if (exact) {
+ const isActive = (path: string) => {
+  // Jika path adalah dashboard, hanya aktif ketika pathname persis sama
+  if (path === "/admin/dashboard") {
    return pathname === path;
   }
-  return (
-   pathname.startsWith(path) &&
-   (path === "/admin" ? pathname === "/admin" : true)
-  );
+  // Untuk path lainnya, aktif ketika pathname dimulai dengan path tersebut
+  return pathname.startsWith(path);
  };
 
  const handleLinkClick = (path: string, hasSubItems: boolean) => {
@@ -154,9 +154,7 @@ export default function Sidebar({
             <Link
              href={link.path}
              className={`flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:text-black transition-all ${
-              isActive(link.path, link.path === "/admin")
-               ? "bg-white text-black font-medium"
-               : ""
+              isActive(link.path) ? "bg-white text-black font-medium" : ""
              }`}
              onClick={(e) => {
               if (link.subItems) {
@@ -193,7 +191,7 @@ export default function Sidebar({
                  href={subItem.path}
                  className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded hover:bg-white hover:text-black ${
                   pathname === subItem.path
-                   ? "text-white font-medium"
+                   ? "bg-white text-black font-medium"
                    : "text-white"
                  }`}
                  onClick={() => handleLinkClick(subItem.path, false)}>
