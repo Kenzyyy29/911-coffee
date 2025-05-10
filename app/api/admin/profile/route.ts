@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/lib/auth/auth-options";
 import {doc, getDoc, getFirestore, updateDoc} from "firebase/firestore";
-import app from "@/lib/firebase/init";
+import {app} from "@/lib/firebase/init";
 import bcrypt from "bcryptjs";
 
 const firestore = getFirestore(app);
