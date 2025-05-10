@@ -15,6 +15,7 @@ import {useMenu} from "@/lib/hooks/useMenu";
 import {useTaxes} from "@/lib/hooks/useTaxes";
 import AddEditMenuDialog from "./AddEditMenuDialog";
 import {Menu} from "@/lib/types/menu";
+import Image from "next/image";
 
 const MenuPageLayout = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<string>("");
@@ -181,7 +182,9 @@ const MenuPageLayout = () => {
             className="hover:bg-gray-50">
             <td className="px-6 py-4 whitespace-nowrap">
              {menu.imageUrl ? (
-              <img
+              <Image
+               width={40}
+               height={40}
                src={menu.imageUrl}
                alt={menu.name}
                className="h-10 w-10 rounded-full object-cover"

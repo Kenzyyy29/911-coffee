@@ -1,5 +1,5 @@
 // lib/hooks/useTaxes.ts
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {db} from "@/lib/firebase/init";
 import {
  collection,
@@ -20,8 +20,7 @@ export const useTaxes = () => {
 
  const taxesCollectionRef = collection(db, "taxes");
 
- // Fetch all taxes
- const fetchTaxes = async () => {
+ const fetchTaxes = useCallback(async () => {
   setLoading(true);
   try {
    const q = query(taxesCollectionRef, orderBy("createdAt", "desc"));
@@ -37,9 +36,8 @@ export const useTaxes = () => {
   } finally {
    setLoading(false);
   }
- };
+ }, [taxesCollectionRef]);
 
- // Add a new tax
  const addTax = async (taxData: Omit<Tax, "id" | "createdAt">) => {
   setLoading(true);
   try {
@@ -48,7 +46,7 @@ export const useTaxes = () => {
     createdAt: new Date().toISOString(),
    };
    const docRef = await addDoc(taxesCollectionRef, newTax);
-   await fetchTaxes(); // Refresh the list
+   await fetchTaxes();
    return docRef.id;
   } catch (err) {
    setError("Failed to add tax");
@@ -59,13 +57,12 @@ export const useTaxes = () => {
   }
  };
 
- // Update an existing tax
  const updateTax = async (id: string, taxData: Partial<Tax>) => {
   setLoading(true);
   try {
    const taxDoc = doc(db, "taxes", id);
    await updateDoc(taxDoc, taxData);
-   await fetchTaxes(); // Refresh the list
+   await fetchTaxes();
   } catch (err) {
    setError("Failed to update tax");
    console.error(err);
@@ -75,13 +72,12 @@ export const useTaxes = () => {
   }
  };
 
- // Delete a tax
  const deleteTax = async (id: string) => {
   setLoading(true);
   try {
    const taxDoc = doc(db, "taxes", id);
    await deleteDoc(taxDoc);
-   await fetchTaxes(); // Refresh the list
+   await fetchTaxes();
   } catch (err) {
    setError("Failed to delete tax");
    console.error(err);
@@ -93,7 +89,7 @@ export const useTaxes = () => {
 
  useEffect(() => {
   fetchTaxes();
- }, []);
+ }, [fetchTaxes]);
 
  return {
   taxes,

@@ -1,4 +1,3 @@
-// app/admin/dashboard/products/taxes/page.tsx
 "use client";
 
 import {useState} from "react";
@@ -8,7 +7,6 @@ import {
  FiEdit2,
  FiTrash2,
  FiPercent,
- FiDollarSign,
  FiInfo,
 } from "react-icons/fi";
 import {useTaxes} from "@/lib/hooks/useTaxes";
