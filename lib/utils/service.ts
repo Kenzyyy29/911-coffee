@@ -7,7 +7,7 @@ import {
  query,
  where,
 } from "firebase/firestore";
-import app from "../firebase/init";
+import {app} from "../firebase/init";
 
 const firestore = getFirestore(app);
 
