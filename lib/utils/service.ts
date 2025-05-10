@@ -11,7 +11,7 @@ import app from "../firebase/init";
 
 const firestore = getFirestore(app);
 
-interface User {
+export interface User {
  id?: string;
  fullname: string;
  email: string;

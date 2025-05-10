@@ -3,10 +3,11 @@ import {signOut} from "next-auth/react";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {motion, AnimatePresence} from "framer-motion";
-import {FaSignOutAlt, FaBox, FaUtensils} from "react-icons/fa";
+import {FaSignOutAlt, FaBox} from "react-icons/fa";
 import {IoIosArrowDropright} from "react-icons/io";
 import {MdDashboard} from "react-icons/md";
 import {useState} from "react";
+import {FaGear} from "react-icons/fa6";
 
 interface SidebarProps {
  isMobile: boolean;
@@ -28,7 +29,21 @@ const adminLinks = [
    {
     name: "Menu",
     path: "/admin/dashboard/products-services/menu",
-    icon: <FaUtensils />,
+   },
+  ],
+ },
+ {
+  name: "Settings",
+  path: "/admin/dashboard/settings",
+  icon: <FaGear />,
+  subItems: [
+   {
+    name: "Profile",
+    path: "/admin/dashboard/settings/profile",
+   },
+   {
+    name: "Menu",
+    path: "/admin/dashboard/products-services/menu",
    },
   ],
  },
@@ -82,7 +97,7 @@ export default function Sidebar({
       animate={isMobile ? {x: sidebarOpen ? 0 : -280} : {x: 0}}
       exit={{x: -280}}
       transition={{type: "spring", stiffness: 300, damping: 30}}
-      className={`fixed left-0 top-0 h-full w-[280px] bg-gradient-to-br from-blue-600 to-blue-700 text-white p-5 flex flex-col rounded-r-xl shadow-xl z-40 ${
+      className={`fixed left-0 top-0 h-full w-[280px] bg-black text-white p-5 flex flex-col rounded-r-xl shadow-xl z-40 ${
        isMobile && !sidebarOpen ? "hidden" : ""
       }`}>
       {/* Custom scrollbar styles */}
@@ -138,9 +153,9 @@ export default function Sidebar({
            <div className="flex flex-col">
             <Link
              href={link.path}
-             className={`flex items-center gap-3 p-3 rounded-lg hover:bg-blue-700/50 transition-all ${
+             className={`flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:text-black transition-all ${
               isActive(link.path, link.path === "/admin")
-               ? "bg-blue-700 font-medium"
+               ? "bg-white text-black font-medium"
                : ""
              }`}
              onClick={(e) => {
@@ -169,20 +184,20 @@ export default function Sidebar({
               initial={{opacity: 0, height: 0}}
               animate={{opacity: 1, height: "auto"}}
               exit={{opacity: 0, height: 0}}
-              className="ml-8 pl-3 border-l-2 border-blue-400/30">
+              className="ml-8 pl-3 border-l-2 border-white">
               {link.subItems.map((subItem) => (
                <li
                 key={subItem.path}
                 className="py-1.5">
                 <Link
                  href={subItem.path}
-                 className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded hover:bg-blue-700/30 ${
+                 className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded hover:bg-white hover:text-black ${
                   pathname === subItem.path
                    ? "text-white font-medium"
                    : "text-white"
                  }`}
                  onClick={() => handleLinkClick(subItem.path, false)}>
-                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                 <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
                  {subItem.name}
                 </Link>
                </li>
@@ -199,7 +214,7 @@ export default function Sidebar({
        <div className="w-full pt-4 pb-2">
         <motion.button
          onClick={() => signOut()}
-         className="flex items-center gap-3 bg-blue-800 hover:bg-blue-600 text-white w-full py-2.5 px-4 rounded-lg cursor-pointer transition-colors"
+         className="flex items-center gap-3 bg-white hover:bg-white/90 text-black w-full py-2.5 px-4 rounded-lg cursor-pointer transition-colors"
          whileHover={{scale: 1.02}}
          whileTap={{scale: 0.98}}>
          <FaSignOutAlt />

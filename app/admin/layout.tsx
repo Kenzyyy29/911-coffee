@@ -3,11 +3,7 @@
 import Sidebar from "@/components/layouts/admin/Sidebar";
 import {useEffect, useState} from "react";
 
-export default function AdminLayout({
- children,
-}: {
- children: React.ReactNode;
-}) {
+export default function AdminLayout({children}: {children: React.ReactNode}) {
  const [isMobile, setIsMobile] = useState(false);
  const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -30,12 +26,12 @@ export default function AdminLayout({
  }, []);
 
  return (
-  <div className="flex min-h-screen bg-gray-50">
+  <div className="flex min-h-[100dvh] bg-white dark:bg-black text-black dark:text-white">
    {/* Mobile toggle button */}
    {isMobile && (
     <button
      onClick={() => setSidebarOpen(!sidebarOpen)}
-     className="fixed top-4 left-4 z-50 p-2 rounded-md bg-blue-600 text-white lg:hidden shadow-lg"
+     className="fixed top-4 left-4 z-50 p-2 rounded-md bg-black dark:bg-white dark:text-black text-white lg:hidden shadow-lg"
      aria-label="Toggle sidebar">
      {sidebarOpen ? (
       <svg
@@ -81,7 +77,7 @@ export default function AdminLayout({
           ${sidebarOpen && isMobile ? "ml-0" : ""}
           ${!isMobile ? "ml-[280px]" : ""}
         `}>
-    <div className="max-w-full overflow-x-auto">{children}</div>
+    <div className="max-w-full overflow-y-auto ">{children}</div>
    </main>
   </div>
  );
