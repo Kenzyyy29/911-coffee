@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
-import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { doc, getFirestore, updateDoc, FieldValue } from "firebase/firestore";
 import { app } from "@/lib/firebase/init";
 import bcrypt from "bcryptjs";
 
 const firestore = getFirestore(app);
 
-// Definisikan tipe yang kompatibel dengan Firestore
-type FirestoreUpdateData = {
-    [key: string]: any;
+// Tipe untuk update data yang kompatibel dengan Firestore
+type FirestoreUpdate = {
     fullname?: string;
     phone?: string;
     password?: string;
-    updated_at: Date;
-} & Record<`${string}.${string}`, any>; // Tambahkan index signature untuk nested fields
+    updated_at: FieldValue | Date;
+} & Record<string, unknown>; // Menambahkan index signature
 
 export async function PUT(request: Request) {
     try {
@@ -25,28 +24,27 @@ export async function PUT(request: Request) {
 
         const { userId, fullname, phone, newPassword } = await request.json();
 
-        // Validate user ID matches session
         if (userId !== session.user.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        const updateData: FirestoreUpdateData = {
+        const updateData: FirestoreUpdate = {
             updated_at: new Date(),
         };
 
-        // Update profile fields if provided
         if (fullname) updateData.fullname = fullname;
         if (phone) updateData.phone = phone;
 
-        // Update password if provided
         if (newPassword) {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
             updateData.password = hashedPassword;
         }
 
-        // Only update if there are changes
         if (Object.keys(updateData).length > 1) {
-            await updateDoc(doc(firestore, "users", userId), updateData);
+            await updateDoc(
+                doc(firestore, "users", userId),
+                updateData
+            );
         }
 
         return NextResponse.json({ message: "Profile updated successfully" });
