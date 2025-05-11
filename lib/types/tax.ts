@@ -1,6 +1,6 @@
 // types/tax.ts
 export interface Tax {
- id?: string;
+ id: string;
  name: string;
  rate: number; // percentage
  description?: string;

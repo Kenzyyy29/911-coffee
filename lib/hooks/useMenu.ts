@@ -18,58 +18,57 @@ export const useMenu = (outletId: string) => {
  const [loading, setLoading] = useState<boolean>(true);
  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-   if (!outletId) {
-    setMenus([]);
-    setLoading(false);
-    return;
-   }
+    useEffect(() => {
+        if (!outletId) {
+            setMenus([]);
+            setLoading(false);
+            return;
+        }
 
-   setLoading(true);
-   const q = query(
-    collection(db, "menus"),
-    where("outletId", "==", outletId),
-    orderBy("createdAt", "desc")
-   );
+        setLoading(true);
+        const q = query(
+            collection(db, "menus"),
+            where("outletId", "==", outletId),
+            orderBy("createdAt", "desc")
+        );
 
-   const unsubscribe = onSnapshot(
-    q,
-    (snapshot) => {
-     try {
-      const menusData: Menu[] = [];
-      snapshot.forEach((doc) => {
-       const data = doc.data();
-       // Pastikan data sesuai dengan interface Menu
-       menusData.push({
-        id: doc.id,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        taxId: data.taxId,
-        outletId: data.outletId,
-        imageUrl: data.imageUrl || "",
-        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-        createdAt: data.createdAt || new Date().toISOString(),
-       });
-      });
-      setMenus(menusData);
-      setError(null);
-     } catch (err) {
-      console.error("Error processing menu data:", err);
-      setError("Failed to process menu data");
-     } finally {
-      setLoading(false);
-     }
-    },
-    (err) => {
-     console.error("Firebase error:", err);
-     setError(err.message);
-     setLoading(false);
-    }
-   );
+        const unsubscribe = onSnapshot(
+            q,
+            (snapshot) => {
+                try {
+                    const menusData: Menu[] = [];
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        menusData.push({
+                            id: doc.id,
+                            name: data.name,
+                            description: data.description,
+                            price: data.price,
+                            taxIds: data.taxIds || [], // Changed to handle array
+                            outletId: data.outletId,
+                            imageUrl: data.imageUrl || "",
+                            isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+                            createdAt: data.createdAt || new Date().toISOString(),
+                        });
+                    });
+                    setMenus(menusData);
+                    setError(null);
+                } catch (err) {
+                    console.error("Error processing menu data:", err);
+                    setError("Failed to process menu data");
+                } finally {
+                    setLoading(false);
+                }
+            },
+            (err) => {
+                console.error("Firebase error:", err);
+                setError(err.message);
+                setLoading(false);
+            }
+        );
 
-   return () => unsubscribe();
-  }, [outletId]);
+        return () => unsubscribe();
+    }, [outletId]);
 
  const addMenu = async (menuData: Omit<Menu, "id" | "createdAt">) => {
   try {

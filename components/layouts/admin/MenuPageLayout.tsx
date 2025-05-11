@@ -19,7 +19,6 @@ import AddMenuModal from "./AddMenuModal";
 import EditMenuModal from "./EditMenuModal";
 import DeleteMenuModal from "./DeleteMenuModal";
 
-
 const MenuPageLayout = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<string>("");
  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -52,25 +51,23 @@ const MenuPageLayout = () => {
   setIsAddModalOpen(true);
  };
 
-
- 
  const handleEditMenu = (menu: Menu) => {
   setCurrentMenu(menu);
   setIsEditModalOpen(true);
  };
 
-const handleDeleteMenu = (id: string) => {
- setMenuToDelete(id);
- setIsDeleteModalOpen(true);
-};
+ const handleDeleteMenu = (id: string) => {
+  setMenuToDelete(id);
+  setIsDeleteModalOpen(true);
+ };
 
-const handleConfirmDelete = async () => {
- if (menuToDelete) {
-  await deleteMenu(menuToDelete);
-  setIsDeleteModalOpen(false);
-  setMenuToDelete(null);
- }
-};
+ const handleConfirmDelete = async () => {
+  if (menuToDelete) {
+   await deleteMenu(menuToDelete);
+   setIsDeleteModalOpen(false);
+   setMenuToDelete(null);
+  }
+ };
 
  const handleAddSubmit = async (menuData: Omit<Menu, "id" | "createdAt">) => {
   try {
@@ -93,6 +90,27 @@ const handleConfirmDelete = async () => {
   } catch (error) {
    console.error("Error updating menu:", error);
   }
+ };
+
+ // Function to calculate total price including all taxes
+ const calculateTotalPrice = (menu: Menu) => {
+  if (!menu.taxIds || menu.taxIds.length === 0) {
+   return menu.price;
+  }
+
+  const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
+  const totalTaxRate = applicableTaxes.reduce((sum, tax) => sum + tax.rate, 0);
+  return menu.price * (1 + totalTaxRate / 100);
+ };
+
+ // Function to get tax names for display
+ const getTaxNames = (menu: Menu) => {
+  if (!menu.taxIds || menu.taxIds.length === 0) {
+   return "";
+  }
+
+  const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
+  return applicableTaxes.map((tax) => tax.name).join(", ");
  };
 
  if (!selectedOutlet) {
@@ -178,7 +196,10 @@ const handleConfirmDelete = async () => {
            Name
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Price
+           Base Price
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Price After Tax
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Status
@@ -190,10 +211,8 @@ const handleConfirmDelete = async () => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
          {menus.map((menu) => {
-          const tax = taxes.find((t) => t.id === menu.taxId);
-          const totalPrice = tax
-           ? menu.price * (1 + tax.rate / 100)
-           : menu.price;
+          const totalPrice = calculateTotalPrice(menu);
+          const taxNames = getTaxNames(menu);
 
           return (
            <motion.tr
@@ -226,10 +245,15 @@ const handleConfirmDelete = async () => {
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
+              IDR {menu.price.toFixed(2)}
+             </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+             <div className="text-sm text-gray-900">
               IDR {totalPrice.toFixed(2)}
-              {tax && (
+              {taxNames && (
                <span className="text-xs text-gray-500 ml-1">
-                (incl. {tax.name})
+                (incl. {taxNames})
                </span>
               )}
              </div>

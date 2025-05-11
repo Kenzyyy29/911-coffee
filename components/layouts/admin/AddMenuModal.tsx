@@ -21,63 +21,80 @@ const AddMenuModal = ({
  taxes,
  outletId,
 }: AddMenuModalProps) => {
- const [formData, setFormData] = useState({
-  name: "",
-  description: "",
-  price: 0,
-  taxId: "",
-  outletId: outletId,
-  imageUrl: "",
-  isAvailable: true,
- });
+    const [formData, setFormData] = useState({
+     name: "",
+     description: "",
+     price: 0,
+     taxIds: [] as string[], // Changed to array
+     outletId: outletId,
+     imageUrl: "",
+     isAvailable: true,
+    });
 
- const handleChange = (
-  e: React.ChangeEvent<
-   HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-  >
- ) => {
-  const {name, value, type} = e.target;
-  const checked = (e.target as HTMLInputElement).checked;
+    const handleChange = (
+     e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+     >
+    ) => {
+     const {name, value, type} = e.target;
+     const checked = (e.target as HTMLInputElement).checked;
 
-  setFormData({
-   ...formData,
-   [name]: type === "checkbox" ? checked : value,
-  });
- };
+     setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+     });
+    };
 
- const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+    const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     const {value, checked} = e.target;
+     setFormData((prev) => {
+      if (checked) {
+       return {
+        ...prev,
+        taxIds: [...prev.taxIds, value],
+       };
+      } else {
+       return {
+        ...prev,
+        taxIds: prev.taxIds.filter((id) => id !== value),
+       };
+      }
+     });
+    };
 
-  if (!formData.name || !formData.price || !formData.taxId) {
-   alert("Please fill all required fields");
-   return;
-  }
+    const handleSubmit = (e: React.FormEvent) => {
+     e.preventDefault();
 
-  const menuData = {
-   name: formData.name,
-   description: formData.description,
-   price: Number(formData.price),
-   taxId: formData.taxId,
-   outletId: outletId,
-   imageUrl: formData.imageUrl || "",
-   isAvailable: Boolean(formData.isAvailable),
-  };
+     if (!formData.name || !formData.price || formData.taxIds.length === 0) {
+      alert("Please fill all required fields");
+      return;
+     }
 
-  onSubmit(menuData);
- };
+     const menuData = {
+      name: formData.name,
+      description: formData.description,
+      price: Number(formData.price),
+      taxIds: formData.taxIds, // Now passing array
+      outletId: outletId,
+      imageUrl: formData.imageUrl || "",
+      isAvailable: Boolean(formData.isAvailable),
+     };
 
- if (!isOpen) return null;
+     onSubmit(menuData);
+    };
+
+    if (!isOpen) return null;
 
  return (
   <motion.div
    initial={{opacity: 0}}
    animate={{opacity: 1}}
    exit={{opacity: 0}}
-   className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+   className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
    <motion.div
     initial={{scale: 0.9, y: 20}}
     animate={{scale: 1, y: 0}}
-    className="bg-white rounded-xl shadow-xl w-full max-w-md">
+    className="bg-white rounded-xl shadow-xl w-full max-w-[600px] max-h-[530px] overflow-y-auto">
     <div className="flex justify-between items-center border-b p-4">
      <h2 className="text-xl font-semibold text-gray-800">Add New Menu</h2>
      <button
@@ -136,23 +153,29 @@ const AddMenuModal = ({
 
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
-        Tax *
+        Taxes *
        </label>
-       <select
-        name="taxId"
-        value={formData.taxId}
-        onChange={handleChange}
-        required
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
-        <option value="">Select Tax</option>
+       <div className="space-y-2">
         {taxes.map((tax) => (
-         <option
+         <div
           key={tax.id}
-          value={tax.id}>
-          {tax.name} ({tax.rate}%)
-         </option>
+          className="flex items-center">
+          <input
+           type="checkbox"
+           id={`tax-${tax.id}`}
+           value={tax.id}
+           checked={formData.taxIds.includes(tax.id)}
+           onChange={handleTaxChange}
+           className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+          />
+          <label
+           htmlFor={`tax-${tax.id}`}
+           className="ml-2 block text-sm text-gray-700">
+           {tax.name} ({tax.rate}%)
+          </label>
+         </div>
         ))}
-       </select>
+       </div>
       </div>
 
       <div>

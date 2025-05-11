@@ -7,7 +7,7 @@ import {FaSignOutAlt, FaBox, FaStore} from "react-icons/fa";
 import {IoIosArrowDropright} from "react-icons/io";
 import {MdDashboard} from "react-icons/md";
 import {useState} from "react";
-import {FaGear} from "react-icons/fa6";
+import {FaGear, FaPencil} from "react-icons/fa6";
 
 interface SidebarProps {
  isMobile: boolean;
@@ -17,6 +17,8 @@ interface SidebarProps {
 
 const adminLinks = [
  {name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard />},
+ {name: "Outlets", path: "/admin/dashboard/outlets", icon: <FaStore />},
+
  {
   name: "Produk",
   path: "/admin/dashboard/products/menu",
@@ -28,7 +30,7 @@ const adminLinks = [
    },
    {
     name: "Bundling",
-    path: "/admin/dashboard/products/bundles",
+    path: "/admin/dashboard/products/bundling",
    },
    {
     name: "Taxes",
@@ -37,11 +39,16 @@ const adminLinks = [
   ],
  },
  {
+  name: "Blog",
+  path: "/admin/dashboard/settings/blog",
+  icon: <FaPencil />,
+ },
+
+ {
   name: "Settings",
   path: "/admin/dashboard/settings/profile",
   icon: <FaGear />,
  },
- {name: "Outlets", path: "/admin/dashboard/outlets", icon: <FaStore />},
 ];
 
 export default function Sidebar({
