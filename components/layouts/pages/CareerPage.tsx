@@ -1,6 +1,6 @@
 "use client";
 import {motion} from "framer-motion";
-import {FiBriefcase, FiArrowRight} from "react-icons/fi";
+import {FiBriefcase, FiArrowRight, FiClock, FiMapPin} from "react-icons/fi";
 import {useCareer} from "@/lib/hooks/useCareer";
 import {Career} from "@/lib/types/career";
 import {useState} from "react";
@@ -53,7 +53,17 @@ const CareerPage = () => {
            <h2 className="text-xl font-bold text-gray-800 mb-1">
             {career.title}
            </h2>
-           <p className="text-gray-600 mb-2">{career.outlet}</p>
+           <div className="flex items-center text-gray-600 mb-2">
+            <FiMapPin className="mr-1" />
+            <span className="mr-3">{career.outlet}</span>
+            <FiClock className="mr-1" />
+            <span>
+             {career.employmentType === "FULL_TIME" && "Full-time"}
+             {career.employmentType === "PART_TIME" && "Part-time"}
+             {career.employmentType === "CONTRACT" && "Kontrak"}
+             {career.employmentType === "INTERNSHIP" && "Magang"}
+            </span>
+           </div>
           </div>
           <motion.button
            whileHover={{scale: 1.05}}
