@@ -40,7 +40,7 @@ const adminLinks = [
  },
  {
   name: "Blog",
-  path: "/admin/dashboard/settings/blog",
+  path: "/admin/dashboard/blog",
   icon: <FaPencil />,
  },
 
