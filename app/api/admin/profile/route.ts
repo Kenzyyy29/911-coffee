@@ -1,56 +1,51 @@
-import {NextResponse} from "next/server";
-import {getServerSession} from "next-auth";
-import {authOptions} from "@/lib/auth/auth-options";
-import {doc, getDoc, getFirestore, updateDoc} from "firebase/firestore";
-import {app} from "@/lib/firebase/init";
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/auth-options";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { app } from "@/lib/firebase/init";
 import bcrypt from "bcryptjs";
 
 const firestore = getFirestore(app);
 
 export async function PUT(request: Request) {
- try {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-   return NextResponse.json({error: "Unauthorized"}, {status: 401});
-  }
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
-  const {fullname, phone, currentPassword, newPassword} = await request.json();
+        const { userId, fullname, phone, newPassword } = await request.json();
 
-  // Update profile data
-  if (fullname || phone) {
-   await updateDoc(doc(firestore, "users", session.user.id), {
-    fullname,
-    phone,
-    updated_at: new Date(),
-   });
-  }
+        // Validate user ID matches session
+        if (userId !== session.user.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+        }
 
-  // Change password if provided
-  if (currentPassword && newPassword) {
-   const userDoc = await getDoc(doc(firestore, "users", session.user.id));
-   if (!userDoc.exists()) {
-    return NextResponse.json({error: "User not found"}, {status: 404});
-   }
+        const updateData: any = {
+            updated_at: new Date(),
+        };
 
-   const user = userDoc.data();
-   const isValid = await bcrypt.compare(currentPassword, user.password);
-   if (!isValid) {
-    return NextResponse.json(
-     {error: "Current password is incorrect"},
-     {status: 400}
-    );
-   }
+        // Update profile fields if provided
+        if (fullname) updateData.fullname = fullname;
+        if (phone) updateData.phone = phone;
 
-   const hashedPassword = await bcrypt.hash(newPassword, 10);
-   await updateDoc(doc(firestore, "users", session.user.id), {
-    password: hashedPassword,
-    updated_at: new Date(),
-   });
-  }
+        // Update password if provided
+        if (newPassword) {
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            updateData.password = hashedPassword;
+        }
 
-  return NextResponse.json({message: "Profile updated successfully"});
- } catch (error) {
-  console.error("Error updating profile:", error);
-  return NextResponse.json({error: "Failed to update profile"}, {status: 500});
- }
+        // Only update if there are changes
+        if (Object.keys(updateData).length > 1) {
+            await updateDoc(doc(firestore, "users", userId), updateData);
+        }
+
+        return NextResponse.json({ message: "Profile updated successfully" });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        return NextResponse.json(
+            { error: "Failed to update profile" },
+            { status: 500 }
+        );
+    }
 }

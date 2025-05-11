@@ -73,6 +73,7 @@ export default function AdminProfileSettings() {
   setError("");
   setSuccess("");
 
+  // Only validate passwords if either field has value
   if (formData.newPassword || formData.confirmPassword) {
    if (formData.newPassword !== formData.confirmPassword) {
     setError("New password and confirm password do not match");
@@ -91,7 +92,11 @@ export default function AdminProfileSettings() {
      "Content-Type": "application/json",
     },
     body: JSON.stringify({
+     userId: session?.user?.id,
      newPassword: formData.newPassword,
+     // Include other fields if needed
+     fullname: formData.fullname,
+     phone: formData.phone,
     }),
    });
 
@@ -102,6 +107,7 @@ export default function AdminProfileSettings() {
    }
 
    setSuccess("Profile updated successfully");
+   // Clear password fields after successful update
    setFormData((prev) => ({
     ...prev,
     newPassword: "",
@@ -109,14 +115,7 @@ export default function AdminProfileSettings() {
    }));
   } catch (err) {
    console.error("Error updating profile:", err);
-
-   if (err instanceof Error) {
-    setError(err.message);
-   } else if (typeof err === "string") {
-    setError(err);
-   } else {
-    setError("Failed to update profile");
-   }
+   setError(err instanceof Error ? err.message : "Failed to update profile");
   }
  };
 
@@ -177,7 +176,7 @@ export default function AdminProfileSettings() {
 
    <motion.form
     onSubmit={handleSubmit}
-    className="space-y-6 bg-white rounded-xl shadow-md"
+    className="space-y-6 bg-white rounded-xl shadow-md p-6"
     initial={{opacity: 0}}
     animate={{opacity: 1}}
     transition={{delay: 0.4}}>
@@ -188,7 +187,7 @@ export default function AdminProfileSettings() {
       transition={{delay: 0.3}}>
       <label
        htmlFor="fullname"
-       className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+       className="text-sm font-medium text-gray-700 mb-1 flex items-center">
        <FiUser className="mr-2" /> Name
       </label>
       <div className="relative">
@@ -197,8 +196,8 @@ export default function AdminProfileSettings() {
         id="fullname"
         name="fullname"
         value={formData.fullname}
-        disabled
-        className="mt-1  w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 p-3 border pl-10"
+        onChange={handleChange}
+        className="mt-1 w-full rounded-lg border-gray-300 shadow-sm p-3 border pl-10"
         required
        />
        <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -211,7 +210,7 @@ export default function AdminProfileSettings() {
       transition={{delay: 0.3}}>
       <label
        htmlFor="email"
-       className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+       className="text-sm font-medium text-gray-700 mb-1 flex items-center">
        <FiMail className="mr-2" /> Email
       </label>
       <div className="relative">
@@ -221,7 +220,7 @@ export default function AdminProfileSettings() {
         name="email"
         value={formData.email}
         disabled
-        className="mt-1  w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 p-3 border pl-10"
+        className="mt-1 w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 p-3 border pl-10"
        />
        <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
@@ -233,7 +232,7 @@ export default function AdminProfileSettings() {
       transition={{delay: 0.4}}>
       <label
        htmlFor="phone"
-       className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+       className="text-sm font-medium text-gray-700 mb-1 flex items-center">
        <FiPhone className="mr-2" /> Phone Number
       </label>
       <div className="relative">
@@ -242,8 +241,8 @@ export default function AdminProfileSettings() {
         id="phone"
         name="phone"
         value={formData.phone}
-        disabled
-        className="mt-1  w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 p-3 border pl-10"
+        onChange={handleChange}
+        className="mt-1 w-full rounded-lg border-gray-300 shadow-sm p-3 border pl-10"
        />
        <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
@@ -265,7 +264,7 @@ export default function AdminProfileSettings() {
        transition={{delay: 0.7}}>
        <label
         htmlFor="newPassword"
-        className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+        className="text-sm font-medium text-gray-700 mb-1 flex items-center">
         <FiLock className="mr-2" /> New Password
        </label>
        <div className="relative">
@@ -275,7 +274,8 @@ export default function AdminProfileSettings() {
          name="newPassword"
          value={formData.newPassword}
          onChange={handleChange}
-         className=" w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black p-3 border pl-10 pr-10"
+         className="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black p-3 border pl-10 pr-10"
+         placeholder="Leave empty to keep current password"
         />
         <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <button
@@ -293,7 +293,7 @@ export default function AdminProfileSettings() {
        transition={{delay: 0.8}}>
        <label
         htmlFor="confirmPassword"
-        className=" text-sm font-medium text-gray-700 mb-1 flex items-center">
+        className="text-sm font-medium text-gray-700 mb-1 flex items-center">
         <FiLock className="mr-2" /> Confirm New Password
        </label>
        <div className="relative">
@@ -303,7 +303,8 @@ export default function AdminProfileSettings() {
          name="confirmPassword"
          value={formData.confirmPassword}
          onChange={handleChange}
-         className=" w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black p-3 border pl-10 pr-10"
+         className="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black p-3 border pl-10 pr-10"
+         placeholder="Confirm new password"
         />
         <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <button
