@@ -7,6 +7,15 @@ import bcrypt from "bcryptjs";
 
 const firestore = getFirestore(app);
 
+// Definisikan tipe yang kompatibel dengan Firestore
+type FirestoreUpdateData = {
+    [key: string]: any;
+    fullname?: string;
+    phone?: string;
+    password?: string;
+    updated_at: Date;
+} & Record<`${string}.${string}`, any>; // Tambahkan index signature untuk nested fields
+
 export async function PUT(request: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -21,7 +30,7 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        const updateData: any = {
+        const updateData: FirestoreUpdateData = {
             updated_at: new Date(),
         };
 
