@@ -129,7 +129,7 @@ const BundlingPage = () => {
     <motion.div
      initial={{opacity: 0}}
      animate={{opacity: 1}}
-     className="mx-auto bg-white text-center p-6">
+     className="mx-auto bg-white text-center">
      <h1 className="text-2xl font-bold text-gray-800 mb-6">Select an Outlet</h1>
      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {outlets.map((outlet) => (
@@ -156,7 +156,7 @@ const BundlingPage = () => {
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
-    className="max-w-7xl mx-auto p-6">
+    className="max-w-7xl mx-auto">
     <div className="flex justify-between items-center mb-6">
      <button
       onClick={() => setSelectedOutletId("")}

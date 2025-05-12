@@ -36,7 +36,7 @@ const DeleteBundlingModal = ({
 
     <p className="text-gray-700 mb-6">
      Are you sure you want to delete the bundling
-     <span className="font-semibold">"{bundling?.name}"</span>? This action
+     <span className="font-semibold">&quot;{bundling?.name}&quot;</span>? This action
      cannot be undone.
     </p>
 

@@ -56,12 +56,12 @@ const AddBundlingModal = ({
  if (!isOpen) return null;
 
  return (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
    <motion.div
     initial={{opacity: 0, scale: 0.9}}
     animate={{opacity: 1, scale: 1}}
     exit={{opacity: 0, scale: 0.9}}
-    className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl">
+    className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto">
     <div className="flex justify-between items-center mb-4">
      <h2 className="text-2xl font-bold text-gray-800">Add New Bundling</h2>
      <button
