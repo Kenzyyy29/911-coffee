@@ -223,9 +223,11 @@ const MenuPageLayout = () => {
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             className="hover:bg-gray-50">
-            <td className="px-4 py-2">
+            <td className="px-6 py-4 whitespace-nowrap">
              {menu.imageUrl ? (
-              <img
+              <Image
+               width={40}
+               height={40}
                src={menu.imageUrl}
                alt={menu.name}
                className="h-10 w-10 rounded-full object-cover"
@@ -245,8 +247,10 @@ const MenuPageLayout = () => {
              </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-             <div className="text-sm text-gray-900">{menu.category}</div>
-            </td>
+            <div className="text-sm text-gray-900">
+              {menu.category}
+            </div>
+          </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
               IDR {menu.price.toFixed(2)}

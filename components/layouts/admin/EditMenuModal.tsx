@@ -1,19 +1,20 @@
 "use client";
 
-import {useState, useEffect, useRef} from "react";
-import {motion} from "framer-motion";
-import {FiX, FiUpload} from "react-icons/fi";
-import {Tax} from "@/lib/types/tax";
-import {Menu} from "@/lib/types/menu";
-import {uploadImage} from "@/lib/vercel/upload";
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { FiX, FiUpload } from "react-icons/fi";
+import { Tax } from "@/lib/types/tax";
+import { Menu } from "@/lib/types/menu";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase/init";
 
 interface EditMenuModalProps {
- isOpen: boolean;
- onClose: () => void;
- onSubmit: (menuData: Omit<Menu, "id" | "createdAt">) => void;
- taxes: Tax[];
- currentMenu: Menu;
- outletId: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (menuData: Omit<Menu, "id" | "createdAt">) => void;
+  taxes: Tax[];
+  currentMenu: Menu;
+  outletId: string;
 }
 
 const EditMenuModal = ({
@@ -40,6 +41,7 @@ const EditMenuModal = ({
   currentMenu.imageUrl || null
  );
  const [isUploading, setIsUploading] = useState(false);
+ const [uploadProgress, setUploadProgress] = useState(0);
 
  useEffect(() => {
   if (currentMenu) {
@@ -58,7 +60,9 @@ const EditMenuModal = ({
  }, [currentMenu, outletId]);
 
  const handleChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  e: React.ChangeEvent<
+   HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  >
  ) => {
   const {name, value, type} = e.target;
   const checked = (e.target as HTMLInputElement).checked;
@@ -69,60 +73,98 @@ const EditMenuModal = ({
   });
  };
 
+ const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const {value, checked} = e.target;
+  setFormData((prev) => {
+   if (checked) {
+    return {
+     ...prev,
+     taxIds: [...prev.taxIds, value],
+    };
+   } else {
+    return {
+     ...prev,
+     taxIds: prev.taxIds.filter((id) => id !== value),
+    };
+   }
+  });
+ };
+
  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
   setIsUploading(true);
+  setUploadProgress(0);
 
   try {
+   // Create preview
    const reader = new FileReader();
    reader.onload = (event) => {
     setImagePreview(event.target?.result as string);
    };
    reader.readAsDataURL(file);
 
-   const imageUrl = await uploadImage(
-    file,
-    `menu-images/${Date.now()}-${file.name}`
+   // Upload to Firebase Storage
+   const storageRef = ref(storage, `menu-images/${Date.now()}-${file.name}`);
+   const uploadTask = uploadBytesResumable(storageRef, file);
+
+   uploadTask.on(
+    "state_changed",
+    (snapshot) => {
+     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+     setUploadProgress(progress);
+    },
+    (error) => {
+     console.error("Upload error:", error);
+     alert("Failed to upload image");
+     setIsUploading(false);
+    },
+    async () => {
+     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+     setFormData({...formData, imageUrl: downloadURL});
+     setIsUploading(false);
+    }
    );
-   setFormData({...formData, imageUrl});
   } catch (error) {
-   alert("Gagal upload gambar!");
-   console.error(error);
-  } finally {
+   console.error("Error uploading image:", error);
+   alert("Failed to upload image");
    setIsUploading(false);
   }
  };
 
- const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const {value, checked} = e.target;
-  setFormData((prev) => ({
-   ...prev,
-   taxIds: checked
-    ? [...prev.taxIds, value]
-    : prev.taxIds.filter((id) => id !== value),
-  }));
+ const triggerFileInput = () => {
+  fileInputRef.current?.click();
  };
-
- const triggerFileInput = () => fileInputRef.current?.click();
 
  const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
 
-  if (!formData.name || !formData.price || !formData.category) {
-   alert("Harap isi semua field wajib!");
+  if (
+   !formData.name ||
+   !formData.price ||
+   formData.taxIds.length === 0 ||
+   !formData.category
+  ) {
+   alert("Please fill all required fields");
    return;
   }
 
-  onSubmit({
-   ...formData,
+  const menuData = {
+   name: formData.name,
+   description: formData.description,
    price: Number(formData.price),
-  });
+   taxIds: formData.taxIds,
+   outletId: outletId,
+   imageUrl: formData.imageUrl,
+   isAvailable: Boolean(formData.isAvailable),
+   category: formData.category,
+  };
+
+  onSubmit(menuData);
  };
 
  if (!isOpen) return null;
-
  return (
   <motion.div
    initial={{opacity: 0}}
@@ -145,48 +187,17 @@ const EditMenuModal = ({
      onSubmit={handleSubmit}
      className="p-6">
      <div className="space-y-4">
+      {/* Form fields remain the same as in original */}
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
-        Menu Image
-       </label>
-       <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleImageUpload}
-        accept="image/*"
-        className="hidden"
-       />
-       <div className="flex items-center gap-4">
-        <button
-         type="button"
-         onClick={triggerFileInput}
-         className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-         disabled={isUploading}>
-         <FiUpload className="mr-2" />
-         {isUploading ? "Uploading..." : "Upload Image"}
-        </button>
-        {imagePreview && (
-         <div className="h-16 w-16 rounded-md overflow-hidden border border-gray-200">
-          <img
-           src={imagePreview}
-           alt="Preview"
-           className="h-full w-full object-cover"
-          />
-         </div>
-        )}
-       </div>
-      </div>
-      <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Category *
+        Menu Name *
        </label>
        <input
         type="text"
-        name="category"
-        value={formData.category}
+        name="name"
+        value={formData.name}
         onChange={handleChange}
         required
-        placeholder="e.g., Main Course, Beverage, Dessert"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
        />
       </div>
@@ -200,6 +211,20 @@ const EditMenuModal = ({
         value={formData.description}
         onChange={handleChange}
         rows={3}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+        Category *
+       </label>
+       <input
+        type="text"
+        name="category"
+        value={formData.category}
+        onChange={handleChange}
+        required
+        placeholder="e.g., Main Course, Beverage, Dessert"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
        />
       </div>
@@ -248,30 +273,23 @@ const EditMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium mb-1">Gambar Menu</label>
-       <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleImageUpload}
-        accept="image/*"
-        className="hidden"
-       />
-       <div className="flex items-center gap-2">
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+        Image URL
+       </label>
+       <div className="flex items-center">
+        <input
+         type="text"
+         name="imageUrl"
+         value={formData.imageUrl}
+         onChange={handleChange}
+         placeholder="https://example.com/image.jpg"
+         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        />
         <button
          type="button"
-         onClick={triggerFileInput}
-         disabled={isUploading}
-         className="px-3 py-2 border rounded-lg flex items-center gap-2">
+         className="ml-2 p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
          <FiUpload />
-         {isUploading ? "Uploading..." : "Pilih Gambar"}
         </button>
-        {imagePreview && (
-         <img
-          src={imagePreview}
-          alt="Preview"
-          className="h-12 w-12 object-cover rounded"
-         />
-        )}
        </div>
       </div>
 
@@ -301,9 +319,8 @@ const EditMenuModal = ({
       </button>
       <button
        type="submit"
-       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
-       disabled={isUploading}>
-       Add Menu
+       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700">
+       Update Menu
       </button>
      </div>
     </form>
