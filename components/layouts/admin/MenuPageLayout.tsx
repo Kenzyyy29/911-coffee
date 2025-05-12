@@ -196,8 +196,8 @@ const MenuPageLayout = () => {
            Name
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Category
-          </th>
+        Category
+      </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Base Price
           </th>
@@ -246,11 +246,6 @@ const MenuPageLayout = () => {
               {menu.description}
              </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">
-              {menu.category}
-            </div>
-          </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
               IDR {menu.price.toFixed(2)}

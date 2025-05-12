@@ -1,20 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { FiX, FiUpload } from "react-icons/fi";
-import { Tax } from "@/lib/types/tax";
-import { Menu } from "@/lib/types/menu";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase/init";
+import {useState, useEffect} from "react";
+import {motion} from "framer-motion";
+import {FiX, FiUpload} from "react-icons/fi";
+import {Tax} from "@/lib/types/tax";
+import {Menu} from "@/lib/types/menu";
 
 interface EditMenuModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (menuData: Omit<Menu, "id" | "createdAt">) => void;
-  taxes: Tax[];
-  currentMenu: Menu;
-  outletId: string;
+ isOpen: boolean;
+ onClose: () => void;
+ onSubmit: (menuData: Omit<Menu, "id" | "createdAt">) => void;
+ taxes: Tax[];
+ currentMenu: Menu;
+ outletId: string;
 }
 
 const EditMenuModal = ({
@@ -25,146 +23,86 @@ const EditMenuModal = ({
  currentMenu,
  outletId,
 }: EditMenuModalProps) => {
- const [formData, setFormData] = useState({
-  name: currentMenu.name,
-  description: currentMenu.description,
-  price: currentMenu.price,
-  taxIds: currentMenu.taxIds || [],
-  outletId: outletId,
-  imageUrl: currentMenu.imageUrl,
-  isAvailable: currentMenu.isAvailable,
-  category: currentMenu.category || "",
- });
+    const [formData, setFormData] = useState({
+     name: currentMenu.name,
+     description: currentMenu.description,
+     price: currentMenu.price,
+     taxIds: currentMenu.taxIds || [], // Changed to array
+     outletId: outletId,
+     imageUrl: currentMenu.imageUrl,
+     isAvailable: currentMenu.isAvailable,
+     category: currentMenu.category || "",
+    });
 
- const fileInputRef = useRef<HTMLInputElement>(null);
- const [imagePreview, setImagePreview] = useState<string | null>(
-  currentMenu.imageUrl || null
- );
- const [isUploading, setIsUploading] = useState(false);
- const [uploadProgress, setUploadProgress] = useState(0);
+    useEffect(() => {
+     if (currentMenu) {
+      setFormData({
+       name: currentMenu.name,
+       description: currentMenu.description,
+       price: currentMenu.price,
+       taxIds: currentMenu.taxIds || [], // Changed to array
+       outletId: outletId,
+       imageUrl: currentMenu.imageUrl,
+       isAvailable: currentMenu.isAvailable,
+       category: currentMenu.category || "",
+      });
+     }
+    }, [currentMenu, outletId]);
 
- useEffect(() => {
-  if (currentMenu) {
+  const handleChange = (
+   e: React.ChangeEvent<
+    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+   >
+  ) => {
+   const {name, value, type} = e.target;
+   const checked = (e.target as HTMLInputElement).checked;
+
    setFormData({
-    name: currentMenu.name,
-    description: currentMenu.description,
-    price: currentMenu.price,
-    taxIds: currentMenu.taxIds || [],
-    outletId: outletId,
-    imageUrl: currentMenu.imageUrl,
-    isAvailable: currentMenu.isAvailable,
-    category: currentMenu.category || "",
+    ...formData,
+    [name]: type === "checkbox" ? checked : value,
    });
-   setImagePreview(currentMenu.imageUrl || null);
-  }
- }, [currentMenu, outletId]);
-
- const handleChange = (
-  e: React.ChangeEvent<
-   HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-  >
- ) => {
-  const {name, value, type} = e.target;
-  const checked = (e.target as HTMLInputElement).checked;
-
-  setFormData({
-   ...formData,
-   [name]: type === "checkbox" ? checked : value,
-  });
- };
-
- const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const {value, checked} = e.target;
-  setFormData((prev) => {
-   if (checked) {
-    return {
-     ...prev,
-     taxIds: [...prev.taxIds, value],
-    };
-   } else {
-    return {
-     ...prev,
-     taxIds: prev.taxIds.filter((id) => id !== value),
-    };
-   }
-  });
- };
-
- const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  setIsUploading(true);
-  setUploadProgress(0);
-
-  try {
-   // Create preview
-   const reader = new FileReader();
-   reader.onload = (event) => {
-    setImagePreview(event.target?.result as string);
-   };
-   reader.readAsDataURL(file);
-
-   // Upload to Firebase Storage
-   const storageRef = ref(storage, `menu-images/${Date.now()}-${file.name}`);
-   const uploadTask = uploadBytesResumable(storageRef, file);
-
-   uploadTask.on(
-    "state_changed",
-    (snapshot) => {
-     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-     setUploadProgress(progress);
-    },
-    (error) => {
-     console.error("Upload error:", error);
-     alert("Failed to upload image");
-     setIsUploading(false);
-    },
-    async () => {
-     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-     setFormData({...formData, imageUrl: downloadURL});
-     setIsUploading(false);
-    }
-   );
-  } catch (error) {
-   console.error("Error uploading image:", error);
-   alert("Failed to upload image");
-   setIsUploading(false);
-  }
- };
-
- const triggerFileInput = () => {
-  fileInputRef.current?.click();
- };
-
- const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-
-  if (
-   !formData.name ||
-   !formData.price ||
-   formData.taxIds.length === 0 ||
-   !formData.category
-  ) {
-   alert("Please fill all required fields");
-   return;
-  }
-
-  const menuData = {
-   name: formData.name,
-   description: formData.description,
-   price: Number(formData.price),
-   taxIds: formData.taxIds,
-   outletId: outletId,
-   imageUrl: formData.imageUrl,
-   isAvailable: Boolean(formData.isAvailable),
-   category: formData.category,
   };
 
-  onSubmit(menuData);
- };
+  const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   const {value, checked} = e.target;
+   setFormData((prev) => {
+    if (checked) {
+     return {
+      ...prev,
+      taxIds: [...prev.taxIds, value],
+     };
+    } else {
+     return {
+      ...prev,
+      taxIds: prev.taxIds.filter((id) => id !== value),
+     };
+    }
+   });
+  };
 
- if (!isOpen) return null;
+  const handleSubmit = (e: React.FormEvent) => {
+   e.preventDefault();
+
+   if (!formData.name || !formData.price || formData.taxIds.length === 0) {
+    alert("Please fill all required fields");
+    return;
+   }
+
+   const menuData = {
+    name: formData.name,
+    description: formData.description,
+    price: Number(formData.price),
+    taxIds: formData.taxIds, // Now passing array
+    outletId: outletId,
+    imageUrl: formData.imageUrl || "",
+    isAvailable: Boolean(formData.isAvailable),
+    category: formData.category,
+   };
+
+   onSubmit(menuData);
+  };
+
+  if (!isOpen) return null;
  return (
   <motion.div
    initial={{opacity: 0}}
@@ -198,6 +136,21 @@ const EditMenuModal = ({
         value={formData.name}
         onChange={handleChange}
         required
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+       />
+      </div>
+
+      <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+        Category *
+       </label>
+       <input
+        type="text"
+        name="category"
+        value={formData.category}
+        onChange={handleChange}
+        required
+        placeholder="e.g., Main Course, Beverage, Dessert"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
        />
       </div>
