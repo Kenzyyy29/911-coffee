@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FaUtensils, FaArrowLeft, FaStar, FaSpinner } from "react-icons/fa";
+import { FaUtensils, FaArrowLeft, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { useMenu } from "@/lib/hooks/useMenu";
