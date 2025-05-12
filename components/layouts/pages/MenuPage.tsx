@@ -1,0 +1,213 @@
+// app/menu/page.tsx
+"use client";
+
+import {useState} from "react";
+import {motion, AnimatePresence} from "framer-motion";
+import {
+ FaStore,
+ FaUtensils,
+ FaSearch,
+ FaSpinner,
+ FaArrowLeft,
+} from "react-icons/fa";
+import {useOutlets} from "@/lib/hooks/useOutlets";
+import {useMenu} from "@/lib/hooks/useMenu";
+import {useTaxes} from "@/lib/hooks/useTaxes";
+import {Menu} from "@/lib/types/menu";
+import {Outlet} from "@/lib/types/outlet";
+import Image from "next/image";
+import Link from "next/link";
+
+const MenuPage = () => {
+ const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
+ const [searchTerm, setSearchTerm] = useState("");
+ const {outlets, loading: outletsLoading} = useOutlets();
+ const {menus, loading: menusLoading} = useMenu(selectedOutlet?.id || "");
+ const {taxes} = useTaxes();
+
+ // Calculate total price with taxes
+ const calculateTotalPrice = (menu: Menu) => {
+  if (!menu.taxIds || menu.taxIds.length === 0) return menu.price;
+
+  const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
+  const totalTaxRate = applicableTaxes.reduce((sum, tax) => sum + tax.rate, 0);
+
+  return menu.price * (1 + totalTaxRate / 100);
+ };
+
+ const filteredMenus = menus.filter((menu) =>
+  menu.name.toLowerCase().includes(searchTerm.toLowerCase())
+ );
+
+ return (
+  <div className="min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8 pt-[100px]">
+   <motion.div
+    initial={{opacity: 0, y: -20}}
+    animate={{opacity: 1, y: 0}}
+    transition={{duration: 0.5}}
+    className="max-w-6xl mx-auto">
+    {/* Header */}
+    <div className="flex items-center gap-4 mb-6">
+     {selectedOutlet && (
+      <motion.button
+       whileHover={{scale: 1.05}}
+       whileTap={{scale: 0.95}}
+       onClick={() => setSelectedOutlet(null)}
+       className="p-2 rounded-full bg-white shadow-md text-gray-600 hover:bg-gray-100 transition-colors">
+       <FaArrowLeft className="text-lg" />
+      </motion.button>
+     )}
+     <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+      <FaUtensils className="text-orange-500" />
+      {selectedOutlet ? `${selectedOutlet.name} Menu` : "Our Outlets"}
+     </h1>
+    </div>
+
+    {/* Outlet Selection */}
+    {!selectedOutlet && (
+     <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      transition={{delay: 0.2}}
+      className="bg-white rounded-xl shadow-md p-6 mb-8">
+      <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
+       <FaStore className="text-blue-500" /> Select an Outlet
+      </h2>
+      {outletsLoading ? (
+       <div className="flex justify-center py-8">
+        <FaSpinner className="animate-spin text-2xl text-blue-500" />
+       </div>
+      ) : (
+       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {outlets.map((outlet) => (
+         <motion.div
+          key={outlet.id}
+          whileHover={{scale: 1.03}}
+          whileTap={{scale: 0.98}}
+          className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition-colors"
+          onClick={() => setSelectedOutlet(outlet)}>
+          <h3 className="font-medium text-gray-800">{outlet.name}</h3>
+          <p className="text-sm text-gray-500 mt-1">{outlet.address}</p>
+         </motion.div>
+        ))}
+       </div>
+      )}
+     </motion.div>
+    )}
+
+    {/* Menu Section */}
+    {selectedOutlet && (
+     <motion.div
+      initial={{opacity: 0}}
+      animate={{opacity: 1}}
+      transition={{delay: 0.3}}>
+      {/* Outlet Info */}
+      <motion.div
+       initial={{opacity: 0, y: -10}}
+       animate={{opacity: 1, y: 0}}
+       transition={{duration: 0.3}}
+       className="bg-white rounded-xl shadow-md p-6 mb-8">
+       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+         <h2 className="text-xl font-semibold text-gray-700">
+          {selectedOutlet.name}
+         </h2>
+         <p className="text-gray-500">{selectedOutlet.address}</p>
+        </div>
+       </div>
+      </motion.div>
+
+      {/* Search Bar */}
+      <div className="relative mb-6">
+       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <FaSearch className="text-gray-400" />
+       </div>
+       <input
+        type="text"
+        placeholder="Search menu items..."
+        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+       />
+      </div>
+
+      {/* Menu Items */}
+      {menusLoading ? (
+       <div className="flex justify-center py-12">
+        <FaSpinner className="animate-spin text-3xl text-orange-500" />
+       </div>
+      ) : filteredMenus.length === 0 ? (
+       <motion.div
+        initial={{opacity: 0}}
+        animate={{opacity: 1}}
+        className="text-center py-12 bg-white rounded-xl shadow-sm">
+        <p className="text-gray-500">
+         {searchTerm
+          ? "No menu items match your search"
+          : "No menu items available at this outlet"}
+        </p>
+       </motion.div>
+      ) : (
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatePresence>
+         {filteredMenus.map((menu) => (
+          <Link
+           key={menu.id}
+           href={`/menu/${menu.id}?outlet=${selectedOutlet?.id}`}
+           passHref>
+           <motion.div
+            initial={{opacity: 0, y: 20}}
+            animate={{opacity: 1, y: 0}}
+            exit={{opacity: 0, scale: 0.9}}
+            transition={{duration: 0.3}}
+            whileHover={{y: -5}}
+            className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="relative h-48 w-full">
+             {menu.imageUrl ? (
+              <Image
+               src={menu.imageUrl}
+               alt={menu.name}
+               fill
+               className="object-cover"
+              />
+             ) : (
+              <div className="bg-gray-200 h-full w-full flex items-center justify-center">
+               <FaUtensils className="text-4xl text-gray-400" />
+              </div>
+             )}
+            </div>
+            <div className="p-4">
+             <div className="flex justify-between items-start">
+              <h3 className="font-bold text-lg text-gray-800">{menu.name}</h3>
+              <span className="font-bold text-orange-500">
+               ${calculateTotalPrice(menu).toFixed(2)}
+              </span>
+             </div>
+             <p className="text-gray-500 mt-2 line-clamp-2">
+              {menu.description}
+             </p>
+             <div className="mt-4 flex justify-between items-center">
+              <span
+               className={`px-2 py-1 rounded text-xs font-medium ${
+                menu.isAvailable
+                 ? "bg-green-100 text-green-800"
+                 : "bg-red-100 text-red-800"
+               }`}>
+               {menu.isAvailable ? "Available" : "Unavailable"}
+              </span>
+             </div>
+            </div>
+           </motion.div>
+          </Link>
+         ))}
+        </AnimatePresence>
+       </div>
+      )}
+     </motion.div>
+    )}
+   </motion.div>
+  </div>
+ );
+};
+
+export default MenuPage;
