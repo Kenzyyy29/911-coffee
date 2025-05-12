@@ -21,6 +21,7 @@ import Link from "next/link";
 const MenuPage = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
  const [searchTerm, setSearchTerm] = useState("");
+ const [selectedCategory, setSelectedCategory] = useState<string>("All");
  const {outlets, loading: outletsLoading} = useOutlets();
  const {menus, loading: menusLoading} = useMenu(selectedOutlet?.id || "");
  const {taxes} = useTaxes();
@@ -35,9 +36,14 @@ const MenuPage = () => {
   return menu.price * (1 + totalTaxRate / 100);
  };
 
- const filteredMenus = menus.filter((menu) =>
-  menu.name.toLowerCase().includes(searchTerm.toLowerCase())
- );
+ // Get unique categories from menus
+ const categories = ["All", ...new Set(menus.map((menu) => menu.category).filter(Boolean))];
+
+ const filteredMenus = menus.filter((menu) => {
+  const matchesSearch = menu.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesCategory = selectedCategory === "All" || menu.category === selectedCategory;
+  return matchesSearch && matchesCategory;
+ });
 
  return (
   <div className="min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8 pt-[100px]">
@@ -131,6 +137,27 @@ const MenuPage = () => {
        />
       </div>
 
+      {/* Category Filter */}
+      {categories.length > 1 && (
+       <div className="mb-6">
+        <h3 className="text-sm font-medium text-gray-700 mb-2">Categories</h3>
+        <div className="flex flex-wrap gap-2">
+         {categories.map((category) => (
+          <button
+           key={category}
+           onClick={() => setSelectedCategory(category)}
+           className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+            selectedCategory === category
+             ? "bg-orange-500 text-white"
+             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+           }`}>
+           {category}
+          </button>
+         ))}
+        </div>
+       </div>
+      )}
+
       {/* Menu Items */}
       {menusLoading ? (
        <div className="flex justify-center py-12">
@@ -142,8 +169,8 @@ const MenuPage = () => {
         animate={{opacity: 1}}
         className="text-center py-12 bg-white rounded-xl shadow-sm">
         <p className="text-gray-500">
-         {searchTerm
-          ? "No menu items match your search"
+         {searchTerm || selectedCategory !== "All"
+          ? "No menu items match your search criteria"
           : "No menu items available at this outlet"}
         </p>
        </motion.div>
@@ -183,6 +210,11 @@ const MenuPage = () => {
                ${calculateTotalPrice(menu).toFixed(2)}
               </span>
              </div>
+             {menu.category && (
+              <span className="inline-block mt-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+               {menu.category}
+              </span>
+             )}
              <p className="text-gray-500 mt-2 line-clamp-2">
               {menu.description}
              </p>
