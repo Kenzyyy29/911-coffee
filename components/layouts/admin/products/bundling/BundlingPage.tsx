@@ -1,0 +1,347 @@
+// /app/admin/dashboard/products/bundling/BundlingPage.tsx
+"use client";
+
+import {useState} from "react";
+import {motion} from "framer-motion";
+import {
+ FiPlus,
+ FiEdit2,
+ FiTrash2,
+ FiArrowLeft,
+ FiPackage,
+} from "react-icons/fi";
+import {useBundling} from "@/lib/hooks/useBundling";
+import {useOutlets} from "@/lib/hooks/useOutlets";
+import {useTaxes} from "@/lib/hooks/useTaxes";
+import {useMenu} from "@/lib/hooks/useMenu";
+import Image from "next/image";
+import AddBundlingModal from "./AddBundlingModal";
+import EditBundlingModal from "./EditBundlingModal";
+import DeleteBundlingModal from "./DeleteBundlingModal";
+import {Bundling} from "@/lib/types/bundling";
+
+const BundlingPage = () => {
+ const [selectedOutletId, setSelectedOutletId] = useState<string>("");
+ const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+ const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+ const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+ const [selectedBundling, setSelectedBundling] = useState<Bundling | null>(
+  null
+ );
+
+ const {
+  bundlings,
+  loading,
+  error,
+  addBundling,
+  updateBundling,
+  deleteBundling,
+ } = useBundling(selectedOutletId);
+ const {outlets} = useOutlets();
+ const {taxes} = useTaxes();
+ const {menus} = useMenu(selectedOutletId);
+
+ const currentOutlet = outlets.find((outlet) => outlet.id === selectedOutletId);
+
+ const handleAddBundling = async (
+  bundlingData: Omit<Bundling, "id" | "createdAt">
+ ) => {
+  try {
+   await addBundling(bundlingData);
+   setIsAddModalOpen(false);
+  } catch (error) {
+   console.error("Error adding bundling:", error);
+  }
+ };
+
+ const handleEditBundling = async (
+  id: string,
+  bundlingData: Partial<Bundling>
+ ) => {
+  try {
+   await updateBundling(id, bundlingData);
+   setIsEditModalOpen(false);
+  } catch (error) {
+   console.error("Error updating bundling:", error);
+  }
+ };
+
+ const handleDeleteBundling = async () => {
+  if (!selectedBundling) return;
+  try {
+   await deleteBundling(selectedBundling.id);
+   setIsDeleteModalOpen(false);
+  } catch (error) {
+   console.error("Error deleting bundling:", error);
+  }
+ };
+
+ const openEditModal = (bundling: Bundling) => {
+  setSelectedBundling(bundling);
+  setIsEditModalOpen(true);
+ };
+
+ const openDeleteModal = (bundling: Bundling) => {
+  setSelectedBundling(bundling);
+  setIsDeleteModalOpen(true);
+ };
+
+ // Function to calculate total price including all taxes
+ const calculateTotalPrice = (bundling: Bundling) => {
+  if (!bundling.taxIds || bundling.taxIds.length === 0) {
+   return bundling.price;
+  }
+
+  const applicableTaxes = taxes.filter((tax) =>
+   bundling.taxIds.includes(tax.id)
+  );
+  const totalTaxRate = applicableTaxes.reduce((sum, tax) => sum + tax.rate, 0);
+  return bundling.price * (1 + totalTaxRate / 100);
+ };
+
+ // Function to get tax names for display
+ const getTaxNames = (bundling: Bundling) => {
+  if (!bundling.taxIds || bundling.taxIds.length === 0) {
+   return "";
+  }
+
+  const applicableTaxes = taxes.filter((tax) =>
+   bundling.taxIds.includes(tax.id)
+  );
+  return applicableTaxes.map((tax) => `${tax.name} (${tax.rate}%)`).join(", ");
+ };
+
+ // Function to get included menu names
+ const getMenuNames = (bundling: Bundling) => {
+  if (!bundling.menuIds || bundling.menuIds.length === 0) {
+   return "";
+  }
+
+  const includedMenus = menus.filter((menu) =>
+   bundling.menuIds.includes(menu.id)
+  );
+  return includedMenus.map((menu) => menu.name).join(", ");
+ };
+
+ if (!selectedOutletId) {
+  return (
+   <div className="max-h-[100dvh] w-full overflow-hidden">
+    <motion.div
+     initial={{opacity: 0}}
+     animate={{opacity: 1}}
+     className="mx-auto bg-white text-center p-6">
+     <h1 className="text-2xl font-bold text-gray-800 mb-6">Select an Outlet</h1>
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {outlets.map((outlet) => (
+       <motion.div
+        key={outlet.id}
+        whileHover={{scale: 1.03}}
+        whileTap={{scale: 0.98}}
+        onClick={() => setSelectedOutletId(outlet.id)}
+        className="p-6 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+        <h3 className="font-medium text-gray-900">{outlet.name}</h3>
+        <p className="text-sm text-gray-500 mt-1">
+         {outlet.address || "No address provided"}
+        </p>
+       </motion.div>
+      ))}
+     </div>
+    </motion.div>
+   </div>
+  );
+ }
+
+ return (
+  <div className="max-h-[100dvh] overflow-y-auto">
+   <motion.div
+    initial={{opacity: 0, y: -20}}
+    animate={{opacity: 1, y: 0}}
+    className="max-w-7xl mx-auto p-6">
+    <div className="flex justify-between items-center mb-6">
+     <button
+      onClick={() => setSelectedOutletId("")}
+      className="flex items-center text-gray-600 hover:text-gray-800">
+      <FiArrowLeft className="mr-2" />
+      Back to Outlets
+     </button>
+     <motion.button
+      onClick={() => setIsAddModalOpen(true)}
+      className="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+      <FiPlus className="mr-2" />
+      Add Bundling
+     </motion.button>
+    </div>
+
+    <div className="mb-6">
+     <h1 className="text-2xl font-bold text-gray-800">
+      {currentOutlet?.name} Bundlings
+     </h1>
+     <p className="text-gray-600">
+      Manage all bundling packages for this outlet
+     </p>
+    </div>
+
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+     {loading ? (
+      <div className="p-8 text-center text-gray-500">Loading bundlings...</div>
+     ) : error ? (
+      <div className="p-8 text-center text-red-500">{error}</div>
+     ) : bundlings.length === 0 ? (
+      <div className="p-8 text-center text-gray-500">
+       <FiPackage className="mx-auto text-4xl mb-4 text-gray-300" />
+       <p>No bundlings found for this outlet</p>
+       <button
+        onClick={() => setIsAddModalOpen(true)}
+        className="mt-4 text-gray-800 underline hover:text-gray-600">
+        Create your first bundling
+       </button>
+      </div>
+     ) : (
+      <div className="overflow-x-auto">
+       <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+         <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Image
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Name
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Included Menus
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Base Price
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Price After Tax
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Status
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Actions
+          </th>
+         </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+         {bundlings.map((bundling) => {
+          const totalPrice = calculateTotalPrice(bundling);
+          const taxNames = getTaxNames(bundling);
+          const menuNames = getMenuNames(bundling);
+
+          return (
+           <motion.tr
+            key={bundling.id}
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            className="hover:bg-gray-50">
+            <td className="px-6 py-4 whitespace-nowrap">
+             {bundling.imageUrl ? (
+              <Image
+               width={40}
+               height={40}
+               src={bundling.imageUrl}
+               alt={bundling.name}
+               className="h-10 w-10 rounded-md object-cover"
+              />
+             ) : (
+              <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+               <FiPackage className="text-gray-400" />
+              </div>
+             )}
+            </td>
+            <td className="px-6 py-4">
+             <div className="text-sm font-medium text-gray-900">
+              {bundling.name}
+             </div>
+             <div className="text-sm text-gray-500 mt-1">
+              {bundling.description}
+             </div>
+            </td>
+            <td className="px-6 py-4">
+             <div className="text-sm text-gray-900">{menuNames || "-"}</div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+             <div className="text-sm text-gray-900">
+              {new Intl.NumberFormat("id-ID", {
+               style: "currency",
+               currency: "IDR",
+              }).format(bundling.price)}
+             </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+             <div className="text-sm text-gray-900">
+              {new Intl.NumberFormat("id-ID", {
+               style: "currency",
+               currency: "IDR",
+              }).format(totalPrice)}
+              {taxNames && (
+               <span className="text-xs text-gray-500 ml-1">
+                (incl. {taxNames})
+               </span>
+              )}
+             </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+             <span
+              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+               bundling.isAvailable
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+              }`}>
+              {bundling.isAvailable ? "Available" : "Unavailable"}
+             </span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+             <button
+              onClick={() => openEditModal(bundling)}
+              className="text-gray-600 hover:text-gray-900 mr-4">
+              <FiEdit2 />
+             </button>
+             <button
+              onClick={() => openDeleteModal(bundling)}
+              className="text-red-600 hover:text-red-900">
+              <FiTrash2 />
+             </button>
+            </td>
+           </motion.tr>
+          );
+         })}
+        </tbody>
+       </table>
+      </div>
+     )}
+    </div>
+   </motion.div>
+
+   {/* Modals */}
+   <AddBundlingModal
+    isOpen={isAddModalOpen}
+    onClose={() => setIsAddModalOpen(false)}
+    onSubmit={handleAddBundling}
+    taxes={taxes}
+    menus={menus}
+    outletId={selectedOutletId}
+   />
+
+   <EditBundlingModal
+    isOpen={isEditModalOpen}
+    onClose={() => setIsEditModalOpen(false)}
+    onSubmit={handleEditBundling}
+    bundling={selectedBundling}
+    taxes={taxes}
+    menus={menus}
+   />
+
+   <DeleteBundlingModal
+    isOpen={isDeleteModalOpen}
+    onClose={() => setIsDeleteModalOpen(false)}
+    onConfirm={handleDeleteBundling}
+    bundling={selectedBundling} // Kirim seluruh objek bundling
+   />
+  </div>
+ );
+};
+
+export default BundlingPage;
