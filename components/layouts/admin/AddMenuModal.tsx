@@ -1,10 +1,11 @@
 "use client";
 
-import {useState} from "react";
+import {useState, useRef} from "react";
 import {motion} from "framer-motion";
 import {FiX, FiUpload} from "react-icons/fi";
 import {Tax} from "@/lib/types/tax";
 import {Menu} from "@/lib/types/menu";
+import {uploadImage} from "@/lib/vercel/upload";
 
 interface AddMenuModalProps {
  isOpen: boolean;
@@ -21,69 +22,88 @@ const AddMenuModal = ({
  taxes,
  outletId,
 }: AddMenuModalProps) => {
-    const [formData, setFormData] = useState({
-     name: "",
-     description: "",
-     price: 0,
-     taxIds: [] as string[], // Changed to array
-     outletId: outletId,
-     imageUrl: "",
-     isAvailable: true,
-    });
+ const [formData, setFormData] = useState({
+  name: "",
+  description: "",
+  price: 0,
+  taxIds: [] as string[],
+  outletId: outletId,
+  imageUrl: "",
+  isAvailable: true,
+  category: "",
+ });
 
-    const handleChange = (
-     e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-     >
-    ) => {
-     const {name, value, type} = e.target;
-     const checked = (e.target as HTMLInputElement).checked;
+ const fileInputRef = useRef<HTMLInputElement>(null);
+ const [imagePreview, setImagePreview] = useState<string | null>(null);
+ const [isUploading, setIsUploading] = useState(false);
 
-     setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-     });
-    };
+ const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+ ) => {
+  const {name, value, type} = e.target;
+  const checked = (e.target as HTMLInputElement).checked;
 
-    const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-     const {value, checked} = e.target;
-     setFormData((prev) => {
-      if (checked) {
-       return {
-        ...prev,
-        taxIds: [...prev.taxIds, value],
-       };
-      } else {
-       return {
-        ...prev,
-        taxIds: prev.taxIds.filter((id) => id !== value),
-       };
-      }
-     });
-    };
+  setFormData({
+   ...formData,
+   [name]: type === "checkbox" ? checked : value,
+  });
+ };
 
-    const handleSubmit = (e: React.FormEvent) => {
-     e.preventDefault();
+ const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const {value, checked} = e.target;
+  setFormData((prev) => ({
+   ...prev,
+   taxIds: checked
+    ? [...prev.taxIds, value]
+    : prev.taxIds.filter((id) => id !== value),
+  }));
+ };
 
-     if (!formData.name || !formData.price || formData.taxIds.length === 0) {
-      alert("Please fill all required fields");
-      return;
-     }
+ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-     const menuData = {
-      name: formData.name,
-      description: formData.description,
-      price: Number(formData.price),
-      taxIds: formData.taxIds, // Now passing array
-      outletId: outletId,
-      imageUrl: formData.imageUrl || "",
-      isAvailable: Boolean(formData.isAvailable),
-     };
+  setIsUploading(true);
 
-     onSubmit(menuData);
-    };
+  try {
+   // Preview gambar
+   const reader = new FileReader();
+   reader.onload = (event) => {
+    setImagePreview(event.target?.result as string);
+   };
+   reader.readAsDataURL(file);
 
-    if (!isOpen) return null;
+   // Upload ke Vercel Blob
+   const imageUrl = await uploadImage(
+    file,
+    `menu-images/${Date.now()}-${file.name}`
+   );
+   setFormData({...formData, imageUrl});
+  } catch (error) {
+   alert("Gagal upload gambar!");
+   console.error(error);
+  } finally {
+   setIsUploading(false);
+  }
+ };
+
+ const triggerFileInput = () => fileInputRef.current?.click();
+
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!formData.name || !formData.price || !formData.category) {
+   alert("Harap isi semua field wajib!");
+   return;
+  }
+
+  onSubmit({
+   ...formData,
+   price: Number(formData.price),
+  });
+ };
+
+ if (!isOpen) return null;
 
  return (
   <motion.div
@@ -94,7 +114,7 @@ const AddMenuModal = ({
    <motion.div
     initial={{scale: 0.9, y: 20}}
     animate={{scale: 1, y: 0}}
-    className="bg-white rounded-xl shadow-xl w-full max-w-[600px] max-h-[530px] overflow-y-auto">
+    className="bg-white rounded-xl shadow-xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
     <div className="flex justify-between items-center border-b p-4">
      <h2 className="text-xl font-semibold text-gray-800">Add New Menu</h2>
      <button
@@ -107,17 +127,48 @@ const AddMenuModal = ({
      onSubmit={handleSubmit}
      className="p-6">
      <div className="space-y-4">
-      {/* Form fields remain the same as in original */}
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
-        Menu Name *
+        Menu Image
+       </label>
+       <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        accept="image/*"
+        className="hidden"
+       />
+       <div className="flex items-center gap-4">
+        <button
+         type="button"
+         onClick={triggerFileInput}
+         className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+         disabled={isUploading}>
+         <FiUpload className="mr-2" />
+         {isUploading ? "Uploading..." : "Upload Image"}
+        </button>
+        {imagePreview && (
+         <div className="h-16 w-16 rounded-md overflow-hidden border border-gray-200">
+          <img
+           src={imagePreview}
+           alt="Preview"
+           className="h-full w-full object-cover"
+          />
+         </div>
+        )}
+       </div>
+      </div>
+      <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+        Category *
        </label>
        <input
         type="text"
-        name="name"
-        value={formData.name}
+        name="category"
+        value={formData.category}
         onChange={handleChange}
         required
+        placeholder="e.g., Main Course, Beverage, Dessert"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
        />
       </div>
@@ -179,23 +230,30 @@ const AddMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Image URL
-       </label>
-       <div className="flex items-center">
-        <input
-         type="text"
-         name="imageUrl"
-         value={formData.imageUrl}
-         onChange={handleChange}
-         placeholder="https://example.com/image.jpg"
-         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        />
+       <label className="block text-sm font-medium mb-1">Gambar Menu</label>
+       <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        accept="image/*"
+        className="hidden"
+       />
+       <div className="flex items-center gap-2">
         <button
          type="button"
-         className="ml-2 p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+         onClick={triggerFileInput}
+         disabled={isUploading}
+         className="px-3 py-2 border rounded-lg flex items-center gap-2">
          <FiUpload />
+         {isUploading ? "Uploading..." : "Pilih Gambar"}
         </button>
+        {imagePreview && (
+         <img
+          src={imagePreview}
+          alt="Preview"
+          className="h-12 w-12 object-cover rounded"
+         />
+        )}
        </div>
       </div>
 
@@ -225,7 +283,8 @@ const AddMenuModal = ({
       </button>
       <button
        type="submit"
-       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700">
+       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+       disabled={isUploading}>
        Add Menu
       </button>
      </div>

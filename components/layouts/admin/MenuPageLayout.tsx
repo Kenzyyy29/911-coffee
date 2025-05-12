@@ -196,6 +196,9 @@ const MenuPageLayout = () => {
            Name
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Category
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Base Price
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -220,11 +223,9 @@ const MenuPageLayout = () => {
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="px-4 py-2">
              {menu.imageUrl ? (
-              <Image
-               width={40}
-               height={40}
+              <img
                src={menu.imageUrl}
                alt={menu.name}
                className="h-10 w-10 rounded-full object-cover"
@@ -242,6 +243,9 @@ const MenuPageLayout = () => {
              <div className="text-sm text-gray-500 mt-1">
               {menu.description}
              </div>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+             <div className="text-sm text-gray-900">{menu.category}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">

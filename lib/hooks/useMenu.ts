@@ -1,22 +1,22 @@
-import {useState, useEffect} from "react";
-import {db} from "@/lib/firebase/init";
+import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase/init";
 import {
- collection,
- doc,
- addDoc,
- updateDoc,
- deleteDoc,
- onSnapshot,
- query,
- where,
- orderBy,
+    collection,
+    doc,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    onSnapshot,
+    query,
+    where,
+    orderBy,
 } from "firebase/firestore";
-import {Menu} from "@/lib/types/menu";
+import { Menu } from "@/lib/types/menu";
 
 export const useMenu = (outletId: string) => {
- const [menus, setMenus] = useState<Menu[]>([]);
- const [loading, setLoading] = useState<boolean>(true);
- const [error, setError] = useState<string | null>(null);
+    const [menus, setMenus] = useState<Menu[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!outletId) {
@@ -49,6 +49,7 @@ export const useMenu = (outletId: string) => {
                             imageUrl: data.imageUrl || "",
                             isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
                             createdAt: data.createdAt || new Date().toISOString(),
+                            category: data.category || "",
                         });
                     });
                     setMenus(menusData);
@@ -70,52 +71,52 @@ export const useMenu = (outletId: string) => {
         return () => unsubscribe();
     }, [outletId]);
 
- const addMenu = async (menuData: Omit<Menu, "id" | "createdAt">) => {
-  try {
-   setLoading(true);
-   const docRef = await addDoc(collection(db, "menus"), {
-    ...menuData,
-    createdAt: new Date().toISOString(),
-   });
-   return docRef.id;
-  } catch (err) {
-   setError((err as Error).message);
-   throw err;
-  } finally {
-   setLoading(false);
-  }
- };
+    const addMenu = async (menuData: Omit<Menu, "id" | "createdAt">) => {
+        try {
+            setLoading(true);
+            const docRef = await addDoc(collection(db, "menus"), {
+                ...menuData,
+                createdAt: new Date().toISOString(),
+            });
+            return docRef.id;
+        } catch (err) {
+            setError((err as Error).message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
 
- const updateMenu = async (id: string, menuData: Partial<Menu>) => {
-  try {
-   setLoading(true);
-   await updateDoc(doc(db, "menus", id), menuData);
-  } catch (err) {
-   setError((err as Error).message);
-   throw err;
-  } finally {
-   setLoading(false);
-  }
- };
+    const updateMenu = async (id: string, menuData: Partial<Menu>) => {
+        try {
+            setLoading(true);
+            await updateDoc(doc(db, "menus", id), menuData);
+        } catch (err) {
+            setError((err as Error).message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
 
- const deleteMenu = async (id: string) => {
-  try {
-   setLoading(true);
-   await deleteDoc(doc(db, "menus", id));
-  } catch (err) {
-   setError((err as Error).message);
-   throw err;
-  } finally {
-   setLoading(false);
-  }
- };
+    const deleteMenu = async (id: string) => {
+        try {
+            setLoading(true);
+            await deleteDoc(doc(db, "menus", id));
+        } catch (err) {
+            setError((err as Error).message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
 
- return {
-  menus,
-  loading,
-  error,
-  addMenu,
-  updateMenu,
-  deleteMenu,
- };
+    return {
+        menus,
+        loading,
+        error,
+        addMenu,
+        updateMenu,
+        deleteMenu,
+    };
 };

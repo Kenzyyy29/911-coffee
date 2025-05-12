@@ -8,4 +8,5 @@ export interface Menu {
     imageUrl: string;
     isAvailable: boolean;
     createdAt: string;
+    category: string;
 }
