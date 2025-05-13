@@ -105,14 +105,6 @@ const MenuPageLayout = () => {
  };
 
  // Function to get tax names for display
- const getTaxNames = (menu: Menu) => {
-  if (!menu.taxIds || menu.taxIds.length === 0) {
-   return "";
-  }
-
-  const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
-  return applicableTaxes.map((tax) => tax.name).join(", ");
- };
 
  if (!selectedOutlet) {
   return (
@@ -169,7 +161,6 @@ const MenuPageLayout = () => {
      <h1 className="text-2xl font-bold text-gray-800">
       {currentOutlet?.name} Menu
      </h1>
-     <p className="text-gray-600">Manage all menu items for this outlet</p>
     </div>
 
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -191,25 +182,25 @@ const MenuPageLayout = () => {
         <thead className="bg-gray-50">
          <tr>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Image
+           Gambar
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Name
+           Nama
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Category
+           Kategori
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Base Price
+           Harga Awal
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Price After Tax
+           Harga Pajak
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Status
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Actions
+           Aksi
           </th>
          </tr>
         </thead>
@@ -256,6 +247,7 @@ const MenuPageLayout = () => {
               {formatPrice(totalPrice)}
              </div>
             </td>
+            
             <td className="px-6 py-4 whitespace-nowrap">
              <span
               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
