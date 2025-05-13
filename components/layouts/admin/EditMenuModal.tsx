@@ -1,10 +1,12 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {motion} from "framer-motion";
 import {FiX, FiUpload} from "react-icons/fi";
 import {Tax} from "@/lib/types/tax";
 import {Menu} from "@/lib/types/menu";
+import {uploadImage} from "@/lib/utils/uploadImage";
+import Image from "next/image";
 
 interface EditMenuModalProps {
  isOpen: boolean;
@@ -23,86 +25,113 @@ const EditMenuModal = ({
  currentMenu,
  outletId,
 }: EditMenuModalProps) => {
-    const [formData, setFormData] = useState({
-     name: currentMenu.name,
-     description: currentMenu.description,
-     price: currentMenu.price,
-     taxIds: currentMenu.taxIds || [], // Changed to array
-     outletId: outletId,
-     imageUrl: currentMenu.imageUrl,
-     isAvailable: currentMenu.isAvailable,
-     category: currentMenu.category || "",
-    });
+ const [formData, setFormData] = useState({
+  name: currentMenu.name,
+  description: currentMenu.description,
+  price: currentMenu.price,
+  taxIds: currentMenu.taxIds || [],
+  outletId: outletId,
+  imageUrl: currentMenu.imageUrl,
+  isAvailable: currentMenu.isAvailable,
+  category: currentMenu.category || "",
+ });
 
-    useEffect(() => {
-     if (currentMenu) {
-      setFormData({
-       name: currentMenu.name,
-       description: currentMenu.description,
-       price: currentMenu.price,
-       taxIds: currentMenu.taxIds || [], // Changed to array
-       outletId: outletId,
-       imageUrl: currentMenu.imageUrl,
-       isAvailable: currentMenu.isAvailable,
-       category: currentMenu.category || "",
-      });
-     }
-    }, [currentMenu, outletId]);
+ const [uploading, setUploading] = useState(false);
+ const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = (
-   e: React.ChangeEvent<
-    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-   >
-  ) => {
-   const {name, value, type} = e.target;
-   const checked = (e.target as HTMLInputElement).checked;
+ useEffect(() => {
+  if (currentMenu) {
+   setFormData({
+    name: currentMenu.name,
+    description: currentMenu.description,
+    price: currentMenu.price,
+    taxIds: currentMenu.taxIds || [],
+    outletId: outletId,
+    imageUrl: currentMenu.imageUrl,
+    isAvailable: currentMenu.isAvailable,
+    category: currentMenu.category || "",
+   });
+  }
+ }, [currentMenu, outletId]);
+
+ const handleUpload = async () => {
+  const file = fileInputRef.current?.files?.[0];
+  if (!file) return;
+
+  try {
+   setUploading(true);
+   const blob = await uploadImage(file);
 
    setFormData({
     ...formData,
-    [name]: type === "checkbox" ? checked : value,
+    imageUrl: blob.url,
    });
-  };
-
-  const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-   const {value, checked} = e.target;
-   setFormData((prev) => {
-    if (checked) {
-     return {
-      ...prev,
-      taxIds: [...prev.taxIds, value],
-     };
-    } else {
-     return {
-      ...prev,
-      taxIds: prev.taxIds.filter((id) => id !== value),
-     };
-    }
-   });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-   e.preventDefault();
-
-   if (!formData.name || !formData.price || formData.taxIds.length === 0) {
-    alert("Please fill all required fields");
-    return;
+  } catch (error) {
+   if (error instanceof Error) {
+    alert(error.message);
+   } else {
+    alert("Upload failed with unknown error");
    }
+  } finally {
+   setUploading(false);
+  }
+ };
 
-   const menuData = {
-    name: formData.name,
-    description: formData.description,
-    price: Number(formData.price),
-    taxIds: formData.taxIds, // Now passing array
-    outletId: outletId,
-    imageUrl: formData.imageUrl || "",
-    isAvailable: Boolean(formData.isAvailable),
-    category: formData.category,
-   };
+ const handleChange = (
+  e: React.ChangeEvent<
+   HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  >
+ ) => {
+  const {name, value, type} = e.target;
+  const checked = (e.target as HTMLInputElement).checked;
 
-   onSubmit(menuData);
+  setFormData({
+   ...formData,
+   [name]: type === "checkbox" ? checked : value,
+  });
+ };
+
+ const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const {value, checked} = e.target;
+  setFormData((prev) => {
+   if (checked) {
+    return {
+     ...prev,
+     taxIds: [...prev.taxIds, value],
+    };
+   } else {
+    return {
+     ...prev,
+     taxIds: prev.taxIds.filter((id) => id !== value),
+    };
+   }
+  });
+ };
+
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!formData.name || !formData.price || formData.taxIds.length === 0) {
+   alert("Please fill all required fields");
+   return;
+  }
+
+  const menuData = {
+   name: formData.name,
+   description: formData.description,
+   price: Number(formData.price),
+   taxIds: formData.taxIds,
+   outletId: outletId,
+   imageUrl: formData.imageUrl || "",
+   isAvailable: Boolean(formData.isAvailable),
+   category: formData.category,
   };
 
-  if (!isOpen) return null;
+  onSubmit(menuData);
+ };
+
+ if (!isOpen) return null;
+
  return (
   <motion.div
    initial={{opacity: 0}}
@@ -125,7 +154,6 @@ const EditMenuModal = ({
      onSubmit={handleSubmit}
      className="p-6">
      <div className="space-y-4">
-      {/* Form fields remain the same as in original */}
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
         Menu Name *
@@ -164,20 +192,6 @@ const EditMenuModal = ({
         value={formData.description}
         onChange={handleChange}
         rows={3}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-       />
-      </div>
-      <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Category *
-       </label>
-       <input
-        type="text"
-        name="category"
-        value={formData.category}
-        onChange={handleChange}
-        required
-        placeholder="e.g., Main Course, Beverage, Dessert"
         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
        />
       </div>
@@ -227,23 +241,34 @@ const EditMenuModal = ({
 
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
-        Image URL
+        Menu Image
        </label>
-       <div className="flex items-center">
-        <input
-         type="text"
-         name="imageUrl"
-         value={formData.imageUrl}
-         onChange={handleChange}
-         placeholder="https://example.com/image.jpg"
-         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        />
-        <button
-         type="button"
-         className="ml-2 p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-         <FiUpload />
-        </button>
-       </div>
+       <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleUpload}
+        accept="image/*"
+        className="hidden"
+       />
+       <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        <FiUpload className="mr-2" />
+        {uploading ? "Uploading..." : "Upload New Image"}
+       </button>
+       {formData.imageUrl && (
+        <div className="mt-2">
+         <Image
+          src={formData.imageUrl}
+          alt="Current Menu"
+          width={320}
+          height={160}
+          className="max-w-xs max-h-40 object-contain"
+         />
+        </div>
+       )}
       </div>
 
       <div className="flex items-center">

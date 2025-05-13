@@ -2,7 +2,7 @@
 
 import {useRef, useState} from "react";
 import {motion} from "framer-motion";
-import {FiX} from "react-icons/fi";
+import {FiX, FiUpload} from "react-icons/fi";
 import {Tax} from "@/lib/types/tax";
 import {Menu} from "@/lib/types/menu";
 import {uploadImage} from "@/lib/utils/uploadImage";
@@ -23,16 +23,18 @@ const AddMenuModal = ({
  taxes,
  outletId,
 }: AddMenuModalProps) => {
- const [formData, setFormData] = useState({
+ const initialFormData = {
   name: "",
   description: "",
   price: 0,
-  taxIds: [] as string[], // Changed to array
+  taxIds: [] as string[],
   outletId: outletId,
   imageUrl: "",
   isAvailable: true,
   category: "",
- });
+ };
+
+ const [formData, setFormData] = useState(initialFormData);
  const [uploading, setUploading] = useState(false);
  const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -102,7 +104,7 @@ const AddMenuModal = ({
    name: formData.name,
    description: formData.description,
    price: Number(formData.price),
-   taxIds: formData.taxIds, // Now passing array
+   taxIds: formData.taxIds,
    outletId: outletId,
    imageUrl: formData.imageUrl || "",
    isAvailable: Boolean(formData.isAvailable),
@@ -110,6 +112,11 @@ const AddMenuModal = ({
   };
 
   onSubmit(menuData);
+  // Reset form after submit
+  setFormData(initialFormData);
+  if (fileInputRef.current) {
+   fileInputRef.current.value = "";
+  }
  };
 
  if (!isOpen) return null;
@@ -136,7 +143,7 @@ const AddMenuModal = ({
      onSubmit={handleSubmit}
      className="p-6">
      <div className="space-y-4">
-      {/* Form fields remain the same as in original */}
+      {/* Form fields */}
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
         Menu Name *
@@ -223,6 +230,9 @@ const AddMenuModal = ({
       </div>
 
       <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+        Menu Image
+       </label>
        <input
         type="file"
         ref={fileInputRef}
@@ -230,22 +240,24 @@ const AddMenuModal = ({
         accept="image/*"
         className="hidden"
        />
-
        <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}>
+        disabled={uploading}
+        className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        <FiUpload className="mr-2" />
         {uploading ? "Uploading..." : "Upload Image"}
        </button>
-
        {formData.imageUrl && (
-        <Image
-         src={formData.imageUrl}
-         alt="Preview"
-         width={320} // Tambahkan width
-         height={160} // Tambahkan height
-         className="max-w-xs max-h-40 object-contain" // Tambahkan object-contain untuk menjaga aspect ratio
-        />
+        <div className="mt-2">
+         <Image
+          src={formData.imageUrl}
+          alt="Preview"
+          width={320}
+          height={160}
+          className="max-w-xs max-h-40 object-contain"
+         />
+        </div>
        )}
       </div>
 

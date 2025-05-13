@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {Menu} from "@/lib/types/menu";
 import {formatPrice} from "@/lib/utils/formatPrice";
+import {useTaxes} from "@/lib/hooks/useTaxes";
 
 interface MenuRecommendationsProps {
  recommendations: Menu[];
@@ -18,7 +19,24 @@ export const MenuRecommendations = ({
  currentMenuId,
  outletId,
 }: MenuRecommendationsProps) => {
+ const {taxes} = useTaxes();
+
  if (recommendations.length === 0) return null;
+
+ // Calculate total price with taxes
+ const calculateTotalPrice = (menu: Menu) => {
+  if (!menu?.taxIds || menu.taxIds.length === 0) return menu?.price || 0;
+
+  const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
+  let totalPrice = menu.price;
+
+  // Apply each tax sequentially (compound)
+  applicableTaxes.forEach((tax) => {
+   totalPrice *= 1 + tax.rate / 100;
+  });
+
+  return totalPrice;
+ };
 
  return (
   <div className="mt-12 px-4 sm:px-0">
@@ -73,7 +91,7 @@ export const MenuRecommendations = ({
             {menu.name}
            </h3>
            <span className="font-bold text-onyx1 dark:text-white whitespace-nowrap pl-2">
-            {formatPrice(menu.price)}
+            {formatPrice(calculateTotalPrice(menu))}
            </span>
           </div>
 

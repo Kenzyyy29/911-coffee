@@ -28,9 +28,14 @@ const MenuDetailPage = () => {
   if (!menu?.taxIds || menu.taxIds.length === 0) return menu?.price || 0;
 
   const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
-  const totalTaxRate = applicableTaxes.reduce((sum, tax) => sum + tax.rate, 0);
+  let totalPrice = menu.price;
 
-  return menu.price * (1 + totalTaxRate / 100);
+  // Apply each tax sequentially (compound)
+  applicableTaxes.forEach((tax) => {
+   totalPrice *= 1 + tax.rate / 100;
+  });
+
+  return totalPrice;
  };
 
  // Get random recommendations

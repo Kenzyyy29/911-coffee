@@ -100,8 +100,14 @@ const MenuPageLayout = () => {
   }
 
   const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
-  const totalTaxRate = applicableTaxes.reduce((sum, tax) => sum + tax.rate, 0);
-  return menu.price * (1 + totalTaxRate / 100);
+  let totalPrice = menu.price;
+
+  // Apply each tax sequentially (compound)
+  applicableTaxes.forEach((tax) => {
+   totalPrice *= 1 + tax.rate / 100;
+  });
+
+  return totalPrice;
  };
 
  // Function to get tax names for display
