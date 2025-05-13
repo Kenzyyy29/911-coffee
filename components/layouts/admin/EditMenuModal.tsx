@@ -137,22 +137,24 @@ const EditMenuModal = ({
    initial={{opacity: 0}}
    animate={{opacity: 1}}
    exit={{opacity: 0}}
-   className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+   className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
    <motion.div
     initial={{scale: 0.9, y: 20}}
     animate={{scale: 1, y: 0}}
-    className="bg-white rounded-xl shadow-xl w-full max-w-[600px] max-h-[530px] overflow-y-auto">
-    <div className="flex justify-between items-center border-b p-4">
+    className="bg-white rounded-xl shadow-xl w-full max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] overflow-y-auto">
+    <div className="flex justify-between items-center sticky top-0 bg-white border-b p-4 z-10">
      <h2 className="text-xl font-semibold text-gray-800">Edit Menu</h2>
      <button
       onClick={onClose}
-      className="text-gray-500 hover:text-gray-700">
+      className="text-gray-500 hover:text-gray-700 transition-colors"
+      aria-label="Close modal">
       <FiX size={24} />
      </button>
     </div>
+
     <form
      onSubmit={handleSubmit}
-     className="p-6">
+     className="p-4 md:p-6">
      <div className="space-y-4">
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -216,7 +218,7 @@ const EditMenuModal = ({
        <label className="block text-sm font-medium text-gray-700 mb-1">
         Taxes *
        </label>
-       <div className="space-y-2">
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {taxes.map((tax) => (
          <div
           key={tax.id}
@@ -254,18 +256,18 @@ const EditMenuModal = ({
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
-        className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        className="flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
         <FiUpload className="mr-2" />
         {uploading ? "Uploading..." : "Upload New Image"}
        </button>
        {formData.imageUrl && (
-        <div className="mt-2">
+        <div className="mt-2 flex justify-center">
          <Image
           src={formData.imageUrl}
           alt="Current Menu"
           width={320}
           height={160}
-          className="max-w-xs max-h-40 object-contain"
+          className="max-w-full h-auto max-h-40 object-contain rounded-lg"
          />
         </div>
        )}
@@ -288,16 +290,16 @@ const EditMenuModal = ({
       </div>
      </div>
 
-     <div className="mt-6 flex justify-end space-x-3">
+     <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
       <button
        type="button"
        onClick={onClose}
-       className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+       className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
        Cancel
       </button>
       <button
        type="submit"
-       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700">
+       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
        Update Menu
       </button>
      </div>

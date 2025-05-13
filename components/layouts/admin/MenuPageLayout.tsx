@@ -18,7 +18,7 @@ import Image from "next/image";
 import AddMenuModal from "./AddMenuModal";
 import EditMenuModal from "./EditMenuModal";
 import DeleteMenuModal from "./DeleteMenuModal";
-import { formatPrice } from "@/lib/utils/formatPrice";
+import {formatPrice} from "@/lib/utils/formatPrice";
 
 const MenuPageLayout = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<string>("");
@@ -110,24 +110,22 @@ const MenuPageLayout = () => {
   return totalPrice;
  };
 
- // Function to get tax names for display
-
  if (!selectedOutlet) {
   return (
-   <div className="max-h-[100dvh] w-full overflow-hidden">
+   <div className="min-h-screen p-4 md:p-8">
     <motion.div
      initial={{opacity: 0}}
      animate={{opacity: 1}}
-     className=" mx-auto bg-white text-center">
+     className="max-w-6xl mx-auto bg-white rounded-lg p-6">
      <h1 className="text-2xl font-bold text-gray-800 mb-6">Select an Outlet</h1>
-     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {outlets.map((outlet) => (
        <motion.div
         key={outlet.id}
         whileHover={{scale: 1.03}}
         whileTap={{scale: 0.98}}
         onClick={() => setSelectedOutlet(outlet.id)}
-        className="p-6 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+        className="p-4 sm:p-6 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
         <h3 className="font-medium text-gray-900">{outlet.name}</h3>
         <p className="text-sm text-gray-500 mt-1">
          {outlet.address || "No address provided"}
@@ -143,21 +141,23 @@ const MenuPageLayout = () => {
  const currentOutlet = outlets.find((o) => o.id === selectedOutlet);
 
  return (
-  <div className="max-h-[100dvh]">
+  <div className="min-h-screen p-4 md:p-8">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     className="max-w-7xl mx-auto">
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
      <button
       onClick={() => setSelectedOutlet("")}
-      className="flex items-center text-gray-600 hover:text-gray-800">
+      className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
       <FiArrowLeft className="mr-2" />
       Back to Outlets
      </button>
      <motion.button
       onClick={handleAddMenu}
-      className="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+      whileHover={{scale: 1.03}}
+      whileTap={{scale: 0.98}}
+      className="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors w-full sm:w-auto justify-center">
       <FiPlus className="mr-2" />
       Add Menu
      </motion.button>
@@ -178,35 +178,35 @@ const MenuPageLayout = () => {
        <p>No menus found for this outlet</p>
        <button
         onClick={handleAddMenu}
-        className="mt-4 text-gray-800 underline hover:text-gray-600">
+        className="mt-4 text-gray-800 underline hover:text-gray-600 transition-colors">
         Add your first menu
        </button>
       </div>
      ) : (
-      <div className="overflow-y-auto">
+      <div className="overflow-x-auto">
        <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
          <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Gambar
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Image
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Nama
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Name
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Kategori
+          <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Category
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Harga Awal
+          <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Base Price
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Harga Pajak
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Price
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Status
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Aksi
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Actions
           </th>
          </tr>
         </thead>
@@ -220,41 +220,42 @@ const MenuPageLayout = () => {
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="px-4 py-4 whitespace-nowrap">
              {menu.imageUrl ? (
-              <Image
-               width={40}
-               height={40}
-               src={menu.imageUrl}
-               alt={menu.name}
-               className="h-10 w-10 rounded-full object-cover"
-              />
+              <div className="flex-shrink-0 h-10 w-10">
+               <Image
+                width={40}
+                height={40}
+                src={menu.imageUrl}
+                alt={menu.name}
+                className="h-10 w-10 rounded-full object-cover"
+               />
+              </div>
              ) : (
               <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                <FiImage className="text-gray-400" />
               </div>
              )}
             </td>
-            <td className="px-6 py-4">
+            <td className="px-4 py-4">
              <div className="text-sm font-medium text-gray-900">
               {menu.name}
              </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="hidden sm:table-cell px-4 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">{menu.category}</div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
               {formatPrice(menu.price)}
              </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-             <div className="text-sm text-gray-900">
+            <td className="px-4 py-4 whitespace-nowrap">
+             <div className="text-sm font-medium text-gray-900">
               {formatPrice(totalPrice)}
              </div>
             </td>
-            
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="px-4 py-4 whitespace-nowrap">
              <span
               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                menu.isAvailable
@@ -264,17 +265,21 @@ const MenuPageLayout = () => {
               {menu.isAvailable ? "Available" : "Unavailable"}
              </span>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-             <button
-              onClick={() => handleEditMenu(menu)}
-              className="text-gray-600 hover:text-gray-900 mr-4">
-              <FiEdit2 />
-             </button>
-             <button
-              onClick={() => handleDeleteMenu(menu.id)}
-              className="text-red-600 hover:text-red-900">
-              <FiTrash2 />
-             </button>
+            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+             <div className="flex space-x-4">
+              <button
+               onClick={() => handleEditMenu(menu)}
+               className="text-gray-600 hover:text-gray-900 transition-colors"
+               aria-label="Edit menu">
+               <FiEdit2 />
+              </button>
+              <button
+               onClick={() => handleDeleteMenu(menu.id)}
+               className="text-red-600 hover:text-red-900 transition-colors"
+               aria-label="Delete menu">
+               <FiTrash2 />
+              </button>
+             </div>
             </td>
            </motion.tr>
           );
