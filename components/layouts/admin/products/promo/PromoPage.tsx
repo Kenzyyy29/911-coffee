@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {motion} from "framer-motion";
 import {
  FiPlus,
@@ -26,7 +26,7 @@ const PromoPage = () => {
  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
  const [promoToDelete, setPromoToDelete] = useState<string | null>(null);
  const [currentPromo, setCurrentPromo] = useState<Promo | null>(null);
- const {promos, loading, error, addPromo, updatePromo, deletePromo} =
+ const {promos, loading, addPromo, updatePromo, deletePromo} =
   usePromo(selectedOutlet);
  const {outlets} = useOutlets();
 
