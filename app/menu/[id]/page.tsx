@@ -1,5 +1,6 @@
 import MenuDetailPage from "@/components/layouts/pages/MenuDetailPage";
 import {Metadata} from "next";
+import {Suspense} from "react";
 
 export const metadata: Metadata = {
  title: "Menu",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function MenuDetail() {
- return <MenuDetailPage />;
+ return (
+  <Suspense fallback={<div>Loading...</div>}>
+   <MenuDetailPage />
+  </Suspense>
+ );
 }
