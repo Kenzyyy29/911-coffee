@@ -5,7 +5,6 @@ import Navbar from "@/components/layouts/Navbar";
 import {SessionProvider} from "next-auth/react";
 import {usePathname} from "next/navigation";
 import Footer from "@/components/layouts/Footer";
-// import Footer from "@/components/layouts/Footer";
 
 const geistSans = Geist({
  variable: "--font-geist-sans",
@@ -22,6 +21,7 @@ const disableNavbar = [
  "/auth/register",
  "/admin/dashboard",
  "/unauthorized",
+ "/menu"
 ];
 
 const disableFooter = [
@@ -29,6 +29,7 @@ const disableFooter = [
  "/auth/register",
  "/admin/dashboard",
  "/unauthorized",
+ "/menu"
 ];
 
 export default function RootLayout({

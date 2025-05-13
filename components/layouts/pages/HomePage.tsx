@@ -37,7 +37,7 @@ const kelebihan = {
 
 const menu = [
  {name: "Butter Coffee", image: "/bestSeller/8.png", price: "Rp. 32,340"},
- {name: "Tahu Lada Garam", image: "/menus/4.png", price: "Rp. 19,635"},
+ {name: "Tahu Lada Garam", image: "/bestSeller/8.png", price: "Rp. 19,635"},
  {name: "Korova Mushroom", image: "/bestSeller/27.png", price: "Rp. 78,540"},
 ];
 
@@ -101,30 +101,34 @@ const staggerContainer = {
 
 export default function HomePage() {
  return (
-  <div className="flex flex-col">
+  <div className="flex flex-col overflow-x-hidden">
    {/* Hero Section */}
-   <section
-    className="relative h-screen w-full flex items-center justify-center text-white"
-    style={{
-     backgroundImage: "url('/1.jpeg')",
-     backgroundSize: "cover",
-     backgroundPosition: "center",
-    }}>
-    <div className="absolute inset-0 bg-black/40" />
+   <section className="relative h-[80vh] min-h-[500px] max-h-[800px] w-full">
+    <div className="absolute inset-0">
+     <Image
+      src="/1.jpeg"
+      alt="911 Coffee Hero"
+      fill
+      className="object-cover"
+      priority
+     />
+     <div className="absolute inset-0 bg-black/50" />
+    </div>
     <motion.div
      initial={{opacity: 0}}
      animate={{opacity: 1}}
      transition={{duration: 1}}
-     className="relative z-10 text-center h-full w-full flex flex-col gap-6 items-center justify-center px-10">
+     className="relative h-full w-full flex flex-col gap-6 items-center justify-center px-4 sm:px-6 text-center text-white">
      <motion.div
       initial={{scale: 0.9}}
       animate={{scale: 1}}
-      transition={{duration: 0.5}}>
+      transition={{duration: 0.5}}
+      className="max-w-4xl mx-auto px-4">
       <FiCoffee className="mx-auto text-5xl mb-4" />
-      <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 tracking-tight">
        911 COFFEE
       </h1>
-      <p className="text-xl md:text-2xl font-light mb-8">
+      <p className="text-xl sm:text-2xl font-light mb-8">
        GOOD COFFEE START FROM HERE
       </p>
      </motion.div>
@@ -135,7 +139,7 @@ export default function HomePage() {
       className="mt-4">
       <Link
        href="/product"
-       className="bg-white text-black px-8 py-3 rounded-full font-medium flex items-center gap-2 hover:bg-gray-100 transition-colors">
+       className="bg-white text-black px-6 sm:px-8 py-3 rounded-full font-medium flex items-center gap-2 hover:bg-gray-100 transition-colors">
        Explore Menu <BsArrowRight />
       </Link>
      </motion.div>
@@ -143,74 +147,79 @@ export default function HomePage() {
    </section>
 
    {/* Kelebihan */}
-   <section className="min-h-screen w-full py-20 bg-white">
-    <div className="container mx-auto px-6">
+   <section className="w-full py-16 sm:py-20 bg-white">
+    <div className="container mx-auto px-4 sm:px-6">
      <motion.div
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"
-      viewport={{once: true}}
-      className="flex flex-col lg:flex-row items-center gap-12">
+      viewport={{once: true, margin: "-100px"}}
+      className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
       <motion.div
        variants={fadeIn}
-       className="lg:w-1/2 space-y-10">
-       <h1 className="text-4xl font-bold mb-10 text-black/40">
+       className="lg:w-1/2 space-y-8 order-2 lg:order-1">
+       <h1 className="text-3xl sm:text-4xl font-bold text-black/40">
         {kelebihan.name}
        </h1>
 
-       {kelebihan.items.map((item, index) => (
-        <motion.div
-         key={index}
-         variants={fadeIn}
-         whileHover={{x: 10}}
-         className="flex gap-6 items-start">
-         <div className="rounded-full bg-black text-white p-4 flex-shrink-0">
-          <div className="text-2xl">{item.icon}</div>
-         </div>
-         <div>
-          <h2 className="text-xl font-semibold text-black/40">{item.name}</h2>
-          <p className="text-gray-600">{item.description}</p>
-         </div>
-        </motion.div>
-       ))}
+       <div className="space-y-8">
+        {kelebihan.items.map((item, index) => (
+         <motion.div
+          key={index}
+          variants={fadeIn}
+          whileHover={{x: 10}}
+          className="flex gap-4 sm:gap-6 items-start">
+          <div className="rounded-full bg-black text-white p-3 sm:p-4 flex-shrink-0">
+           <div className="text-xl sm:text-2xl">{item.icon}</div>
+          </div>
+          <div>
+           <h2 className="text-lg sm:text-xl font-semibold text-black/40">
+            {item.name}
+           </h2>
+           <p className="text-gray-600">{item.description}</p>
+          </div>
+         </motion.div>
+        ))}
+       </div>
       </motion.div>
 
       <motion.div
        variants={fadeIn}
-       className="lg:w-1/2 overflow-hidden rounded-xl shadow-2xl">
-       <Image
-        height={600}
-        width={600}
-        src="/6.jpeg"
-        alt="Coffee Shop Interior"
-        className="w-full h-auto object-cover"
-       />
+       className="lg:w-1/2 w-full order-1 lg:order-2 mb-8 lg:mb-0">
+       <div className="aspect-[4/3] relative rounded-xl overflow-hidden shadow-2xl">
+        <Image
+         src="/6.jpeg"
+         alt="Coffee Shop Interior"
+         fill
+         className="object-cover"
+        />
+       </div>
       </motion.div>
      </motion.div>
     </div>
    </section>
 
    {/* Menu Section */}
-   <section className="py-20 bg-[#f4f4f4]">
-    <div className="container mx-auto px-6">
+   <section className="py-16 sm:py-20 bg-[#f4f4f4]">
+    <div className="container mx-auto px-4 sm:px-6">
      <motion.div
       initial={{opacity: 0, y: 20}}
       whileInView={{opacity: 1, y: 0}}
       viewport={{once: true}}
       transition={{duration: 0.5}}
-      className="text-center mb-16">
-      <h1 className="text-3xl font-bold text-black/40 mb-4">
+      className="text-center mb-12 sm:mb-16">
+      <h1 className="text-3xl font-bold text-black/40 mb-3">
        BEST SELLER MENU
       </h1>
-      <div className="w-20 h-1 bg-black mx-auto"></div>
+      <div className="w-20 h-1 bg-black mx-auto" />
      </motion.div>
 
      <motion.div
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"
-      viewport={{once: true}}
-      className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      viewport={{once: true, margin: "-100px"}}
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       {menu.map((item, index) => (
        <motion.div
         key={index}
@@ -218,14 +227,15 @@ export default function HomePage() {
         whileHover={{y: -10}}
         className="bg-white rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
         <div className="p-6 flex flex-col items-center">
-         <div className="w-40 h-40 flex items-center justify-center mb-6 overflow-hidden">
-          <Image
-           height={200}
-           width={200}
-           src={item.image}
-           alt={item.name}
-           className="w-full h-full object-cover"
-          />
+         <div className="w-40 h-40 flex items-center justify-center mb-6 overflow-hidden rounded-lg">
+          <div className="relative w-full h-full">
+           <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            className="object-cover"
+           />
+          </div>
          </div>
          <h3 className="text-xl font-semibold mb-2 text-black">{item.name}</h3>
          <p className="text-gray-600 font-medium mb-4">{item.price}</p>
@@ -248,23 +258,22 @@ export default function HomePage() {
    </section>
 
    {/* About Section */}
-   <section className="py-20 bg-white">
-    <div className="container mx-auto px-6">
+   <section className="py-16 sm:py-20 bg-white">
+    <div className="container mx-auto px-4 sm:px-6">
      <motion.div
       initial={{opacity: 0}}
       whileInView={{opacity: 1}}
       viewport={{once: true}}
-      className="flex flex-col lg:flex-row items-center gap-12">
+      className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
       <motion.div
        whileHover={{scale: 1.02}}
-       className="lg:w-1/2">
-       <div className="bg-black rounded-xl md:h-[400px] h-[270px] w-full overflow-hidden shadow-2xl">
+       className="lg:w-1/2 w-full">
+       <div className="aspect-[4/3] relative rounded-xl overflow-hidden shadow-2xl">
         <Image
-         height={600}
-         width={600}
          src="/5.jpeg"
          alt="Coffee Shop Interior"
-         className="w-full h-auto object-cover"
+         fill
+         className="object-cover"
         />
        </div>
       </motion.div>
@@ -274,8 +283,8 @@ export default function HomePage() {
        whileInView={{x: 0, opacity: 1}}
        viewport={{once: true}}
        transition={{delay: 0.2}}
-       className="lg:w-1/2">
-       <h1 className="text-4xl font-bold mb-6 text-black/40">
+       className="lg:w-1/2 w-full mt-8 lg:mt-0">
+       <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-black/40">
         Kami selalu memberikan pelayanan terbaik untuk anda
        </h1>
        <p className="text-gray-600 mb-8 text-lg">
@@ -303,13 +312,13 @@ export default function HomePage() {
    </section>
 
    {/* Testimonials */}
-   <section className="py-20 bg-black text-white">
-    <div className="container mx-auto px-6">
+   <section className="py-16 sm:py-20 bg-black text-white">
+    <div className="container mx-auto px-4 sm:px-6">
      <motion.div
       initial={{opacity: 0}}
       whileInView={{opacity: 1}}
       viewport={{once: true}}
-      className="text-center mb-16">
+      className="text-center mb-12 sm:mb-16">
       <h1 className="text-3xl font-bold mb-4">APA KATA MEREKA?</h1>
       <p className="text-gray-400">Testimoni dari pelanggan kami</p>
      </motion.div>
@@ -318,13 +327,13 @@ export default function HomePage() {
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"
-      viewport={{once: true}}
-      className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      viewport={{once: true, margin: "-100px"}}
+      className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
       {testimonials.map((testimonial, index) => (
        <motion.div
         key={index}
         variants={fadeIn}
-        className="bg-gray-900 rounded-xl p-8">
+        className="bg-gray-900 rounded-xl p-6 sm:p-8">
         <div className="flex mb-4">
          {[...Array(5)].map((_, i) => (
           <svg
@@ -347,16 +356,16 @@ export default function HomePage() {
    </section>
 
    {/* Instagram Section */}
-   <section className="py-20 bg-white">
-    <div className="container mx-auto px-6">
+   <section className="py-16 sm:py-20 bg-white">
+    <div className="container mx-auto px-4 sm:px-6">
      <motion.div
       initial={{opacity: 0}}
       whileInView={{opacity: 1}}
       viewport={{once: true}}
-      className="text-center mb-16">
+      className="text-center mb-12 sm:mb-16">
       <div className="flex justify-center items-center gap-3 mb-4">
        <FaInstagram className="text-3xl text-black/40" />
-       <h1 className="md:text-3xl text-xl font-bold text-black/40">
+       <h1 className="text-xl sm:text-3xl font-bold text-black/40">
         FOLLOW US ON INSTAGRAM
        </h1>
       </div>
@@ -367,8 +376,8 @@ export default function HomePage() {
       variants={staggerContainer}
       initial="hidden"
       whileInView="visible"
-      viewport={{once: true}}
-      className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      viewport={{once: true, margin: "-100px"}}
+      className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
       {instagramPosts.map((post) => (
        <motion.a
         key={post.id}
@@ -377,14 +386,15 @@ export default function HomePage() {
         rel="noopener noreferrer"
         variants={fadeIn}
         whileHover={{scale: 1.03}}
-        className="overflow-hidden rounded-lg shadow-md relative group">
-        <Image
-         width={500}
-         height={500}
-         src={post.imageUrl}
-         alt="Instagram Post"
-         className="w-full h-full object-cover hover:opacity-90 transition-opacity aspect-square"
-        />
+        className="overflow-hidden rounded-lg shadow-md relative group aspect-square">
+        <div className="relative w-full h-full">
+         <Image
+          src={post.imageUrl}
+          alt="Instagram Post"
+          fill
+          className="object-cover hover:opacity-90 transition-opacity"
+         />
+        </div>
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
          <FaInstagram className="text-white text-3xl" />
         </div>
@@ -395,14 +405,14 @@ export default function HomePage() {
    </section>
 
    {/* CTA Section */}
-   <section className="py-20 bg-[#f4f4f4]">
-    <div className="container mx-auto px-6 text-center">
+   <section className="py-16 sm:py-20 bg-[#f4f4f4]">
+    <div className="container mx-auto px-4 sm:px-6 text-center">
      <motion.div
       initial={{opacity: 0, y: 20}}
       whileInView={{opacity: 1, y: 0}}
       viewport={{once: true}}
       className="max-w-3xl mx-auto">
-      <h1 className="text-3xl md:text-4xl font-bold mb-6 text-black/40">
+      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-black/40">
        Siap menikmati kopi terbaik di Tasikmalaya?
       </h1>
       <p className="text-gray-600 mb-8 text-lg">
@@ -416,7 +426,7 @@ export default function HomePage() {
         whileTap={{scale: 0.95}}>
         <Link
          href="/contact"
-         className="bg-black text-white px-8 py-4 rounded-full font-medium inline-flex items-center gap-2">
+         className="bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium inline-flex items-center gap-2">
          Kunjungi Kami <BsArrowRight />
         </Link>
        </motion.div>
@@ -425,8 +435,8 @@ export default function HomePage() {
         whileHover={{scale: 1.05}}
         whileTap={{scale: 0.95}}>
         <Link
-         href="/product"
-         className="border border-black text-black px-8 py-4 rounded-full font-medium inline-flex items-center gap-2">
+         href="/menu"
+         className="border border-black text-black px-6 sm:px-8 py-3 sm:py-4 rounded-full font-medium inline-flex items-center gap-2">
          Lihat Menu
         </Link>
        </motion.div>

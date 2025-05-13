@@ -242,21 +242,18 @@ const MenuPageLayout = () => {
              <div className="text-sm font-medium text-gray-900">
               {menu.name}
              </div>
-             <div className="text-sm text-gray-500 mt-1">
-              {menu.description}
-             </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">{menu.category}</div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
-              IDR {menu.price.toFixed(2)}
+              IDR {menu.price}
              </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
-              IDR {totalPrice.toFixed(2)}
+              IDR {totalPrice}
               {taxNames && (
                <span className="text-xs text-gray-500 ml-1">
                 (incl. {taxNames})

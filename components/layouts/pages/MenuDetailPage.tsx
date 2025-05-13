@@ -58,7 +58,7 @@ const MenuDetailPage = () => {
  if (loading) {
   return (
    <div className="min-h-screen flex items-center justify-center">
-    <FaSpinner className="animate-spin text-4xl text-orange-500" />
+    <FaSpinner className="animate-spin text-4xl text-black" />
    </div>
   );
  }
@@ -69,7 +69,7 @@ const MenuDetailPage = () => {
     <h2 className="text-2xl font-bold text-gray-800 mb-4">Menu not found</h2>
     <Link
      href={`/menu?outlet=${outletId}`}
-     className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+     className="px-6 py-2 bg-black text-white rounded-lg hover:bg-black transition-colors">
      Back to Menu
     </Link>
    </div>
@@ -86,7 +86,7 @@ const MenuDetailPage = () => {
      className="mb-6">
      <Link
       href={`/menu?outlet=${outletId}`}
-      className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors">
+      className="inline-flex items-center gap-2 text-gray-600 hover:text-black transition-colors">
       <FaArrowLeft /> Back to Menu
      </Link>
     </motion.div>
@@ -128,15 +128,16 @@ const MenuDetailPage = () => {
         )}
        </div>
        <div className="text-right">
-        <p className="text-2xl font-bold text-orange-500">
+        <p className="text-2xl font-bold text-black">
          IDR {calculateTotalPrice(currentMenu)}
         </p>
+        <p className="text-gray-600">Harga sudah termasuk Pajak</p>
        </div>
       </div>
 
       {/* Description */}
       <div className="mt-6">
-       <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+       <h3 className="text-lg font-semibold text-gray-800 mb-2">Deskripsi</h3>
        <p className="text-gray-600">
         {currentMenu.description || "No description available."}
        </p>

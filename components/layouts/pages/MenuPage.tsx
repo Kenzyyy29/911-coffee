@@ -37,21 +37,27 @@ const MenuPage = () => {
  };
 
  // Get unique categories from menus
- const categories = ["All", ...new Set(menus.map((menu) => menu.category).filter(Boolean))];
+ const categories = [
+  "All",
+  ...new Set(menus.map((menu) => menu.category).filter(Boolean)),
+ ];
 
  const filteredMenus = menus.filter((menu) => {
-  const matchesSearch = menu.name.toLowerCase().includes(searchTerm.toLowerCase());
-  const matchesCategory = selectedCategory === "All" || menu.category === selectedCategory;
+  const matchesSearch = menu.name
+   .toLowerCase()
+   .includes(searchTerm.toLowerCase());
+  const matchesCategory =
+   selectedCategory === "All" || menu.category === selectedCategory;
   return matchesSearch && matchesCategory;
  });
 
  return (
-  <div className="min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8 pt-[100px]">
+  <div className=" bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.5}}
-    className="max-w-6xl mx-auto">
+    className="max-w-6xl mx-auto min-h-[100dvh]">
     {/* Header */}
     <div className="flex items-center gap-4 mb-6">
      {selectedOutlet && (
@@ -64,7 +70,6 @@ const MenuPage = () => {
       </motion.button>
      )}
      <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-      <FaUtensils className="text-orange-500" />
       {selectedOutlet ? `${selectedOutlet.name} Menu` : "Our Outlets"}
      </h1>
     </div>
@@ -77,7 +82,7 @@ const MenuPage = () => {
       transition={{delay: 0.2}}
       className="bg-white rounded-xl shadow-md p-6 mb-8">
       <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
-       <FaStore className="text-blue-500" /> Select an Outlet
+       <FaStore className="text-blue-500" /> Pilih Outlet
       </h2>
       {outletsLoading ? (
        <div className="flex justify-center py-8">
@@ -148,7 +153,7 @@ const MenuPage = () => {
            onClick={() => setSelectedCategory(category)}
            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
             selectedCategory === category
-             ? "bg-orange-500 text-white"
+             ? "bg-black text-white"
              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
            }`}>
            {category}
@@ -161,7 +166,7 @@ const MenuPage = () => {
       {/* Menu Items */}
       {menusLoading ? (
        <div className="flex justify-center py-12">
-        <FaSpinner className="animate-spin text-3xl text-orange-500" />
+        <FaSpinner className="animate-spin text-3xl text-black" />
        </div>
       ) : filteredMenus.length === 0 ? (
        <motion.div
@@ -206,8 +211,8 @@ const MenuPage = () => {
             <div className="p-4">
              <div className="flex justify-between items-start">
               <h3 className="font-bold text-lg text-gray-800">{menu.name}</h3>
-              <span className="font-bold text-orange-500">
-               ${calculateTotalPrice(menu).toFixed(2)}
+              <span className="font-bold text-black">
+               IDR {calculateTotalPrice(menu)}
               </span>
              </div>
              {menu.category && (
