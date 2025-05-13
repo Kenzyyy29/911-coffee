@@ -69,15 +69,14 @@ const MenuPage = () => {
  };
 
  // Function to get outlet image path
-  const getOutletImage = (outletId: string) => {
-   try {
-    // Try to require the image (helps with build-time checking)
-    require(`@/public/outlets/${outletId}.jpg`);
-    return `/outlets/${outletId}.jpg`;
-   } catch (e) {
-    return `/outlets/default.jpeg`; 
-   }
-  };
+ const getOutletImage = (outletId: string) => {
+  try {
+   // Using template literal instead of require
+   return `/outlets/${outletId}.jpg`;
+  } catch {
+   return `/outlets/default.jpeg`;
+  }
+ };
 
  return (
   <div className="min-h-[100dvh] p-4 md:p-8 bg-white dark:bg-onyx1">

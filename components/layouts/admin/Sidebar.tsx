@@ -29,6 +29,10 @@ const adminLinks = [
     path: "/admin/dashboard/products/menu",
    },
    {
+    name: "Promo",
+    path: "/admin/dashboard/products/promo",
+   },
+   {
     name: "Bundling",
     path: "/admin/dashboard/products/bundling",
    },

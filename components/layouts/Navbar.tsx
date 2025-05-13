@@ -37,16 +37,20 @@ export default function Navbar() {
 
  const navItems = [
   {
-   name: "Tentang Kami",
-   path: "/about",
-  },
-  {
    name: "Outlet",
    path: "/outlet",
   },
   {
    name: "Menu",
    path: "/menu",
+  },
+  {
+   name: "Promo",
+   path: "/promo",
+  },
+  {
+   name: "Bundling",
+   path: "/bundling",
   },
   {
    name: "Blog",
