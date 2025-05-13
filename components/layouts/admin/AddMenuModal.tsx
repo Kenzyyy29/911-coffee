@@ -6,6 +6,7 @@ import {FiX} from "react-icons/fi";
 import {Tax} from "@/lib/types/tax";
 import {Menu} from "@/lib/types/menu";
 import {uploadImage} from "@/lib/utils/uploadImage";
+import Image from "next/image";
 
 interface AddMenuModalProps {
  isOpen: boolean;
@@ -238,10 +239,12 @@ const AddMenuModal = ({
        </button>
 
        {formData.imageUrl && (
-        <img
+        <Image
          src={formData.imageUrl}
          alt="Preview"
-         className="max-w-xs max-h-40"
+         width={320} // Tambahkan width
+         height={160} // Tambahkan height
+         className="max-w-xs max-h-40 object-contain" // Tambahkan object-contain untuk menjaga aspect ratio
         />
        )}
       </div>

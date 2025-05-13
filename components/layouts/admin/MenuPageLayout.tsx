@@ -216,7 +216,6 @@ const MenuPageLayout = () => {
         <tbody className="bg-white divide-y divide-gray-200">
          {menus.map((menu) => {
           const totalPrice = calculateTotalPrice(menu);
-          const taxNames = getTaxNames(menu);
 
           return (
            <motion.tr

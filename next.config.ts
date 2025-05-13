@@ -6,11 +6,6 @@ const nextConfig: NextConfig = {
   remotePatterns: [
    {
     protocol: "https",
-    hostname: "drive.google.com",
-    pathname: "/uc",
-   },
-   {
-    protocol: "https",
     hostname: "*.public.blob.vercel-storage.com",
    },
   ],
