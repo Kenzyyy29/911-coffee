@@ -68,6 +68,17 @@ const MenuPage = () => {
   setSelectedCategory("All");
  };
 
+ // Function to get outlet image path
+  const getOutletImage = (outletId: string) => {
+   try {
+    // Try to require the image (helps with build-time checking)
+    require(`@/public/outlets/${outletId}.jpg`);
+    return `/outlets/${outletId}.jpg`;
+   } catch (e) {
+    return `/outlets/default.jpeg`; 
+   }
+  };
+
  return (
   <div className="min-h-[100dvh] p-4 md:p-8 bg-white dark:bg-onyx1">
    <motion.div
@@ -112,8 +123,17 @@ const MenuPage = () => {
           key={outlet.id}
           whileHover={{scale: 1.03}}
           whileTap={{scale: 0.98}}
-          className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition-colors"
+          className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col"
           onClick={() => setSelectedOutlet(outlet)}>
+          <div className="relative h-40 w-full mb-3 rounded-md overflow-hidden">
+           <Image
+            src={getOutletImage(outlet.id)}
+            alt={outlet.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+           />
+          </div>
           <h3 className="font-medium text-onyx1 dark:text-white">
            {outlet.name}
           </h3>
@@ -138,11 +158,22 @@ const MenuPage = () => {
        transition={{duration: 0.3}}
        className="bg-white dark:bg-onyx2 rounded-xl shadow-md p-6 mb-8">
        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-         <h2 className="text-xl font-semibold text-onyx1 dark:text-white">
-          {selectedOutlet.name}
-         </h2>
-         <p className="text-gray-500">{selectedOutlet.address}</p>
+        <div className="flex items-center gap-4">
+         <div className="relative h-20 w-20 min-w-[80px] rounded-md overflow-hidden">
+          <Image
+           src={getOutletImage(selectedOutlet.id)}
+           alt={selectedOutlet.name}
+           fill
+           className="object-cover"
+           sizes="80px"
+          />
+         </div>
+         <div>
+          <h2 className="text-xl font-semibold text-onyx1 dark:text-white">
+           {selectedOutlet.name}
+          </h2>
+          <p className="text-gray-500">{selectedOutlet.address}</p>
+         </div>
         </div>
        </div>
       </motion.div>
@@ -219,9 +250,7 @@ const MenuPage = () => {
             whileHover={{y: -5}}
             className="bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
-             {/* Added padding here */}
              <div className="relative h-full w-full">
-              {/* Nested container for image */}
               {menu.imageUrl ? (
                <Image
                 src={menu.imageUrl}
