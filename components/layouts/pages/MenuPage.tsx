@@ -17,6 +17,7 @@ import {Menu} from "@/lib/types/menu";
 import {Outlet} from "@/lib/types/outlet";
 import Image from "next/image";
 import Link from "next/link";
+import { formatPrice } from "@/lib/utils/formatPrice";
 
 const MenuPage = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
@@ -52,12 +53,12 @@ const MenuPage = () => {
  });
 
  return (
-  <div className=" bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+  <div className="h-[100dvh] p-4 md:p-8">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.5}}
-    className="max-w-6xl mx-auto min-h-[100dvh]">
+    className="max-w-6xl mx-auto">
     {/* Header */}
     <div className="flex items-center gap-4 mb-6">
      {selectedOutlet && (
@@ -200,7 +201,7 @@ const MenuPage = () => {
                src={menu.imageUrl}
                alt={menu.name}
                fill
-               className="object-cover"
+               className="object-contain"
               />
              ) : (
               <div className="bg-gray-200 h-full w-full flex items-center justify-center">
@@ -212,7 +213,7 @@ const MenuPage = () => {
              <div className="flex justify-between items-start">
               <h3 className="font-bold text-lg text-gray-800">{menu.name}</h3>
               <span className="font-bold text-black">
-               IDR {calculateTotalPrice(menu)}
+               {formatPrice(calculateTotalPrice(menu))}
               </span>
              </div>
              {menu.category && (

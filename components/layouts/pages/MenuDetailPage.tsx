@@ -12,6 +12,7 @@ import {useTaxes} from "@/lib/hooks/useTaxes";
 import {useParams, useSearchParams} from "next/navigation";
 import {MenuRecommendations} from "@/components/layouts/pages/MenuRecomendations";
 import {Menu} from "@/lib/types/menu";
+import { formatPrice } from "@/lib/utils/formatPrice";
 
 const MenuDetailPage = () => {
  const params = useParams();
@@ -31,9 +32,8 @@ const MenuDetailPage = () => {
   const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
   const totalTaxRate = applicableTaxes.reduce((sum, tax) => sum + tax.rate, 0);
 
-  return (menu.price * (1 + totalTaxRate / 100)).toFixed(2);
+  return menu.price * (1 + totalTaxRate / 100); // Hapus .toFixed(2)
  };
-
  // Get random recommendations
  const getRandomRecommendations = (
   allMenus: Menu[],
@@ -78,7 +78,7 @@ const MenuDetailPage = () => {
 
  return (
   <div className="min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
-   <div className="max-w-4xl mx-auto">
+   <div className="">
     {/* Back button */}
     <motion.div
      initial={{opacity: 0, y: -20}}
@@ -96,15 +96,15 @@ const MenuDetailPage = () => {
      initial={{opacity: 0}}
      animate={{opacity: 1}}
      transition={{duration: 0.5}}
-     className="bg-white rounded-xl shadow-md overflow-hidden">
+     className="bg-white rounded-xl shadow-md overflow-hidden flex w-full">
      {/* Menu Image */}
-     <div className="relative h-64 md:h-80 w-full">
+     <div className="relative h-64 md:h-80 w-[700px]">
       {currentMenu.imageUrl ? (
        <Image
         src={currentMenu.imageUrl}
         alt={currentMenu.name}
         fill
-        className="object-cover"
+        className="object-contain"
         priority
        />
       ) : (
@@ -115,8 +115,8 @@ const MenuDetailPage = () => {
      </div>
 
      {/* Menu Content */}
-     <div className="p-6 md:p-8">
-      <div className="flex justify-between items-start">
+     <div className="p-6 md:p-8 w-full">
+      <div className="flex justify-between items-start w-full">
        <div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
          {currentMenu.name}
@@ -129,7 +129,7 @@ const MenuDetailPage = () => {
        </div>
        <div className="text-right">
         <p className="text-2xl font-bold text-black">
-         IDR {calculateTotalPrice(currentMenu)}
+         {formatPrice(calculateTotalPrice(currentMenu))}
         </p>
         <p className="text-gray-600">Harga sudah termasuk Pajak</p>
        </div>

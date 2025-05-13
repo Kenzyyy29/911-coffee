@@ -1,10 +1,11 @@
 "use client";
 
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {motion} from "framer-motion";
-import {FiX, FiUpload} from "react-icons/fi";
+import {FiX} from "react-icons/fi";
 import {Tax} from "@/lib/types/tax";
 import {Menu} from "@/lib/types/menu";
+import {uploadImage} from "@/lib/utils/uploadImage";
 
 interface AddMenuModalProps {
  isOpen: boolean;
@@ -31,6 +32,31 @@ const AddMenuModal = ({
   isAvailable: true,
   category: "",
  });
+ const [uploading, setUploading] = useState(false);
+ const fileInputRef = useRef<HTMLInputElement>(null);
+
+ const handleUpload = async () => {
+  const file = fileInputRef.current?.files?.[0];
+  if (!file) return;
+
+  try {
+   setUploading(true);
+   const blob = await uploadImage(file);
+
+   setFormData({
+    ...formData,
+    imageUrl: blob.url,
+   });
+  } catch (error) {
+   if (error instanceof Error) {
+    alert(error.message);
+   } else {
+    alert("Upload failed with unknown error");
+   }
+  } finally {
+   setUploading(false);
+  }
+ };
 
  const handleChange = (
   e: React.ChangeEvent<
@@ -196,24 +222,28 @@ const AddMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Image URL
-       </label>
-       <div className="flex items-center">
-        <input
-         type="text"
-         name="imageUrl"
-         value={formData.imageUrl}
-         onChange={handleChange}
-         placeholder="https://example.com/image.jpg"
-         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+       <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleUpload}
+        accept="image/*"
+        className="hidden"
+       />
+
+       <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}>
+        {uploading ? "Uploading..." : "Upload Image"}
+       </button>
+
+       {formData.imageUrl && (
+        <img
+         src={formData.imageUrl}
+         alt="Preview"
+         className="max-w-xs max-h-40"
         />
-        <button
-         type="button"
-         className="ml-2 p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-         <FiUpload />
-        </button>
-       </div>
+       )}
       </div>
 
       <div className="flex items-center">

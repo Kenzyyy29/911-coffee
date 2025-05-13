@@ -18,6 +18,7 @@ import Image from "next/image";
 import AddMenuModal from "./AddMenuModal";
 import EditMenuModal from "./EditMenuModal";
 import DeleteMenuModal from "./DeleteMenuModal";
+import { formatPrice } from "@/lib/utils/formatPrice";
 
 const MenuPageLayout = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<string>("");
@@ -248,17 +249,12 @@ const MenuPageLayout = () => {
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
-              IDR {menu.price}
+              {formatPrice(menu.price)}
              </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
              <div className="text-sm text-gray-900">
-              IDR {totalPrice}
-              {taxNames && (
-               <span className="text-xs text-gray-500 ml-1">
-                (incl. {taxNames})
-               </span>
-              )}
+              {formatPrice(totalPrice)}
              </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">

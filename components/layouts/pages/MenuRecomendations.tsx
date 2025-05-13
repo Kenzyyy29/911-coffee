@@ -6,6 +6,7 @@ import {FaUtensils} from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import {Menu} from "@/lib/types/menu";
+import { formatPrice } from "@/lib/utils/formatPrice";
 
 interface MenuRecommendationsProps {
  recommendations: Menu[];
@@ -23,7 +24,7 @@ export const MenuRecommendations = ({
  return (
   <div className="mt-12">
    <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-    <FaUtensils className="text-orange-500" /> You Might Also Like
+    <FaUtensils className="text-black" /> You Might Also Like
    </h3>
    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {recommendations
@@ -41,7 +42,7 @@ export const MenuRecommendations = ({
            src={menu.imageUrl}
            alt={menu.name}
            fill
-           className="object-cover"
+           className="object-contain"
           />
          ) : (
           <div className="bg-gray-200 h-full w-full flex items-center justify-center">
@@ -52,8 +53,8 @@ export const MenuRecommendations = ({
         <div className="p-4">
          <div className="flex justify-between items-start">
           <h3 className="font-bold text-gray-800">{menu.name}</h3>
-          <span className="font-bold text-orange-500">
-           ${menu.price.toFixed(2)}
+          <span className="font-bold text-black">
+           {formatPrice(menu.price)}
           </span>
          </div>
         </div>
