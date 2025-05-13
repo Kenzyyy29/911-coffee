@@ -1,7 +1,7 @@
 // app/menu/page.tsx
 "use client";
 
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {motion, AnimatePresence} from "framer-motion";
 import {
  FaStore,
@@ -17,15 +17,26 @@ import {Menu} from "@/lib/types/menu";
 import {Outlet} from "@/lib/types/outlet";
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils/formatPrice";
+import {useSearchParams} from "next/navigation";
+import {formatPrice} from "@/lib/utils/formatPrice";
 
 const MenuPage = () => {
+ const searchParams = useSearchParams();
  const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
  const [searchTerm, setSearchTerm] = useState("");
  const [selectedCategory, setSelectedCategory] = useState<string>("All");
  const {outlets, loading: outletsLoading} = useOutlets();
  const {menus, loading: menusLoading} = useMenu(selectedOutlet?.id || "");
  const {taxes} = useTaxes();
+
+ // Check for outlet ID in URL params on initial load
+ useEffect(() => {
+  const outletId = searchParams.get("outlet");
+  if (outletId && outlets.length > 0) {
+   const outlet = outlets.find((o) => o.id === outletId);
+   if (outlet) setSelectedOutlet(outlet);
+  }
+ }, [outlets, searchParams]);
 
  // Calculate total price with taxes
  const calculateTotalPrice = (menu: Menu) => {
@@ -52,25 +63,31 @@ const MenuPage = () => {
   return matchesSearch && matchesCategory;
  });
 
+ const handleBackToOutlets = () => {
+  setSelectedOutlet(null);
+  setSearchTerm("");
+  setSelectedCategory("All");
+ };
+
  return (
-  <div className="h-[100dvh] p-4 md:p-8">
+  <div className="min-h-[100dvh] p-4 md:p-8 bg-white dark:bg-onyx1">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.5}}
     className="max-w-6xl mx-auto">
     {/* Header */}
-    <div className="flex items-center gap-4 mb-6">
+    <div className="flex items-center gap-4 mb-6 ">
      {selectedOutlet && (
       <motion.button
        whileHover={{scale: 1.05}}
        whileTap={{scale: 0.95}}
-       onClick={() => setSelectedOutlet(null)}
-       className="p-2 rounded-full bg-white shadow-md text-gray-600 hover:bg-gray-100 transition-colors">
+       onClick={handleBackToOutlets}
+       className="p-2 rounded-full bg-white shadow-md text-gray-600 hover:bg-gray-100 transition-colors ">
        <FaArrowLeft className="text-lg" />
       </motion.button>
      )}
-     <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+     <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-white">
       {selectedOutlet ? `${selectedOutlet.name} Menu` : "Our Outlets"}
      </h1>
     </div>
@@ -81,13 +98,13 @@ const MenuPage = () => {
       initial={{opacity: 0}}
       animate={{opacity: 1}}
       transition={{delay: 0.2}}
-      className="bg-white rounded-xl shadow-md p-6 mb-8">
-      <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
-       <FaStore className="text-blue-500" /> Pilih Outlet
+      className=" rounded-xl shadow-md mb-8">
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-onyx1 dark:text-white">
+       <FaStore className="text-onyx1 dark:text-white" /> Pilih Outlet
       </h2>
       {outletsLoading ? (
        <div className="flex justify-center py-8">
-        <FaSpinner className="animate-spin text-2xl text-blue-500" />
+        <FaSpinner className="animate-spin text-2xl text-onyx1 dark:text-white" />
        </div>
       ) : (
        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -98,7 +115,9 @@ const MenuPage = () => {
           whileTap={{scale: 0.98}}
           className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition-colors"
           onClick={() => setSelectedOutlet(outlet)}>
-          <h3 className="font-medium text-gray-800">{outlet.name}</h3>
+          <h3 className="font-medium text-onyx1 dark:text-white">
+           {outlet.name}
+          </h3>
           <p className="text-sm text-gray-500 mt-1">{outlet.address}</p>
          </motion.div>
         ))}
@@ -118,10 +137,10 @@ const MenuPage = () => {
        initial={{opacity: 0, y: -10}}
        animate={{opacity: 1, y: 0}}
        transition={{duration: 0.3}}
-       className="bg-white rounded-xl shadow-md p-6 mb-8">
+       className="bg-white dark:bg-onyx2 rounded-xl shadow-md p-6 mb-8">
        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-         <h2 className="text-xl font-semibold text-gray-700">
+         <h2 className="text-xl font-semibold text-onyx1 dark:text-white">
           {selectedOutlet.name}
          </h2>
          <p className="text-gray-500">{selectedOutlet.address}</p>
@@ -129,51 +148,56 @@ const MenuPage = () => {
        </div>
       </motion.div>
 
-      {/* Search Bar */}
-      <div className="relative mb-6">
-       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <FaSearch className="text-gray-400" />
-       </div>
-       <input
-        type="text"
-        placeholder="Search menu items..."
-        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-       />
-      </div>
-
-      {/* Category Filter */}
-      {categories.length > 1 && (
-       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Categories</h3>
-        <div className="flex flex-wrap gap-2">
-         {categories.map((category) => (
-          <button
-           key={category}
-           onClick={() => setSelectedCategory(category)}
-           className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-            selectedCategory === category
-             ? "bg-black text-white"
-             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-           }`}>
-           {category}
-          </button>
-         ))}
+      {/* Search and Filter Section */}
+      <div className="bg-white dark:bg-onyx2 rounded-xl shadow-md p-6 mb-8">
+       {/* Search Bar */}
+       <div className="relative mb-6">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+         <FaSearch className="text-gray-400" />
         </div>
+        <input
+         type="text"
+         placeholder="Search menu items..."
+         className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+         value={searchTerm}
+         onChange={(e) => setSearchTerm(e.target.value)}
+        />
        </div>
-      )}
+
+       {/* Category Filter */}
+       {categories.length > 1 && (
+        <div>
+         <h3 className="text-sm font-medium text-onyx1 dark:text-white mb-2">
+          Categories
+         </h3>
+         <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+           <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+             selectedCategory === category
+              ? "bg-onyx1 text-white"
+              : "bg-gray-200 text-gray-500 hover:bg-gray-300"
+            }`}>
+            {category}
+           </button>
+          ))}
+         </div>
+        </div>
+       )}
+      </div>
 
       {/* Menu Items */}
       {menusLoading ? (
        <div className="flex justify-center py-12">
-        <FaSpinner className="animate-spin text-3xl text-black" />
+        <FaSpinner className="animate-spin text-3xl text-black dark:text-white" />
        </div>
       ) : filteredMenus.length === 0 ? (
        <motion.div
         initial={{opacity: 0}}
         animate={{opacity: 1}}
-        className="text-center py-12 bg-white rounded-xl shadow-sm">
+        className="text-center py-12 bg-white dark:bg-onyx1 rounded-xl shadow-sm">
         <p className="text-gray-500">
          {searchTerm || selectedCategory !== "All"
           ? "No menu items match your search criteria"
@@ -186,7 +210,7 @@ const MenuPage = () => {
          {filteredMenus.map((menu) => (
           <Link
            key={menu.id}
-           href={`/menu/${menu.id}?outlet=${selectedOutlet?.id}`}
+           href={`/menu/${menu.id}?outlet=${selectedOutlet.id}`}
            passHref>
            <motion.div
             initial={{opacity: 0, y: 20}}
@@ -194,25 +218,32 @@ const MenuPage = () => {
             exit={{opacity: 0, scale: 0.9}}
             transition={{duration: 0.3}}
             whileHover={{y: -5}}
-            className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="relative h-48 w-full">
-             {menu.imageUrl ? (
-              <Image
-               src={menu.imageUrl}
-               alt={menu.name}
-               fill
-               className="object-contain"
-              />
-             ) : (
-              <div className="bg-gray-200 h-full w-full flex items-center justify-center">
-               <FaUtensils className="text-4xl text-gray-400" />
-              </div>
-             )}
+            className="bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
+             {/* Added padding here */}
+             <div className="relative h-full w-full">
+              {/* Nested container for image */}
+              {menu.imageUrl ? (
+               <Image
+                src={menu.imageUrl}
+                alt={menu.name}
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+               />
+              ) : (
+               <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
+                <FaUtensils className="text-4xl text-gray-400" />
+               </div>
+              )}
+             </div>
             </div>
             <div className="p-4">
              <div className="flex justify-between items-start">
-              <h3 className="font-bold text-lg text-gray-800">{menu.name}</h3>
-              <span className="font-bold text-black">
+              <h3 className="font-bold text-lg text-onyx1 dark:text-white">
+               {menu.name}
+              </h3>
+              <span className="font-bold text-onyx1 dark:text-white">
                {formatPrice(calculateTotalPrice(menu))}
               </span>
              </div>
