@@ -149,8 +149,7 @@ const UserPromoPage = () => {
      <motion.div
       initial={{opacity: 0}}
       animate={{opacity: 1}}
-      transition={{delay: 0.2}}
-      className="rounded-xl shadow-md mb-8">
+      transition={{delay: 0.2}}>
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-onyx1 dark:text-white">
        <FaStore className="text-onyx1 dark:text-white" /> Pilih Outlet
       </h2>
