@@ -60,7 +60,7 @@ const MenuDetailPage = () => {
       const lastView = localStorage.getItem(storageKey);
       
       // 2. Jika pernah dilihat dalam 30 menit terakhir, abaikan
-      if (lastView && (now - Number(lastView)) < 30 * 60 * 1000) {
+      if (lastView && (now - Number(lastView)) < 10 * 60 * 1000) {
         return;
       }
       
