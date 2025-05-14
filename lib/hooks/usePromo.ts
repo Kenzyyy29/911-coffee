@@ -9,7 +9,6 @@ import {
  onSnapshot,
  query,
  where,
- orderBy,
 } from "firebase/firestore";
 import {Promo} from "@/lib/types/promo";
 

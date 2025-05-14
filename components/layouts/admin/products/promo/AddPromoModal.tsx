@@ -14,30 +14,30 @@ interface AddPromoModalProps {
  outletId: string;
 }
 
+const initialFormData = (outletId: string) => ({
+ name: "",
+ description: "",
+ price: 0,
+ outletId: outletId,
+ imageUrl: "",
+ isActive: true,
+ category: "sarapan & ngopi pagi" as PromoCategory,
+});
+
 const AddPromoModal = ({
  isOpen,
  onClose,
  onSubmit,
  outletId,
 }: AddPromoModalProps) => {
- const initialFormData = {
-  name: "",
-  description: "",
-  price: 0,
-  outletId: outletId,
-  imageUrl: "",
-  isActive: true,
-  category: "sarapan & ngopi pagi" as PromoCategory,
- };
-
- const [formData, setFormData] = useState(initialFormData);
+ const [formData, setFormData] = useState(initialFormData(outletId));
  const [uploading, setUploading] = useState(false);
  const fileInputRef = useRef<HTMLInputElement>(null);
 
  // Reset form when modal opens/closes
  useEffect(() => {
   if (isOpen) {
-   setFormData(initialFormData);
+   setFormData(initialFormData(outletId));
    if (fileInputRef.current) {
     fileInputRef.current.value = "";
    }
@@ -100,7 +100,7 @@ const AddPromoModal = ({
 
   onSubmit(promoData);
   // Reset form after submit
-  setFormData(initialFormData);
+  setFormData(initialFormData(outletId));
   if (fileInputRef.current) {
    fileInputRef.current.value = "";
   }
