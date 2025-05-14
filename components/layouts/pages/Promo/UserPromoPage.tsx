@@ -1,7 +1,7 @@
 "use client";
 
 import {useState, useRef, useEffect} from "react";
-import {motion, AnimatePresence, PanInfo} from "framer-motion";
+import {motion, PanInfo} from "framer-motion";
 import {
  FaSearch,
  FaSpinner,
@@ -9,6 +9,7 @@ import {
  FaTag,
  FaChevronLeft,
  FaChevronRight,
+ FaStore,
 } from "react-icons/fa";
 import {useOutlets} from "@/lib/hooks/useOutlets";
 import {usePromo} from "@/lib/hooks/usePromo";
@@ -139,8 +140,7 @@ const UserPromoPage = () => {
       </motion.button>
      )}
      <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-white">
-      <FaTag className="text-orange-500" />{" "}
-      {selectedOutlet ? `${selectedOutlet.name} Promos` : "Our Promotions"}
+      {selectedOutlet ? `${selectedOutlet.name} Promo` : "Promo Harian"}
      </h1>
     </div>
 
@@ -150,9 +150,9 @@ const UserPromoPage = () => {
       initial={{opacity: 0}}
       animate={{opacity: 1}}
       transition={{delay: 0.2}}
-      className="rounded-xl shadow-md mb-8 bg-white dark:bg-onyx2 p-6">
+      className="rounded-xl shadow-md mb-8">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-onyx1 dark:text-white">
-       <FaTag className="text-orange-500" /> Select Outlet to View Promos
+       <FaStore className="text-onyx1 dark:text-white" /> Pilih Outlet
       </h2>
       {outletsLoading ? (
        <div className="flex justify-center py-8">
@@ -216,9 +216,7 @@ const UserPromoPage = () => {
           <h2 className="text-xl font-semibold text-onyx1 dark:text-white">
            {selectedOutlet.name}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-           {selectedOutlet.address}
-          </p>
+          <p className="text-gray-500">{selectedOutlet.address}</p>
          </div>
         </div>
        </div>
@@ -233,7 +231,7 @@ const UserPromoPage = () => {
         <input
          type="text"
          placeholder="Search promos..."
-         className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-onyx3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-onyx2 text-gray-800 dark:text-white"
+         className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-onyx3 focus:outline-none focus:ring-2 focus:ring-onyx1 focus:border-transparent bg-white dark:bg-onyx2 text-gray-800 dark:text-white"
          value={searchTerm}
          onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -302,7 +300,7 @@ const UserPromoPage = () => {
               exit={{opacity: 0, scale: 0.9}}
               transition={{duration: 0.3}}
               whileHover={{y: -5}}
-              className="w-72 flex-shrink-0 bg-white dark:bg-onyx3 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              className="w-72 flex-shrink-0 bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
                <div className="relative h-full w-full">
                 {promo.imageUrl ? (
@@ -320,7 +318,7 @@ const UserPromoPage = () => {
                 )}
                </div>
               </div>
-              <div className="p-4">
+              <div className="p-4 bg-white dark:bg-onyx2">
                <div className="flex justify-between items-start">
                 <h3 className="font-bold text-lg text-onyx1 dark:text-white">
                  {promo.name}
@@ -330,7 +328,7 @@ const UserPromoPage = () => {
                 </span>
                </div>
                {promo.category && (
-                <span className="inline-block mt-1 px-2 py-1 bg-gray-100 dark:bg-onyx2 text-gray-600 dark:text-gray-300 text-xs rounded-full">
+                <span className="inline-block mt-1 px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs rounded-full">
                  {promo.category}
                 </span>
                )}

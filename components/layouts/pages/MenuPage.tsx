@@ -97,12 +97,12 @@ const MenuPage = () => {
        whileHover={{scale: 1.05}}
        whileTap={{scale: 0.95}}
        onClick={handleBackToOutlets}
-       className="p-2 rounded-full bg-white shadow-md text-gray-600 hover:bg-gray-100 transition-colors ">
+       className="p-2 rounded-full bg-white dark:bg-onyx2 shadow-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors">
        <FaArrowLeft className="text-lg" />
       </motion.button>
      )}
      <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-white">
-      {selectedOutlet ? `${selectedOutlet.name} Menu` : "Our Outlets"}
+      {selectedOutlet ? `${selectedOutlet.name} Menu` : "Menu Kami"}
      </h1>
     </div>
 
@@ -127,7 +127,7 @@ const MenuPage = () => {
           key={outlet.id}
           whileHover={{scale: 1.03}}
           whileTap={{scale: 0.98}}
-          className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col"
+          className="border rounded-lg p-4 bg-white dark:bg-onyx2 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col"
           onClick={() => setSelectedOutlet(outlet)}>
           <div className="relative h-40 w-full mb-3 rounded-md overflow-hidden">
            <Image
@@ -184,15 +184,14 @@ const MenuPage = () => {
 
       {/* Search and Filter Section */}
       <div className="bg-white dark:bg-onyx2 rounded-xl shadow-md p-6 mb-8">
-       {/* Search Bar */}
        <div className="relative mb-6">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
          <FaSearch className="text-gray-400" />
         </div>
         <input
          type="text"
-         placeholder="Search menu items..."
-         className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+         placeholder="Cari Menu..."
+         className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-onyx3 focus:outline-none focus:ring-2 focus:ring-onyx1 focus:border-transparent bg-white dark:bg-onyx2 text-gray-800 dark:text-white"
          value={searchTerm}
          onChange={(e) => setSearchTerm(e.target.value)}
         />
