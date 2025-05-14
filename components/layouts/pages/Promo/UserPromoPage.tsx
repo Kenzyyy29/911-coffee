@@ -1,3 +1,4 @@
+// /UserPromoPage.tsx
 "use client";
 
 import {useState, useRef, useEffect} from "react";
@@ -15,6 +16,7 @@ import {useOutlets} from "@/lib/hooks/useOutlets";
 import {usePromo} from "@/lib/hooks/usePromo";
 import {Outlet} from "@/lib/types/outlet";
 import Image from "next/image";
+import Link from "next/link";
 import {useSearchParams} from "next/navigation";
 import {formatPrice} from "@/lib/utils/formatPrice";
 import {
@@ -292,60 +294,64 @@ const UserPromoPage = () => {
             className="flex gap-6 pb-4"
             style={{width: "max-content"}}>
             {categoryPromos.map((promo) => (
-             <motion.div
+             <Link
               key={promo.id}
-              initial={{opacity: 0, y: 20}}
-              animate={{opacity: 1, y: 0}}
-              exit={{opacity: 0, scale: 0.9}}
-              transition={{duration: 0.3}}
-              whileHover={{y: -5}}
-              className="w-72 flex-shrink-0 bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
-               <div className="relative h-full w-full">
-                {promo.imageUrl ? (
-                 <Image
-                  src={promo.imageUrl}
-                  alt={promo.name}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                 />
-                ) : (
-                 <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
-                  <FaTag className="text-4xl text-gray-400 dark:text-gray-600" />
-                 </div>
+              href={`/promo/${promo.id}?outlet=${selectedOutlet.id}`}
+              passHref>
+              <motion.div
+               initial={{opacity: 0, y: 20}}
+               animate={{opacity: 1, y: 0}}
+               exit={{opacity: 0, scale: 0.9}}
+               transition={{duration: 0.3}}
+               whileHover={{y: -5}}
+               className="w-72 flex-shrink-0 bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+               <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
+                <div className="relative h-full w-full">
+                 {promo.imageUrl ? (
+                  <Image
+                   src={promo.imageUrl}
+                   alt={promo.name}
+                   fill
+                   className="object-contain"
+                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                 ) : (
+                  <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
+                   <FaTag className="text-4xl text-gray-400 dark:text-gray-600" />
+                  </div>
+                 )}
+                </div>
+               </div>
+               <div className="p-4 bg-white dark:bg-onyx2">
+                <div className="flex justify-between items-start">
+                 <h3 className="font-bold text-lg text-onyx1 dark:text-white">
+                  {promo.name}
+                 </h3>
+                 <span className="font-bold text-onyx1 dark:text-white">
+                  {formatPrice(promo.price)}
+                 </span>
+                </div>
+                {promo.category && (
+                 <span className="inline-block mt-1 px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs rounded-full">
+                  {promo.category}
+                 </span>
                 )}
+                <p className="text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
+                 {promo.description}
+                </p>
+                <div className="mt-4 flex justify-between items-center">
+                 <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${
+                   promo.isActive
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                  }`}>
+                  {promo.isActive ? "Active" : "Inactive"}
+                 </span>
+                </div>
                </div>
-              </div>
-              <div className="p-4 bg-white dark:bg-onyx2">
-               <div className="flex justify-between items-start">
-                <h3 className="font-bold text-lg text-onyx1 dark:text-white">
-                 {promo.name}
-                </h3>
-                <span className="font-bold text-onyx1 dark:text-white">
-                 {formatPrice(promo.price)}
-                </span>
-               </div>
-               {promo.category && (
-                <span className="inline-block mt-1 px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs rounded-full">
-                 {promo.category}
-                </span>
-               )}
-               <p className="text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
-                {promo.description}
-               </p>
-               <div className="mt-4 flex justify-between items-center">
-                <span
-                 className={`px-2 py-1 rounded text-xs font-medium ${
-                  promo.isActive
-                   ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                   : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                 }`}>
-                 {promo.isActive ? "Active" : "Inactive"}
-                </span>
-               </div>
-              </div>
-             </motion.div>
+              </motion.div>
+             </Link>
             ))}
            </div>
           </motion.div>
