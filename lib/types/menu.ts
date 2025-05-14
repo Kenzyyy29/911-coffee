@@ -9,4 +9,6 @@ export interface Menu {
     isAvailable: boolean;
     createdAt: string;
     category: string;
+    clickCount?: number;
+    lastClicked?: string;
 }

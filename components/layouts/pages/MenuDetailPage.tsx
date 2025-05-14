@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react";
 import {motion} from "framer-motion";
-import {FaUtensils, FaArrowLeft, FaSpinner} from "react-icons/fa";
+import {FaUtensils, FaArrowLeft, FaSpinner, FaFire} from "react-icons/fa";
 import Image from "next/image";
 import {useMenu} from "@/lib/hooks/useMenu";
 import {useTaxes} from "@/lib/hooks/useTaxes";
@@ -10,6 +10,8 @@ import {useParams, useSearchParams, useRouter} from "next/navigation";
 import {MenuRecommendations} from "@/components/layouts/pages/MenuRecomendations";
 import {Menu} from "@/lib/types/menu";
 import {formatPrice} from "@/lib/utils/formatPrice";
+import {db} from "@/lib/firebase/init";
+import {doc, updateDoc, increment} from "firebase/firestore";
 
 const MenuDetailPage = () => {
  const params = useParams();
@@ -22,6 +24,7 @@ const MenuDetailPage = () => {
  const {taxes} = useTaxes();
  const [currentMenu, setCurrentMenu] = useState<Menu | null>(null);
  const [recommendations, setRecommendations] = useState<Menu[]>([]);
+ const [isTrackingClick, setIsTrackingClick] = useState(false);
 
  // Calculate total price with taxes
  const calculateTotalPrice = (menu: Menu) => {
@@ -49,11 +52,50 @@ const MenuDetailPage = () => {
   return shuffled.slice(0, count);
  };
 
+ // Track menu view count
+ const trackMenuView = async (menuId: string) => {
+    try {
+      // 1. Cek localStorage untuk tracking terakhir
+      const storageKey = `menu_view_${menuId}`;
+      const now = Date.now();
+      const lastView = localStorage.getItem(storageKey);
+      
+      // 2. Jika pernah dilihat dalam 30 menit terakhir, abaikan
+      if (lastView && (now - Number(lastView)) < 30 * 60 * 1000) {
+        return;
+      }
+      
+      // 3. Update counter di Firestore
+      const menuRef = doc(db, "menus", menuId);
+      await updateDoc(menuRef, {
+        clickCount: increment(1),
+        lastClicked: new Date().toISOString()
+      });
+      
+      // 4. Simpan timestamp terakhir
+      localStorage.setItem(storageKey, now.toString());
+      
+      // 5. Set expiry untuk data localStorage (30 menit)
+      setTimeout(() => {
+        localStorage.removeItem(storageKey);
+      }, 30 * 60 * 1000);
+      
+    } catch (error) {
+      console.error("Error tracking menu view:", error);
+    }
+  };
+  
  useEffect(() => {
   if (menus.length > 0) {
    const foundMenu = menus.find((menu) => menu.id === menuId);
-   setCurrentMenu(foundMenu || null);
-   setRecommendations(getRandomRecommendations(menus, menuId));
+   if (foundMenu) {
+    setCurrentMenu(foundMenu);
+    setRecommendations(getRandomRecommendations(menus, menuId));
+    // Track the menu view
+    trackMenuView(menuId);
+   } else {
+    setCurrentMenu(null);
+   }
   }
  }, [menus, menuId]);
 
@@ -68,7 +110,9 @@ const MenuDetailPage = () => {
  if (!currentMenu) {
   return (
    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white dark:bg-onyx1">
-    <h2 className="text-2xl font-bold text-gray-800 mb-4">Menu not found</h2>
+    <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">
+     Menu not found
+    </h2>
     <button
      onClick={() => router.push(`/menu?outlet=${outletId}`)}
      className="px-6 py-2 bg-black text-white rounded-lg hover:bg-black transition-colors">
@@ -79,7 +123,7 @@ const MenuDetailPage = () => {
  }
 
  return (
-  <div className="min-h-[100dvh]bg-white dark:bg-onyx1 px-4 py-6 sm:p-6 md:p-8">
+  <div className="min-h-[100dvh] bg-white dark:bg-onyx1 px-4 py-6 sm:p-6 md:p-8">
    <div className="max-w-6xl mx-auto">
     {/* Back button */}
     <motion.div
@@ -119,13 +163,13 @@ const MenuDetailPage = () => {
 
      {/* Menu Content */}
      <div className="p-4 sm:p-6 md:p-8 w-full lg:w-1/2 xl:w-[40%]">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 w-full">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 w-full">
        <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-onyx1 dark:text-white">
          {currentMenu.name}
         </h1>
         {currentMenu.category && (
-         <span className="inline-block mt-2 px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+         <span className="inline-block mt-2 px-3 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-sm rounded-full">
           {currentMenu.category}
          </span>
         )}
@@ -140,6 +184,16 @@ const MenuDetailPage = () => {
        </div>
       </div>
 
+      {/* Popularity Indicator */}
+      {currentMenu.clickCount && currentMenu.clickCount > 0 && (
+       <div className="mt-4 flex items-center gap-2 text-orange-500">
+        <FaFire />
+        <span className="text-sm font-medium">
+         {currentMenu.clickCount} views
+        </span>
+       </div>
+      )}
+
       {/* Description */}
       <div className="mt-6">
        <h3 className="text-lg font-semibold text-onyx1 dark:text-white mb-2">
@@ -153,14 +207,28 @@ const MenuDetailPage = () => {
       {/* Additional Info */}
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
        <div>
-        <h4 className="text-sm font-medium text-gray-500">Availability</h4>
+        <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+         Availability
+        </h4>
         <p
          className={`mt-1 font-medium ${
-          currentMenu.isAvailable ? "text-green-600" : "text-red-600"
+          currentMenu.isAvailable
+           ? "text-green-600 dark:text-green-400"
+           : "text-red-600 dark:text-red-400"
          }`}>
          {currentMenu.isAvailable ? "In Stock" : "Out of Stock"}
         </p>
        </div>
+       {currentMenu.lastClicked && (
+        <div>
+         <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+          Last Viewed
+         </h4>
+         <p className="mt-1 text-gray-600 dark:text-gray-300">
+          {new Date(currentMenu.lastClicked).toLocaleDateString()}
+         </p>
+        </div>
+       )}
       </div>
      </div>
     </motion.div>
