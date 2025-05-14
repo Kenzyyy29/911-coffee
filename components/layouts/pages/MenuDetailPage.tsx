@@ -24,7 +24,6 @@ const MenuDetailPage = () => {
  const {taxes} = useTaxes();
  const [currentMenu, setCurrentMenu] = useState<Menu | null>(null);
  const [recommendations, setRecommendations] = useState<Menu[]>([]);
- const [isTrackingClick, setIsTrackingClick] = useState(false);
 
  // Calculate total price with taxes
  const calculateTotalPrice = (menu: Menu) => {

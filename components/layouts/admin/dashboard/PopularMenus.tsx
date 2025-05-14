@@ -3,7 +3,7 @@
 
 import {useState, useEffect} from "react";
 import {motion, AnimatePresence} from "framer-motion";
-import {FaUtensils, FaFire, FaSpinner} from "react-icons/fa";
+import { FaFire, FaSpinner} from "react-icons/fa";
 import {FiTrendingUp} from "react-icons/fi";
 import {formatPrice} from "@/lib/utils/formatPrice";
 import {db} from "@/lib/firebase/init";
