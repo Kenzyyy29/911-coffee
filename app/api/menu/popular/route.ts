@@ -17,7 +17,7 @@ export async function GET() {
         }));
 
         return NextResponse.json(popularMenus);
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { error: "Failed to fetch popular menus" },
             { status: 500 }
