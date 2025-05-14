@@ -27,6 +27,7 @@ const MenuPageLayout = () => {
  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
  const [menuToDelete, setMenuToDelete] = useState<string | null>(null);
  const [currentMenu, setCurrentMenu] = useState<Menu | null>(null);
+ const [selectedCategory, setSelectedCategory] = useState<string>("All");
  const {menus, loading, error} = useMenu(selectedOutlet);
  const {outlets} = useOutlets();
  const {
@@ -36,6 +37,12 @@ const MenuPageLayout = () => {
   deleteMenu,
  } = useMenu(selectedOutlet);
  const {taxes} = useTaxes();
+
+ // Filter menus based on selected category
+ const filteredMenus =
+  selectedCategory === "All"
+   ? menus
+   : menus.filter((menu) => menu.category === selectedCategory);
 
  useEffect(() => {
   console.log("Current Outlet:", selectedOutlet);
@@ -159,9 +166,7 @@ const MenuPageLayout = () => {
      </button>
      <motion.button
       onClick={handleAddMenu}
-      whileHover={{scale: 1.03}}
-      whileTap={{scale: 0.98}}
-      className="flex items-center bg-onyx1 dark:bg-onyx2 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors w-full sm:w-auto justify-center">
+      className="flex items-center bg-onyx1 dark:bg-onyx2 text-white px-4 py-2 rounded-lg hover:bg-onyx2 dark:hover:bg-onyx2/90 transition-colors w-full sm:w-auto justify-center">
       <FiPlus className="mr-2" />
       Add Menu
      </motion.button>
@@ -173,21 +178,54 @@ const MenuPageLayout = () => {
      </h1>
     </div>
 
+    {/* Filter Section */}
+    <div className="mb-6">
+     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 space-x-2 pb-2">
+      <button
+       onClick={() => setSelectedCategory("All")}
+       className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap max-w-[375px] ${
+        selectedCategory === "All"
+         ? "bg-onyx1 dark:bg-onyx2 text-white"
+         : "bg-gray-100 dark:bg-onyx2 text-onyx1 dark:text-white hover:bg-gray-200 dark:hover:bg-onyx3"
+       } transition-colors`}>
+       All Categories
+      </button>
+      {/* Extract unique categories from menus */}
+      {Array.from(new Set(menus.map((menu) => menu.category))).map(
+       (category) => (
+        <button
+         key={category}
+         onClick={() => setSelectedCategory(category)}
+         className={`px-4 py-2 rounded-full text-sm font-medium max-w-[375px] whitespace-nowrap ${
+          selectedCategory === category
+           ? "bg-onyx1 dark:bg-onyx2 text-white"
+           : "bg-gray-100 dark:bg-onyx2 text-onyx1 dark:text-white hover:bg-gray-200 dark:hover:bg-onyx3"
+         } transition-colors`}>
+         {category}
+        </button>
+       )
+      )}
+     </div>
+    </div>
+
     <div className="bg-white dark:bg-onyx1 rounded-xl shadow-sm overflow-hidden">
      {menusLoading ? (
       <div className="p-8 text-center text-gray-500">Loading menus...</div>
-     ) : menus.length === 0 ? (
+     ) : filteredMenus.length === 0 ? (
       <div className="p-8 text-center text-gray-500">
        <FiCoffee className="mx-auto text-4xl mb-4 text-gray-300" />
-       <p>No menus found for this outlet</p>
+       <p>
+        No menus found{" "}
+        {selectedCategory !== "All" ? `in ${selectedCategory} category` : ""}
+       </p>
        <button
         onClick={handleAddMenu}
         className="mt-4 text-gray-800 underline hover:text-gray-600 transition-colors">
-        Add your first menu
+        Add a new menu
        </button>
       </div>
      ) : (
-      <div className="overflow-y-auto max-h-[70dvh]">
+      <div className="overflow-y-auto max-h-[70dvh] md:max-h-[60dvh]">
        <table className="w-full divide-y divide-gray-200 dark:divide-onyx1">
         <thead className="bg-white dark:bg-onyx2">
          <tr>
@@ -215,7 +253,7 @@ const MenuPageLayout = () => {
          </tr>
         </thead>
         <tbody className="bg-white dark:bg-onyx2 divide-y divide-gray-200 dark:divide-onyx1">
-         {menus.map((menu) => {
+         {filteredMenus.map((menu) => {
           const totalPrice = calculateTotalPrice(menu);
 
           return (

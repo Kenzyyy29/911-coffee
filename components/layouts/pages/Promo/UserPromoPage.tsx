@@ -230,7 +230,7 @@ const UserPromoPage = () => {
         </div>
         <input
          type="text"
-         placeholder="Search promos..."
+         placeholder="Cari Promo..."
          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-onyx3 focus:outline-none focus:ring-2 focus:ring-onyx1 focus:border-transparent bg-white dark:bg-onyx2 text-gray-800 dark:text-white"
          value={searchTerm}
          onChange={(e) => setSearchTerm(e.target.value)}

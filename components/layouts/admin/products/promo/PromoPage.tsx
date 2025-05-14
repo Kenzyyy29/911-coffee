@@ -12,7 +12,12 @@ import {
 } from "react-icons/fi";
 import {useOutlets} from "@/lib/hooks/useOutlets";
 import {usePromo} from "@/lib/hooks/usePromo";
-import {Promo} from "@/lib/types/promo";
+import {
+ Promo,
+ PromoCategory,
+ normalizeCategory,
+ promoCategories,
+} from "@/lib/types/promo";
 import Image from "next/image";
 import AddPromoModal from "./AddPromoModal";
 import EditPromoModal from "./EditPromoModal";
@@ -26,9 +31,19 @@ const PromoPage = () => {
  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
  const [promoToDelete, setPromoToDelete] = useState<string | null>(null);
  const [currentPromo, setCurrentPromo] = useState<Promo | null>(null);
+ const [selectedCategory, setSelectedCategory] = useState<
+  PromoCategory | "All"
+ >("All");
  const {promos, loading, addPromo, updatePromo, deletePromo} =
   usePromo(selectedOutlet);
  const {outlets} = useOutlets();
+
+ const filteredPromos =
+  selectedCategory === "All"
+   ? promos
+   : promos.filter(
+      (promo) => normalizeCategory(promo.category) === selectedCategory
+     );
 
  const handleAddPromo = () => {
   if (!selectedOutlet) {
@@ -80,21 +95,25 @@ const PromoPage = () => {
 
  if (!selectedOutlet) {
   return (
-   <div className="max-h-[100dvh] w-full overflow-hidden">
+   <div className="min-h-screen p-4 md:p-8 bg-white dark:bg-onyx1">
     <motion.div
      initial={{opacity: 0}}
      animate={{opacity: 1}}
-     className="mx-auto bg-white text-center p-6">
-     <h1 className="text-2xl font-bold text-gray-800 mb-6">Select an Outlet</h1>
-     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+     className="max-w-6xl mx-auto rounded-lg">
+     <h1 className="text-2xl font-bold text-onyx1 dark:text-white mb-6">
+      Pilih Outlet
+     </h1>
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {outlets.map((outlet) => (
        <motion.div
         key={outlet.id}
         whileHover={{scale: 1.03}}
         whileTap={{scale: 0.98}}
         onClick={() => setSelectedOutlet(outlet.id)}
-        className="p-6 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-        <h3 className="font-medium text-gray-900">{outlet.name}</h3>
+        className="p-4 sm:p-6 border border-onyx1 dark:border-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+        <h3 className="font-medium text-onyx1 dark:text-white">
+         {outlet.name}
+        </h3>
         <p className="text-sm text-gray-500 mt-1">
          {outlet.address || "No address provided"}
         </p>
@@ -109,114 +128,143 @@ const PromoPage = () => {
  const currentOutlet = outlets.find((o) => o.id === selectedOutlet);
 
  return (
-  <div className="max-h-[100dvh] overflow-y-auto">
+  <div className="min-h-screen bg-white dark:bg-onyx1">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
-    className="max-w-7xl mx-auto p-6">
-    <div className="flex justify-between items-center mb-6">
+    className="max-w-7xl mx-auto">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
      <button
       onClick={() => setSelectedOutlet("")}
-      className="flex items-center text-gray-600 hover:text-gray-800">
+      className="flex items-center text-onyx1 dark:text-white">
       <FiArrowLeft className="mr-2" />
-      Back to Outlets
+      Kembali ke Outlets
      </button>
      <motion.button
       onClick={handleAddPromo}
-      whileHover={{scale: 1.05}}
-      whileTap={{scale: 0.95}}
-      className="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+      className="flex items-center bg-onyx1 dark:bg-onyx2 text-white px-4 py-2 rounded-lg hover:bg-onyx2 dark:hover:bg-onyx2/90 transition-colors w-full sm:w-auto justify-center">
       <FiPlus className="mr-2" />
       Add Promo
      </motion.button>
     </div>
 
     <div className="mb-6">
-     <h1 className="text-2xl font-bold text-gray-800">
-      {currentOutlet?.name} Promos
+     <h1 className="text-2xl font-bold text-onyx1 dark:text-white text-center md:text-start">
+      {currentOutlet?.name} Promo
      </h1>
     </div>
 
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    {/* Filter Section */}
+    <div className="mb-6">
+     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 space-x-2 overflow-x-auto pb-2">
+      <button
+       onClick={() => setSelectedCategory("All")}
+       className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap max-w-[375px] ${
+        selectedCategory === "All"
+         ? "bg-onyx1 dark:bg-onyx2 text-white"
+         : "bg-gray-100 dark:bg-onyx2 text-onyx1 dark:text-white hover:bg-gray-200 dark:hover:bg-onyx3"
+       } transition-colors`}>
+       All Categories
+      </button>
+      {Object.keys(promoCategories).map((category) => (
+       <button
+        key={category}
+        onClick={() => setSelectedCategory(category as PromoCategory)}
+        className={`px-4 py-2 rounded-full text-sm font-medium max-w-[375px] whitespace-nowrap ${
+         selectedCategory === category
+          ? "bg-onyx1 dark:bg-onyx2 text-white"
+          : "bg-gray-100 dark:bg-onyx2 text-onyx1 dark:text-white hover:bg-gray-200 dark:hover:bg-onyx3"
+        } transition-colors`}>
+        {category}
+       </button>
+      ))}
+     </div>
+    </div>
+
+    <div className="bg-white dark:bg-onyx2 rounded-xl shadow-sm overflow-hidden">
      {loading ? (
-      <div className="p-8 text-center text-gray-500">Loading promos...</div>
-     ) : promos.length === 0 ? (
+      <div className="p-8 text-center text-gray-500">Loading promo...</div>
+     ) : filteredPromos.length === 0 ? (
       <div className="p-8 text-center text-gray-500">
        <FiCoffee className="mx-auto text-4xl mb-4 text-gray-300" />
-       <p>No promos found for this outlet</p>
+       <p>
+        No promos found{" "}
+        {selectedCategory !== "All" ? `for ${selectedCategory} category` : ""}
+       </p>
        <button
         onClick={handleAddPromo}
-        className="mt-4 text-gray-800 underline hover:text-gray-600">
-        Add your first promo
+        className="mt-4 text-onyx1 dark:text-white underline hover:text-gray-600 transition-colors">
+        Add a new promo
        </button>
       </div>
      ) : (
-      <div className="overflow-y-auto">
-       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <div className="overflow-y-auto max-h-[70dvh] max-w-[375px] md:max-w-full">
+       <table className="w-full divide-y divide-gray-200 dark:divide-onyx1">
+        <thead className="bg-white dark:bg-onyx2">
          <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Image
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Name
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Category
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Price
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Status
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Actions
           </th>
          </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-         {promos.map((promo) => (
+        <tbody className="bg-white dark:bg-onyx2 divide-y divide-gray-200 dark:divide-onyx1">
+         {filteredPromos.map((promo) => (
           <motion.tr
            key={promo.id}
            initial={{opacity: 0}}
            animate={{opacity: 1}}
-           whileHover={{backgroundColor: "rgba(0, 0, 0, 0.02)"}}
-           className="transition-colors">
-           <td className="px-6 py-4 whitespace-nowrap">
+           className="hover:bg-gray-50 dark:hover:bg-onyx3 transition-colors">
+           <td className="px-4 py-4 whitespace-nowrap">
             {promo.imageUrl ? (
-             <Image
-              width={40}
-              height={40}
-              src={promo.imageUrl}
-              alt={promo.name}
-              className="h-10 w-10 rounded-full object-cover"
-             />
+             <div className="flex-shrink-0 h-10 w-10">
+              <Image
+               width={40}
+               height={40}
+               src={promo.imageUrl}
+               alt={promo.name}
+               className="h-10 w-10 rounded-full object-cover"
+              />
+             </div>
             ) : (
              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
               <FiImage className="text-gray-400" />
              </div>
             )}
            </td>
-           <td className="px-6 py-4">
-            <div className="text-sm font-medium text-gray-900">
+           <td className="px-4 py-4">
+            <div className="text-sm font-medium text-onyx1 dark:text-white">
              {promo.name}
             </div>
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
              {promo.description}
             </div>
            </td>
-           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900 capitalize">
+           <td className="hidden sm:table-cell px-4 py-4 whitespace-nowrap">
+            <div className="text-sm text-onyx1 dark:text-white capitalize">
              {promo.category}
             </div>
            </td>
-           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">
+           <td className="px-4 py-4 whitespace-nowrap">
+            <div className="text-sm font-medium text-onyx1 dark:text-white">
              {formatPrice(promo.price)}
             </div>
            </td>
-           <td className="px-6 py-4 whitespace-nowrap">
+           <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap">
             <span
              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
               promo.isActive
@@ -226,17 +274,21 @@ const PromoPage = () => {
              {promo.isActive ? "Active" : "Inactive"}
             </span>
            </td>
-           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-            <button
-             onClick={() => handleEditPromo(promo)}
-             className="text-gray-600 hover:text-gray-900 mr-4">
-             <FiEdit2 />
-            </button>
-            <button
-             onClick={() => handleDeletePromo(promo.id)}
-             className="text-red-600 hover:text-red-900">
-             <FiTrash2 />
-            </button>
+           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+            <div className="flex space-x-4">
+             <button
+              onClick={() => handleEditPromo(promo)}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              aria-label="Edit promo">
+              <FiEdit2 />
+             </button>
+             <button
+              onClick={() => handleDeletePromo(promo.id)}
+              className="text-red-600 hover:text-red-900 transition-colors"
+              aria-label="Delete promo">
+              <FiTrash2 />
+             </button>
+            </div>
            </td>
           </motion.tr>
          ))}

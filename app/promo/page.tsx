@@ -4,7 +4,7 @@ import {Metadata} from "next";
 import {Suspense} from "react";
 
 export const metadata: Metadata = {
- title: "Promo",
+ title: "911 Coffee Daily Promo",
  description: "View our current promotions",
 };
 
