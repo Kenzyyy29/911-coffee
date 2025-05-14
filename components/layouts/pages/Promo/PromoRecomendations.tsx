@@ -8,17 +8,17 @@ import Link from "next/link";
 import {Promo} from "@/lib/types/promo";
 import {formatPrice} from "@/lib/utils/formatPrice";
 
-interface PromoRecommendationsProps {
+interface PromoRecomendationsProps {
  recommendations: Promo[];
  currentPromoId: string;
  outletId: string;
 }
 
-export const PromoRecommendations = ({
+export const PromoRecomendations = ({
  recommendations,
  currentPromoId,
  outletId,
-}: PromoRecommendationsProps) => {
+}: PromoRecomendationsProps) => {
  if (recommendations.length === 0) return null;
 
  return (
