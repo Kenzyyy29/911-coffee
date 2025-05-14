@@ -26,12 +26,12 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
  }, []);
 
  return (
-  <div className="flex min-h-[100dvh] bg-white dark:bg-black text-black dark:text-white">
+  <div className="flex min-h-[100dvh] bg-white dark:bg-onyx1 text-black dark:text-white">
    {/* Mobile toggle button */}
    {isMobile && (
     <button
      onClick={() => setSidebarOpen(!sidebarOpen)}
-     className="fixed top-4 left-4 z-50 p-2 rounded-md bg-black dark:bg-white dark:text-black text-white lg:hidden shadow-lg"
+     className="fixed top-4 left-4 z-50 p-2 rounded-md bg-onyx1 dark:bg-white dark:text-black text-white lg:hidden shadow-lg"
      aria-label="Toggle sidebar">
      {sidebarOpen ? (
       <svg

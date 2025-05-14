@@ -27,12 +27,12 @@ const DeleteMenuModal = ({
    <motion.div
     initial={{scale: 0.9, y: 20}}
     animate={{scale: 1, y: 0}}
-    className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+    className="bg-white dark:bg-onyx2 rounded-lg shadow-xl w-full max-w-md mx-4">
     <div className="p-4 md:p-6">
      <div className="flex justify-between items-start">
       <div className="flex items-center">
        <FiAlertTriangle className="text-red-500 text-2xl mr-2" />
-       <h3 className="text-lg font-medium text-gray-900">Delete Menu Item</h3>
+       <h3 className="text-lg font-medium text-onyx1 dark:text-white">Delete Menu Item</h3>
       </div>
       <button
        onClick={onClose}
@@ -43,7 +43,7 @@ const DeleteMenuModal = ({
      </div>
 
      <div className="mt-4">
-      <p className="text-gray-600">
+      <p className="text-gray-600 dark:text-gray-400">
        Are you sure you want to delete{" "}
        <span className="font-semibold">{menuName || "this menu item"}</span>?
        This action cannot be undone.
@@ -55,7 +55,7 @@ const DeleteMenuModal = ({
        type="button"
        onClick={onClose}
        disabled={isLoading}
-       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 transition-colors">
+       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 transition-colors">
        Cancel
       </button>
       <button

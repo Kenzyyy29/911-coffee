@@ -141,12 +141,14 @@ const EditMenuModal = ({
    <motion.div
     initial={{scale: 0.9, y: 20}}
     animate={{scale: 1, y: 0}}
-    className="bg-white rounded-xl shadow-xl w-full max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] overflow-y-auto">
-    <div className="flex justify-between items-center sticky top-0 bg-white border-b p-4 z-10">
-     <h2 className="text-xl font-semibold text-gray-800">Edit Menu</h2>
+    className="bg-white dark:bg-onyx2 rounded-xl shadow-xl w-full max-w-md md:max-w-lg lg:max-w-xl md:max-h-[90vh] max-h-[80vh] overflow-y-auto">
+    <div className="flex justify-between items-center sticky top-0 bg-white dark:bg-onyx2 border-b p-4 z-10">
+     <h2 className="text-xl font-semibold text-onyx1 dark:text-white">
+      Edit Menu
+     </h2>
      <button
       onClick={onClose}
-      className="text-gray-500 hover:text-gray-700 transition-colors"
+      className="text-gray-500 hover:text-onyx1 dark:text-white transition-colors"
       aria-label="Close modal">
       <FiX size={24} />
      </button>
@@ -157,7 +159,7 @@ const EditMenuModal = ({
      className="p-4 md:p-6">
      <div className="space-y-4">
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
+       <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
         Menu Name *
        </label>
        <input
@@ -166,12 +168,12 @@ const EditMenuModal = ({
         value={formData.name}
         onChange={handleChange}
         required
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className="w-full border border-gray-300  rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
        />
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
+       <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
         Category *
        </label>
        <input
@@ -186,7 +188,7 @@ const EditMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
+       <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
         Description
        </label>
        <textarea
@@ -199,7 +201,7 @@ const EditMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
+       <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
         Base Price (IDR) *
        </label>
        <input
@@ -215,7 +217,7 @@ const EditMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
+       <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
         Taxes *
        </label>
        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -233,7 +235,7 @@ const EditMenuModal = ({
           />
           <label
            htmlFor={`tax-${tax.id}`}
-           className="ml-2 block text-sm text-gray-700">
+           className="ml-2 block text-sm text-onyx1 dark:text-white">
            {tax.name} ({tax.rate}%)
           </label>
          </div>
@@ -242,7 +244,7 @@ const EditMenuModal = ({
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
+       <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
         Menu Image
        </label>
        <input
@@ -256,7 +258,7 @@ const EditMenuModal = ({
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
-        className="flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+        className="flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-onyx1 dark:text-white hover:bg-gray-50 transition-colors">
         <FiUpload className="mr-2" />
         {uploading ? "Uploading..." : "Upload New Image"}
        </button>
@@ -284,7 +286,7 @@ const EditMenuModal = ({
        />
        <label
         htmlFor="isAvailable"
-        className="ml-2 block text-sm text-gray-700">
+        className="ml-2 block text-sm text-onyx1 dark:text-white">
         Available for purchase
        </label>
       </div>
@@ -294,12 +296,12 @@ const EditMenuModal = ({
       <button
        type="button"
        onClick={onClose}
-       className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+       className="px-4 py-2 border border-gray-300 rounded-lg text-onyx1 dark:text-white hover:bg-gray-50 transition-colors">
        Cancel
       </button>
       <button
        type="submit"
-       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
+       className="px-4 py-2 bg-onyx1  text-white rounded-lg hover:bg-onyx1 dark:text-white transition-colors">
        Update Menu
       </button>
      </div>

@@ -102,7 +102,7 @@ export default function Sidebar({
       animate={isMobile ? {x: sidebarOpen ? 0 : -280} : {x: 0}}
       exit={{x: -280}}
       transition={{type: "spring", stiffness: 300, damping: 30}}
-      className={`fixed left-0 top-0 h-full w-[280px] bg-black text-white p-5 flex flex-col rounded-r-xl shadow-xl z-40 ${
+      className={`fixed left-0 top-0 h-full w-[280px] bg-onyx1 text-white p-5 flex flex-col rounded-r-xl shadow-xl z-40 ${
        isMobile && !sidebarOpen ? "hidden" : ""
       }`}>
       {/* Custom scrollbar styles */}

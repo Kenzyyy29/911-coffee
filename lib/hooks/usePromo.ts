@@ -29,7 +29,7 @@ export const usePromo = (outletId: string) => {
   const q = query(
    collection(db, "promos"),
    where("outletId", "==", outletId),
-   orderBy("createdAt", "desc")
+   where("isActive", "==", true) // Hanya ambil promo aktif
   );
 
   const unsubscribe = onSnapshot(

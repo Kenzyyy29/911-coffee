@@ -1,6 +1,6 @@
 "use client";
 
-import {useRef, useState} from "react";
+import {useRef, useState, useEffect} from "react";
 import {motion} from "framer-motion";
 import {FiX, FiUpload} from "react-icons/fi";
 import {Promo, PromoCategory} from "@/lib/types/promo";
@@ -20,7 +20,7 @@ const AddPromoModal = ({
  onSubmit,
  outletId,
 }: AddPromoModalProps) => {
- const [formData, setFormData] = useState({
+ const initialFormData = {
   name: "",
   description: "",
   price: 0,
@@ -28,9 +28,21 @@ const AddPromoModal = ({
   imageUrl: "",
   isActive: true,
   category: "sarapan & ngopi pagi" as PromoCategory,
- });
+ };
+
+ const [formData, setFormData] = useState(initialFormData);
  const [uploading, setUploading] = useState(false);
  const fileInputRef = useRef<HTMLInputElement>(null);
+
+ // Reset form when modal opens/closes
+ useEffect(() => {
+  if (isOpen) {
+   setFormData(initialFormData);
+   if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+   }
+  }
+ }, [isOpen, outletId]);
 
  const handleUpload = async () => {
   const file = fileInputRef.current?.files?.[0];
@@ -87,6 +99,11 @@ const AddPromoModal = ({
   };
 
   onSubmit(promoData);
+  // Reset form after submit
+  setFormData(initialFormData);
+  if (fileInputRef.current) {
+   fileInputRef.current.value = "";
+  }
  };
 
  if (!isOpen) return null;
@@ -163,7 +180,7 @@ const AddPromoModal = ({
        <input
         type="number"
         name="price"
-        value={formData.price}
+        value={formData.price || ""}
         onChange={handleChange}
         min="0"
         step="0.01"
