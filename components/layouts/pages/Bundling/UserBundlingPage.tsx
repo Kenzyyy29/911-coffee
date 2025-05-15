@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect} from "react";
 import {motion, AnimatePresence} from "framer-motion";
 import {
   FaStore,
@@ -29,7 +29,6 @@ const UserBundlingPage = () => {
   const {outlets, loading: outletsLoading} = useOutlets();
   const {bundlings, loading: bundlingsLoading} = useBundling(selectedOutlet?.id);
   const {taxes} = useTaxes();
-  const carouselRefs = useRef<CategoryRefs>({});
 
   useEffect(() => {
     const outletId = searchParams.get("outlet");
