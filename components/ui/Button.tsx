@@ -40,7 +40,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   const widthClass = fullWidth ? "w-full" : "";
 
   // Extract motion-specific props to avoid conflicts
-  const {onAnimationStart, ...restProps} = props as HTMLMotionProps<"button">;
+  const {...restProps} = props as HTMLMotionProps<"button">;
 
   return (
    <motion.button

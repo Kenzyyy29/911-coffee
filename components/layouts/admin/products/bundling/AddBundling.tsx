@@ -1,7 +1,6 @@
 "use client";
 
 import {useState} from "react";
-import {motion} from "framer-motion";
 import {Bundling} from "@/lib/types/bundling";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
