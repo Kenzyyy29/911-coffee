@@ -841,16 +841,6 @@ const BundlingPage = () => {
   return applicableTaxes.map((tax) => `${tax.name} (${tax.rate}%)`).join(", ");
  };
 
- const getMenuNames = (bundling: Bundling) => {
-  if (!bundling.menuItems || bundling.menuItems.length === 0) {
-   return "";
-  }
-
-  return bundling.menuItems
-   .map((item) => `${item.name} (${item.quantity}x)`)
-   .join(", ");
- };
-
  if (!selectedOutlet) {
   return (
    <div className="min-h-screen p-4 md:p-8 bg-white dark:bg-onyx1">
@@ -967,7 +957,6 @@ const BundlingPage = () => {
          {bundlings.map((bundling) => {
           const totalPrice = calculateTotalPrice(bundling);
           const taxNames = getTaxNames(bundling);
-          const menuNames = getMenuNames(bundling);
 
           return (
            <motion.tr

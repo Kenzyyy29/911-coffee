@@ -81,18 +81,6 @@ const UserBundlingPage = () => {
     }
   };
 
-  const handleDragEnd = (
-    event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
-    category: string
-  ) => {
-    if (info.offset.x > 50) {
-      handlePrev(category);
-    } else if (info.offset.x < -50) {
-      handleNext(category);
-    }
-  };
-
   const getOutletImage = (outletId: string) => {
     try {
       return `/outlets/${outletId}.jpg`;
