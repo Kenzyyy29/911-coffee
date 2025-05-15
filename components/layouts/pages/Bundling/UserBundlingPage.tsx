@@ -1,7 +1,7 @@
 "use client";
 
 import {useState, useEffect, useRef} from "react";
-import {motion, AnimatePresence, PanInfo} from "framer-motion";
+import {motion, AnimatePresence} from "framer-motion";
 import {
   FaStore,
   FaSearch,
@@ -59,26 +59,6 @@ const UserBundlingPage = () => {
   const handleBackToOutlets = () => {
     setSelectedOutlet(null);
     setSearchTerm("");
-  };
-
-  const handlePrev = (category: string) => {
-    const container = carouselRefs.current[category];
-    if (container) {
-      container.scrollBy({
-        left: -300,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const handleNext = (category: string) => {
-    const container = carouselRefs.current[category];
-    if (container) {
-      container.scrollBy({
-        left: 300,
-        behavior: "smooth",
-      });
-    }
   };
 
   const getOutletImage = (outletId: string) => {
