@@ -73,7 +73,7 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
 
    <main
     className={`
-          flex-1 p-4 md:p-6 transition-all duration-300 min-h-screen
+          flex-1 transition-all duration-300 min-h-[100dvh]
           ${sidebarOpen && isMobile ? "ml-0" : ""}
           ${!isMobile ? "ml-[280px]" : ""}
         `}>

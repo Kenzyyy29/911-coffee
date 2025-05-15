@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {motion} from "framer-motion";
 import {
  FiPlus,
@@ -20,13 +20,196 @@ import {Menu} from "@/lib/types/menu";
 import Image from "next/image";
 import {uploadImage} from "@/lib/utils/uploadImage";
 import {formatPrice} from "@/lib/utils/formatPrice";
-import { Tax } from "@/lib/types/tax";
+import {Tax} from "@/lib/types/tax";
 import Checkbox from "@/components/ui/Checkbox";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import FileUpload from "@/components/ui/FileUpload";
 import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
+
+interface PinVerificationModalProps {
+ isOpen: boolean;
+ onClose: () => void;
+ onVerify: (pin: string) => Promise<boolean>; // Now returns a boolean
+ outletName: string;
+}
+
+const PinVerificationModal = ({
+ isOpen,
+ onClose,
+ onVerify,
+ outletName,
+}: PinVerificationModalProps) => {
+  const [pin, setPin] = useState<string[]>(new Array(4).fill(""));
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [error, setError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+useEffect(() => {
+ if (isOpen) {
+  setPin(new Array(4).fill(""));
+  setActiveIndex(0);
+  setError("");
+  inputRefs.current = inputRefs.current.slice(0, 4);
+  setTimeout(() => inputRefs.current[0]?.focus(), 100);
+ }
+}, [isOpen]);
+
+ const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  index: number
+ ) => {
+  const value = e.target.value;
+
+  // Only allow numeric input
+  if (!/^\d*$/.test(value)) return;
+
+  const newPin = [...pin];
+  newPin[index] = value;
+  setPin(newPin);
+  setError("");
+
+  // Move to next input if a digit was entered
+  if (value && index < 3) {
+   setActiveIndex(index + 1);
+   setTimeout(() => inputRefs.current[index + 1]?.focus(), 10);
+  }
+ };
+
+ const handleKeyDown = (
+  e: React.KeyboardEvent<HTMLInputElement>,
+  index: number
+ ) => {
+  if (e.key === "Backspace" && !pin[index] && index > 0) {
+   // Move to previous input on backspace if current is empty
+   setActiveIndex(index - 1);
+   setTimeout(() => inputRefs.current[index - 1]?.focus(), 10);
+  }
+ };
+
+ const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  e.preventDefault();
+  const pasteData = e.clipboardData.getData("text/plain").slice(0, 4);
+  if (/^\d+$/.test(pasteData)) {
+   const newPin = [...pin];
+   for (let i = 0; i < pasteData.length && i < 4; i++) {
+    newPin[i] = pasteData[i];
+   }
+   setPin(newPin);
+   const lastFilledIndex = Math.min(pasteData.length - 1, 3);
+   setActiveIndex(lastFilledIndex);
+   setTimeout(() => inputRefs.current[lastFilledIndex]?.focus(), 10);
+  }
+ };
+
+ const handleSubmit = async () => {
+  const enteredPin = pin.join("");
+  if (enteredPin.length === 4) {
+   setIsVerifying(true);
+   try {
+    const isValid = await onVerify(enteredPin);
+    if (!isValid) {
+     setError("Invalid PIN. Please try again.");
+     // Reset PIN and focus first input
+     setPin(new Array(4).fill(""));
+     setActiveIndex(0);
+     setTimeout(() => inputRefs.current[0]?.focus(), 100);
+    }
+   } finally {
+    setIsVerifying(false);
+   }
+  } else {
+   setError("Please enter a 4-digit PIN");
+  }
+ };
+
+ if (!isOpen) return null;
+
+ return (
+  <motion.div
+   initial={{opacity: 0}}
+   animate={{opacity: 1}}
+   exit={{opacity: 0}}
+   className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+   <motion.div
+    initial={{scale: 0.9, y: 20}}
+    animate={{scale: 1, y: 0}}
+    className="bg-white dark:bg-onyx2 rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div className="p-6">
+     <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-medium text-onyx1 dark:text-white">
+       Enter PIN for {outletName}
+      </h3>
+      <button
+       onClick={onClose}
+       className="text-gray-400 hover:text-gray-500 transition-colors"
+       aria-label="Close modal">
+       <FiX className="text-xl" />
+      </button>
+     </div>
+
+     <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+      Please enter the 4-digit PIN to access this outlet.
+     </p>
+
+     <div className="flex justify-center space-x-3 mb-6">
+      {pin.map((digit, index) => (
+       <motion.div
+        key={index}
+        whileTap={{scale: 0.95}}
+        className="w-14 h-14">
+        <input
+         ref={(el) => {
+          inputRefs.current[index] = el; // Just assign, don't return
+         }}
+         type="text"
+         inputMode="numeric"
+         maxLength={1}
+         value={digit}
+         onChange={(e) => handleChange(e, index)}
+         onKeyDown={(e) => handleKeyDown(e, index)}
+         onPaste={handlePaste}
+         onFocus={() => setActiveIndex(index)}
+         className={`w-full h-full text-center text-xl font-medium rounded-lg border-2 ${
+          activeIndex === index
+           ? "border-primary dark:border-primary-dark"
+           : "border-gray-300 dark:border-onyx1"
+         } bg-transparent focus:outline-none`}
+        />
+       </motion.div>
+      ))}
+     </div>
+
+     {error && (
+      <motion.p
+       initial={{opacity: 0, y: -10}}
+       animate={{opacity: 1, y: 0}}
+       className="text-red-500 text-sm text-center mb-4">
+       {error}
+      </motion.p>
+     )}
+
+     <div className="flex justify-end gap-3 dark:text-white text-onyx1">
+      <Button
+       type="button"
+       onClick={onClose}
+       variant="outline">
+       Cancel
+      </Button>
+      <Button
+       type="button"
+       onClick={handleSubmit}
+       variant="primary">
+       Verify
+      </Button>
+     </div>
+    </div>
+   </motion.div>
+  </motion.div>
+ );
+};
 
 const AddMenu = ({
  isOpen,
@@ -537,6 +720,35 @@ const MenuPageLayout = () => {
   deleteMenu,
  } = useMenu(selectedOutlet);
  const {taxes} = useTaxes();
+ const [pinModalOpen, setPinModalOpen] = useState(false);
+ const [selectedOutletId, setSelectedOutletId] = useState("");
+ const [selectedOutletName, setSelectedOutletName] = useState("");
+
+ const handleOutletSelect = (outletId: string, outletName: string) => {
+  setSelectedOutletId(outletId);
+  setSelectedOutletName(outletName);
+  setPinModalOpen(true);
+ };
+
+ const verifyPin = async (enteredPin: string) => {
+  let correctPin = "";
+  const outletLower = selectedOutletName.toLowerCase();
+
+  if (outletLower.includes("tasik")) {
+   correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_TASIK || "";
+  } else if (outletLower.includes("dago")) {
+   correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_DAGO || "";
+  } else if (outletLower.includes("garut")) {
+   correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_GARUT || "";
+  }
+
+  if (enteredPin === correctPin) {
+   setSelectedOutlet(selectedOutletId);
+   setPinModalOpen(false);
+   return true;
+  }
+  return false;
+ };
 
  // Filter menus based on selected category
  const filteredMenus =
@@ -633,7 +845,7 @@ const MenuPageLayout = () => {
         key={outlet.id}
         whileHover={{scale: 1.03}}
         whileTap={{scale: 0.98}}
-        onClick={() => setSelectedOutlet(outlet.id)}
+        onClick={() => handleOutletSelect(outlet.id, outlet.name)}
         className="p-4 sm:p-6 border border-onyx1 dark:border-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
         <h3 className="font-medium text-onyx1 dark:text-white">
          {outlet.name}
@@ -645,6 +857,13 @@ const MenuPageLayout = () => {
       ))}
      </div>
     </motion.div>
+
+    <PinVerificationModal
+     isOpen={pinModalOpen}
+     onClose={() => setPinModalOpen(false)}
+     onVerify={verifyPin}
+     outletName={selectedOutletName}
+    />
    </div>
   );
  }
@@ -904,4 +1123,4 @@ const MenuPageLayout = () => {
  );
 };
 
-export default MenuPageLayout
+export default MenuPageLayout;
