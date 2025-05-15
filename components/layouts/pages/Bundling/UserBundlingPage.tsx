@@ -18,10 +18,6 @@ import Image from "next/image";
 import {useSearchParams} from "next/navigation";
 import {formatPrice} from "@/lib/utils/formatPrice";
 
-type CategoryRefs = {
-  [key: string]: HTMLDivElement | null;
-};
-
 const UserBundlingPage = () => {
   const searchParams = useSearchParams();
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
