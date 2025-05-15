@@ -378,7 +378,7 @@ const BundlingPage = () => {
  }
 
  return (
-  <div className="max-h-[100dvh] overflow-y-auto">
+  <div className="max-h-[100dvh] overflow-y-auto p-4 md:p-6">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
