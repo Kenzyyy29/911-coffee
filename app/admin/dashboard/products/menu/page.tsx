@@ -1,4 +1,4 @@
-import MenuPageLayout from "@/components/layouts/admin/MenuPageLayout";
+import MenuPageLayout from "@/components/layouts/admin/products/menu/MenuPageLayout";
 import {Metadata} from "next";
 
 export const metadata: Metadata = {

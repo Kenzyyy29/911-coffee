@@ -3,17 +3,17 @@ import {motion} from "framer-motion";
 import {FiPlus, FiEdit2, FiTrash2, FiBriefcase} from "react-icons/fi";
 import {useCareer} from "@/lib/hooks/useCareer";
 import {useState} from "react";
-import CareerModal from "./CareerModal";
-import { Career } from "@/lib/types/career";
+import AddCareer from "./AddCareer";
+import {Career} from "@/lib/types/career";
 import DeleteCareerModal from "./DeleteCareerModal";
 
 const CareerPageLayout = () => {
-    const {careers, loading, error, addCareer, updateCareer, deleteCareer} =
-     useCareer();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [currentCareer, setCurrentCareer] = useState<Career | null>(null);
-    const [careerToDelete, setCareerToDelete] = useState<string | null>(null);
+ const {careers, loading, error, addCareer, updateCareer, deleteCareer} =
+  useCareer();
+ const [isModalOpen, setIsModalOpen] = useState(false);
+ const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+ const [currentCareer, setCurrentCareer] = useState<Career | null>(null);
+ const [careerToDelete, setCareerToDelete] = useState<string | null>(null);
 
  const handleAdd = () => {
   setCurrentCareer(null);
@@ -158,7 +158,7 @@ const CareerPageLayout = () => {
     description="Are you sure you want to delete this career position? This action cannot be undone."
    />
 
-   <CareerModal
+   <AddCareer
     isOpen={isModalOpen}
     onClose={() => setIsModalOpen(false)}
     onSubmit={handleSubmit}

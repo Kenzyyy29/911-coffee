@@ -15,7 +15,7 @@ import {useOutlets} from "@/lib/hooks/useOutlets";
 import {useTaxes} from "@/lib/hooks/useTaxes";
 import {useMenu} from "@/lib/hooks/useMenu";
 import Image from "next/image";
-import AddBundlingModal from "./AddBundlingModal";
+import AddBundling from "./AddBundling";
 import EditBundlingModal from "./EditBundlingModal";
 import DeleteBundlingModal from "./DeleteBundlingModal";
 import {Bundling} from "@/lib/types/bundling";
@@ -316,7 +316,7 @@ const BundlingPage = () => {
    </motion.div>
 
    {/* Modals */}
-   <AddBundlingModal
+   <AddBundling
     isOpen={isAddModalOpen}
     onClose={() => setIsAddModalOpen(false)}
     onSubmit={handleAddBundling}

@@ -19,7 +19,7 @@ import {
  promoCategories,
 } from "@/lib/types/promo";
 import Image from "next/image";
-import AddPromoModal from "./AddPromoModal";
+import AddPromo from "./AddPromo";
 import EditPromoModal from "./EditPromoModal";
 import DeletePromoModal from "./DeletePromoModal";
 import {formatPrice} from "@/lib/utils/formatPrice";
@@ -299,7 +299,7 @@ const PromoPage = () => {
     </div>
    </motion.div>
 
-   <AddPromoModal
+   <AddPromo
     isOpen={isAddModalOpen}
     onClose={() => setIsAddModalOpen(false)}
     onSubmit={handleAddSubmit}

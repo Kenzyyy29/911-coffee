@@ -3,9 +3,14 @@
 
 import {useState} from "react";
 import {motion} from "framer-motion";
-import {FiPlus, FiEdit2, FiTrash2, FiSave} from "react-icons/fi";
+import {FiPlus, FiEdit2, FiTrash2} from "react-icons/fi";
 import {useBlog} from "@/lib/hooks/useBlog";
-import { BlogPost } from "@/lib/types/blog";
+import {BlogPost} from "@/lib/types/blog";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
+import Textarea from "@/components/ui/Textarea";
+import Checkbox from "@/components/ui/Checkbox";
+import Button from "@/components/ui/Button";
 
 const BlogManagement = () => {
  const {
@@ -164,162 +169,94 @@ const BlogManagement = () => {
    </motion.button>
 
    {isFormOpen && currentPost && (
-    <motion.div
-     initial={{opacity: 0, y: -20}}
-     animate={{opacity: 1, y: 0}}
-     exit={{opacity: 0, y: -20}}
-     className="bg-white rounded-lg shadow-md p-6 mb-8">
-     <h2 className="text-xl font-semibold mb-4">
-      {isEditing ? "Edit Post" : "Add New Post"}
-     </h2>
+    <Modal
+     isOpen={isFormOpen}
+     onClose={() => setIsFormOpen(false)}
+     title={isEditing ? "Edit Post" : "Add New Post"}
+     maxWidth="xl">
      <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-       <div>
-        <label className="block text-gray-700 mb-2">Title*</label>
-        <input
-         type="text"
-         name="title"
-         value={currentPost.title || ""}
-         onChange={handleInputChange}
-         className="w-full px-3 py-2 border rounded-md"
-         required
-        />
-       </div>
-       <div>
-        <label className="block text-gray-700 mb-2">Slug*</label>
-        <input
-         type="text"
-         name="slug"
-         value={currentPost.slug || ""}
-         onChange={handleInputChange}
-         className="w-full px-3 py-2 border rounded-md"
-         required
-        />
-       </div>
-      </div>
-
-      <div className="mb-4">
-       <label className="block text-gray-700 mb-2">Excerpt*</label>
-       <textarea
-        name="excerpt"
-        value={currentPost.excerpt || ""}
+       <Input
+        label="Title*"
+        name="title"
+        value={currentPost.title || ""}
         onChange={handleInputChange}
-        className="w-full px-3 py-2 border rounded-md"
-        rows={2}
+        required
+       />
+       <Input
+        label="Slug*"
+        name="slug"
+        value={currentPost.slug || ""}
+        onChange={handleInputChange}
         required
        />
       </div>
 
-      <div className="mb-4">
-       <label className="block text-gray-700 mb-2">Content*</label>
-       <textarea
-        name="content"
-        value={currentPost.content || ""}
-        onChange={handleInputChange}
-        className="w-full px-3 py-2 border rounded-md"
-        rows={6}
-        required
-       />
-      </div>
+      <Textarea
+       label="Excerpt*"
+       name="excerpt"
+       value={currentPost.excerpt || ""}
+       onChange={handleInputChange}
+       rows={2}
+       required
+      />
+
+      <Textarea
+       label="Content*"
+       name="content"
+       value={currentPost.content || ""}
+       onChange={handleInputChange}
+       rows={6}
+       required
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-       <div>
-        <label className="block text-gray-700 mb-2">Featured Image URL</label>
-        <input
-         type="text"
-         name="featuredImage"
-         value={currentPost.featuredImage || ""}
-         onChange={handleInputChange}
-         className="w-full px-3 py-2 border rounded-md"
-        />
-       </div>
-       <div>
-        <label className="block text-gray-700 mb-2">Author*</label>
-        <input
-         type="text"
-         name="author"
-         value={currentPost.author || ""}
-         onChange={handleInputChange}
-         className="w-full px-3 py-2 border rounded-md"
-         required
-        />
-       </div>
-      </div>
-
-      <div className="mb-4">
-       <label className="block text-gray-700 mb-2">
-        Tags (comma separated)
-       </label>
-       <input
-        type="text"
-        value={currentPost.tags?.join(", ") || ""}
-        onChange={handleTagsChange}
-        className="w-full px-3 py-2 border rounded-md"
+       <Input
+        label="Featured Image URL"
+        name="featuredImage"
+        value={currentPost.featuredImage || ""}
+        onChange={handleInputChange}
+       />
+       <Input
+        label="Author*"
+        name="author"
+        value={currentPost.author || ""}
+        onChange={handleInputChange}
+        required
        />
       </div>
 
-      <div className="flex items-center mb-4">
-       <input
-        type="checkbox"
-        id="isPublished"
-        checked={currentPost.isPublished || false}
-        onChange={handlePublishChange}
-        className="mr-2"
-       />
-       <label
-        htmlFor="isPublished"
-        className="text-gray-700">
-        Publish
-       </label>
-      </div>
+      <Input
+       label="Tags (comma separated)"
+       value={currentPost.tags?.join(", ") || ""}
+       onChange={handleTagsChange}
+      />
+
+      <Checkbox
+       id="isPublished"
+       checked={currentPost.isPublished || false}
+       onChange={handlePublishChange}
+       label="Publish"
+       containerClassName="mb-4"
+      />
 
       <div className="flex justify-end space-x-2">
-       <motion.button
-        whileHover={{scale: 1.02}}
-        whileTap={{scale: 0.98}}
+       <Button
         type="button"
         onClick={() => setIsFormOpen(false)}
-        className="px-4 py-2 border rounded-md text-gray-700"
+        variant="outline"
         disabled={isSubmitting}>
         Cancel
-       </motion.button>
-       <motion.button
-        whileHover={{scale: 1.02}}
-        whileTap={{scale: 0.98}}
+       </Button>
+       <Button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
-        disabled={isSubmitting}>
-        {isSubmitting ? (
-         <>
-          <svg
-           className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-           xmlns="http://www.w3.org/2000/svg"
-           fill="none"
-           viewBox="0 0 24 24">
-           <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"></circle>
-           <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Processing...
-         </>
-        ) : (
-         <>
-          <FiSave className="mr-2" />
-          {isEditing ? "Update" : "Save"}
-         </>
-        )}
-       </motion.button>
+        variant="primary"
+        isLoading={isSubmitting}>
+        {isEditing ? "Update" : "Save"}
+       </Button>
       </div>
      </form>
-    </motion.div>
+    </Modal>
    )}
 
    {loading ? (

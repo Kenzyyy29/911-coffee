@@ -10,6 +10,7 @@ import {
  FaArrowLeft,
  FaChevronLeft,
  FaChevronRight,
+ FaFilter,
 } from "react-icons/fa";
 import {useOutlets} from "@/lib/hooks/useOutlets";
 import {useMenu} from "@/lib/hooks/useMenu";
@@ -30,6 +31,7 @@ const MenuPage = () => {
  const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
  const [searchTerm, setSearchTerm] = useState("");
  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+ const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
  const {outlets, loading: outletsLoading} = useOutlets();
  const {menus, loading: menusLoading} = useMenu(selectedOutlet?.id || "");
  const {taxes} = useTaxes();
@@ -250,12 +252,30 @@ const MenuPage = () => {
           </p>
          </div>
         </div>
+        <div className="flex gap-2">
+         <motion.button
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex items-center text-onyx1 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors">
+          <FaFilter className="mr-2" />
+          Filter
+         </motion.button>
+        </div>
        </div>
       </motion.div>
 
-      {/* Search and Filter Section */}
+      {/* Current filter indicator */}
+      {selectedCategory !== "All" && (
+       <div className="mb-4">
+        <span className="text-sm text-onyx1 dark:text-white">
+         Showing category:{" "}
+         <span className="font-medium">{selectedCategory}</span>
+        </span>
+       </div>
+      )}
+
+      {/* Search Section */}
       <div className="bg-white dark:bg-onyx2 rounded-xl shadow-md p-6 mb-8">
-       <div className="relative mb-6">
+       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
          <FaSearch className="text-gray-400" />
         </div>
@@ -267,29 +287,6 @@ const MenuPage = () => {
          onChange={(e) => setSearchTerm(e.target.value)}
         />
        </div>
-
-       {/* Category Filter */}
-       {categories.length > 1 && (
-        <div>
-         <h3 className="text-sm font-medium text-onyx1 dark:text-white mb-2">
-          Kategori
-         </h3>
-         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-           <button
-            key={category}
-            onClick={() => setSelectedCategory(category)}
-            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-             selectedCategory === category
-              ? "bg-onyx1 text-white dark:bg-onyx3"
-              : "bg-gray-200 text-gray-500 hover:bg-gray-300 dark:bg-onyx3 dark:text-onyx1 dark:hover:bg-onyx4"
-            }`}>
-            {category}
-           </button>
-          ))}
-         </div>
-        </div>
-       )}
       </div>
 
       {/* Menu Items */}
@@ -478,6 +475,60 @@ const MenuPage = () => {
      </motion.div>
     )}
    </motion.div>
+
+   {/* Filter Modal */}
+   {isFilterModalOpen && (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+     <motion.div
+      initial={{opacity: 0, scale: 0.9}}
+      animate={{opacity: 1, scale: 1}}
+      className="bg-white dark:bg-onyx2 rounded-lg p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+       <h3 className="text-lg font-medium text-onyx1 dark:text-white">
+        Filter by Category
+       </h3>
+       <button
+        onClick={() => setIsFilterModalOpen(false)}
+        className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+        &times;
+       </button>
+      </div>
+
+      <div className="space-y-2">
+       <button
+        onClick={() => {
+         setSelectedCategory("All");
+         setIsFilterModalOpen(false);
+        }}
+        className={`w-full text-left px-4 py-2 rounded-lg ${
+         selectedCategory === "All"
+          ? "bg-onyx1 dark:bg-white dark:text-onyx1 text-white"
+          : "bg-gray-100 dark:bg-onyx2 text-onyx1 dark:text-white hover:bg-gray-200 dark:hover:bg-onyx1"
+        } transition-colors`}>
+        All Categories
+       </button>
+
+       {Array.from(new Set(menus.map((menu) => menu.category))).map(
+        (category) => (
+         <button
+          key={category}
+          onClick={() => {
+           setSelectedCategory(category);
+           setIsFilterModalOpen(false);
+          }}
+          className={`w-full text-left px-4 py-2 rounded-lg ${
+           selectedCategory === category
+            ? "bg-onyx1 dark:bg-white dark:text-onyx1 text-white"
+            : "bg-gray-100 dark:bg-onyx2 text-onyx1 dark:text-white hover:bg-gray-200 dark:hover:bg-onyx1"
+          } transition-colors`}>
+          {category}
+         </button>
+        )
+       )}
+      </div>
+     </motion.div>
+    </div>
+   )}
   </div>
  );
 };
