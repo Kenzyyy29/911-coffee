@@ -1,13 +1,16 @@
-// /lib/types/bundling.ts
 export interface Bundling {
+  id: string;
+  name: string;
+  description: string;
+  outletId: string;
+  price: number;
+  taxIds: string[];
+  imageUrl: string;
+  menuItems: {
     id: string;
     name: string;
-    description: string;
-    outletId: string;
-    price: number;
-    taxIds: string[];
-    imageUrl: string;
-    menuIds: string[]; // IDs of menus included in this bundle
-    isAvailable: boolean;
-    createdAt: string;
-  }
+    quantity: number;
+  }[];
+  isAvailable: boolean;
+  createdAt: string;
+}

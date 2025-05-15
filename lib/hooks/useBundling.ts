@@ -45,10 +45,10 @@ export const useBundling = (outletId?: string) => {
                             taxIds: data.taxIds || [],
                             outletId: data.outletId,
                             imageUrl: data.imageUrl || "",
-                            menuIds: data.menuIds || [],
+                            menuItems: data.menuItems || [], // Changed from menuIds to menuItems
                             isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
                             createdAt: data.createdAt || new Date().toISOString(),
-                        });
+                          });
                     });
                     setBundlings(bundlingsData);
                     setError(null);
