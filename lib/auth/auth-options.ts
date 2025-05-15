@@ -1,4 +1,4 @@
-import NextAuth, {NextAuthOptions, DefaultSession} from "next-auth";
+import {NextAuthOptions, DefaultSession} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import {login} from "@/lib/utils/service";
 import bcrypt from "bcryptjs";
@@ -20,11 +20,13 @@ declare module "next-auth" {
    id: string;
    role?: string;
   } & DefaultSession["user"];
+  expires: string;
  }
 
  interface JWT {
   id?: string;
   role?: string;
+  exp?: number;
  }
 }
 
@@ -66,6 +68,7 @@ export const authOptions: NextAuthOptions = {
    if (user) {
     token.id = user.id;
     token.role = (user as User).role;
+    token.exp = Math.floor(Date.now() / 1000) + 60 * 60;
    }
    return token;
   },
@@ -73,6 +76,9 @@ export const authOptions: NextAuthOptions = {
    if (token && session.user) {
     session.user.id = token.id as string;
     session.user.role = token.role as string;
+    if (typeof token.exp === "number") {
+     session.expires = new Date(token.exp * 1000).toISOString();
+    }
    }
    return session;
   },
@@ -87,8 +93,12 @@ export const authOptions: NextAuthOptions = {
   newUser: "/auth/register",
  },
  secret: process.env.NEXTAUTH_SECRET,
+ session: {
+  strategy: "jwt",
+  maxAge: 60 * 60, 
+  updateAge: 60 * 60, 
+ },
+ jwt: {
+  maxAge: 60 * 60, 
+ },
 };
-
-const handler = NextAuth(authOptions);
-
-export {handler as GET, handler as POST};
