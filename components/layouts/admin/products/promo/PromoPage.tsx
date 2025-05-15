@@ -61,7 +61,6 @@ const PinVerificationModal = ({
  ) => {
   const value = e.target.value;
 
-  // Only allow numeric input
   if (!/^\d*$/.test(value)) return;
 
   const newPin = [...pin];
@@ -69,7 +68,6 @@ const PinVerificationModal = ({
   setPin(newPin);
   setError("");
 
-  // Move to next input if a digit was entered
   if (value && index < 3) {
    setActiveIndex(index + 1);
    setTimeout(() => inputRefs.current[index + 1]?.focus(), 10);
@@ -110,7 +108,6 @@ const PinVerificationModal = ({
     const isValid = await onVerify(enteredPin);
     if (!isValid) {
      setError("Invalid PIN. Please try again.");
-     // Reset PIN and focus first input
      setPin(new Array(4).fill(""));
      setActiveIndex(0);
      setTimeout(() => inputRefs.current[0]?.focus(), 100);
@@ -199,7 +196,8 @@ const PinVerificationModal = ({
       <Button
        type="button"
        onClick={handleSubmit}
-       variant="primary">
+       variant="primary"
+       isLoading={isVerifying}>
        Verify
       </Button>
      </div>
@@ -222,35 +220,35 @@ const PromoPage = () => {
  const {promos, loading, addPromo, updatePromo, deletePromo} =
   usePromo(selectedOutlet);
  const {outlets} = useOutlets();
-  const [pinModalOpen, setPinModalOpen] = useState(false);
-  const [selectedOutletName, setSelectedOutletName] = useState("");
-  const [selectedOutletId, setSelectedOutletId] = useState<string>("");
+ const [pinModalOpen, setPinModalOpen] = useState(false);
+ const [selectedOutletName, setSelectedOutletName] = useState("");
+ const [selectedOutletId, setSelectedOutletId] = useState<string>("");
 
-  const handleOutletSelect = (outletId: string, outletName: string) => {
-   setSelectedOutletId(outletId);
-   setSelectedOutletName(outletName);
-   setPinModalOpen(true);
-  };
+ const handleOutletSelect = (outletId: string, outletName: string) => {
+  setSelectedOutletId(outletId);
+  setSelectedOutletName(outletName);
+  setPinModalOpen(true);
+ };
 
-  const verifyPin = async (enteredPin: string) => {
-   let correctPin = "";
-   const outletLower = selectedOutletName.toLowerCase();
+ const verifyPin = async (enteredPin: string) => {
+  let correctPin = "";
+  const outletLower = selectedOutletName.toLowerCase();
 
-   if (outletLower.includes("tasik")) {
-    correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_TASIK || "";
-   } else if (outletLower.includes("dago")) {
-    correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_DAGO || "";
-   } else if (outletLower.includes("garut")) {
-    correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_GARUT || "";
-   }
+  if (outletLower.includes("tasik")) {
+   correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_TASIK || "";
+  } else if (outletLower.includes("dago")) {
+   correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_DAGO || "";
+  } else if (outletLower.includes("garut")) {
+   correctPin = process.env.NEXT_PUBLIC_OUTLET_PIN_GARUT || "";
+  }
 
-   if (enteredPin === correctPin) {
-    setSelectedOutlet(selectedOutletId);
-    setPinModalOpen(false);
-    return true;
-   }
-   return false;
-  };
+  if (enteredPin === correctPin) {
+   setSelectedOutlet(selectedOutletId);
+   setPinModalOpen(false);
+   return true;
+  }
+  return false;
+ };
 
  const filteredPromos =
   selectedCategory === "All"

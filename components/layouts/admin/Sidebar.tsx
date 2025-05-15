@@ -4,7 +4,7 @@ import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {motion, AnimatePresence} from "framer-motion";
 import {FaSignOutAlt, FaBox, FaStore, FaUser} from "react-icons/fa";
-import {IoIosArrowDropright} from "react-icons/io";
+import {IoIosArrowDropright, IoIosArrowDropleft} from "react-icons/io";
 import {MdDashboard} from "react-icons/md";
 import {useState} from "react";
 import {FaGear, FaPencil} from "react-icons/fa6";
@@ -18,7 +18,6 @@ interface SidebarProps {
 const adminLinks = [
  {name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard />},
  {name: "Outlets", path: "/admin/dashboard/outlets", icon: <FaStore />},
-
  {
   name: "Produk",
   path: "/admin/dashboard/products/menu",
@@ -52,7 +51,6 @@ const adminLinks = [
   path: "/admin/dashboard/blog",
   icon: <FaPencil />,
  },
-
  {
   name: "Settings",
   path: "/admin/dashboard/settings/profile",
@@ -69,6 +67,7 @@ export default function Sidebar({
  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
   {}
  );
+ 
  const toggleItemExpand = (path: string) => {
   setExpandedItems((prev) => {
    const newState = Object.keys(prev).reduce((acc, key) => {
@@ -84,11 +83,9 @@ export default function Sidebar({
  };
 
  const isActive = (path: string) => {
-  // Jika path adalah dashboard, hanya aktif ketika pathname persis sama
   if (path === "/admin/dashboard") {
    return pathname === path;
   }
-  // Untuk path lainnya, aktif ketika pathname dimulai dengan path tersebut
   return pathname.startsWith(path);
  };
 
@@ -100,20 +97,40 @@ export default function Sidebar({
 
  return (
   <>
+   {/* Mobile pull-out tab when sidebar is closed */}
+   {isMobile && !sidebarOpen && (
+    <motion.button
+     className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-onyx1 text-white p-2 rounded-full shadow-lg"
+     onClick={() => setSidebarOpen(true)}
+     initial={{x: 0}}
+     animate={{x: 0}}
+     whileHover={{x: 5}}
+     transition={{type: "spring", stiffness: 300, damping: 20}}>
+     <IoIosArrowDropright className="text-xl" />
+    </motion.button>
+   )}
+
    <AnimatePresence>
     {(sidebarOpen || !isMobile) && (
      <motion.div
       initial={isMobile ? {x: -280} : {x: 0}}
       animate={isMobile ? {x: sidebarOpen ? 0 : -280} : {x: 0}}
-      exit={{x: -280}}
+      exit={isMobile ? {x: -280} : {x: 0}}
       transition={{type: "spring", stiffness: 300, damping: 30}}
-      className={`fixed left-0 top-0 h-full w-[280px] bg-onyx1 text-white p-5 flex flex-col rounded-r-xl shadow-xl z-40 ${
-       isMobile && !sidebarOpen ? "hidden" : ""
-      }`}>
-      {/* Custom scrollbar styles */}
-      <style
-       jsx
-       global>{`
+      className={`fixed left-0 top-0 h-full w-[280px] bg-onyx1 text-white p-5 flex flex-col rounded-r-xl shadow-xl z-40`}>
+      
+      {/* Mobile close button */}
+      {isMobile && (
+       <motion.button
+        className="absolute -right-3 top-1/2 -translate-y-1/2 bg-onyx1 text-white p-1 rounded-full shadow-lg border-2 border-white z-50"
+        onClick={() => setSidebarOpen(false)}
+        whileHover={{scale: 1.1}}
+        whileTap={{scale: 0.9}}>
+        <IoIosArrowDropleft className="text-xl" />
+       </motion.button>
+      )}
+
+      <style jsx global>{`
        .sidebar-scroll {
         scrollbar-width: thin;
         scrollbar-color: rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.1);
@@ -148,11 +165,14 @@ export default function Sidebar({
         <Link
          href="/"
          onClick={() => isMobile && setSidebarOpen(false)}>
-         <h1
+         <motion.h1
           className="text-3xl mb-6 text-white text-center italic font-bold"
-          style={{fontFamily: "'Raleway', `sans-serif`"}}>
+          style={{fontFamily: "'Raleway', `sans-serif`"}}
+          initial={{opacity: 0}}
+          animate={{opacity: 1}}
+          transition={{delay: 0.1}}>
           911 COFFEE
-         </h1>
+         </motion.h1>
         </Link>
 
         <ul className="flex flex-col gap-2 w-full">
@@ -176,7 +196,13 @@ export default function Sidebar({
              <span className="text-xl min-w-[24px] flex justify-center">
               {link.icon}
              </span>
-             <span className="flex-1 text-left">{link.name}</span>
+             <motion.span 
+              className="flex-1 text-left"
+              initial={{opacity: 0, x: -10}}
+              animate={{opacity: 1, x: 0}}
+              transition={{delay: 0.1}}>
+              {link.name}
+             </motion.span>
              {link.subItems && (
               <motion.span
                animate={{
@@ -224,7 +250,10 @@ export default function Sidebar({
          onClick={() => signOut()}
          className="flex items-center gap-3 bg-white hover:bg-white/90 text-black w-full py-2.5 px-4 rounded-lg cursor-pointer transition-colors"
          whileHover={{scale: 1.02}}
-         whileTap={{scale: 0.98}}>
+         whileTap={{scale: 0.98}}
+         initial={{opacity: 0, y: 10}}
+         animate={{opacity: 1, y: 0}}
+         transition={{delay: 0.2}}>
          <FaSignOutAlt />
          <span>Keluar</span>
         </motion.button>
@@ -236,9 +265,12 @@ export default function Sidebar({
 
    {/* Overlay for mobile */}
    {isMobile && sidebarOpen && (
-    <div
+    <motion.div
      className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
      onClick={() => setSidebarOpen(false)}
+     initial={{opacity: 0}}
+     animate={{opacity: 1}}
+     exit={{opacity: 0}}
     />
    )}
   </>

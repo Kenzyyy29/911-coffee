@@ -41,21 +41,21 @@ const PinVerificationModal = ({
  onVerify,
  outletName,
 }: PinVerificationModalProps) => {
-  const [pin, setPin] = useState<string[]>(new Array(4).fill(""));
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [error, setError] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+ const [pin, setPin] = useState<string[]>(new Array(4).fill(""));
+ const [activeIndex, setActiveIndex] = useState(0);
+ const [error, setError] = useState("");
+ const [isVerifying, setIsVerifying] = useState(false);
+ const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-useEffect(() => {
- if (isOpen) {
-  setPin(new Array(4).fill(""));
-  setActiveIndex(0);
-  setError("");
-  inputRefs.current = inputRefs.current.slice(0, 4);
-  setTimeout(() => inputRefs.current[0]?.focus(), 100);
- }
-}, [isOpen]);
+ useEffect(() => {
+  if (isOpen) {
+   setPin(new Array(4).fill(""));
+   setActiveIndex(0);
+   setError("");
+   inputRefs.current = inputRefs.current.slice(0, 4);
+   setTimeout(() => inputRefs.current[0]?.focus(), 100);
+  }
+ }, [isOpen]);
 
  const handleChange = (
   e: React.ChangeEvent<HTMLInputElement>,
@@ -201,7 +201,8 @@ useEffect(() => {
       <Button
        type="button"
        onClick={handleSubmit}
-       variant="primary">
+       variant="primary"
+       isLoading={isVerifying}>
        Verify
       </Button>
      </div>
@@ -871,7 +872,7 @@ const MenuPageLayout = () => {
  const currentOutlet = outlets.find((o) => o.id === selectedOutlet);
 
  return (
-  <div className="max-h-[100dvh]">
+  <div className="max-h-[100dvh] p-4 md:p-6">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}

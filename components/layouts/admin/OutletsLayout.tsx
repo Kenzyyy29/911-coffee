@@ -1,4 +1,3 @@
-// /app/admin/dashboard/outlets/Layout.tsx
 "use client";
 
 import {useState} from "react";
@@ -50,23 +49,23 @@ const OutletsLayout = () => {
  };
 
  return (
-  <div className="[100dvh]">
+  <div className="h-[100dvh] p-4 md:p-8 bg-white dark:bg-onyx1">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.3}}
-    className=" mx-auto">
-    <div className="flex justify-between items-center mb-8">
-     <h1 className="text-3xl font-bold text-gray-800">Manage Outlets</h1>
+    className="max-w-6xl mx-auto rounded-lg">
+    <div className="max-w-6xl mx-auto rounded-lg flex justify-between items-center">
+     <h1 className="text-2xl font-bold text-onyx1 dark:text-white mb-6">
+      Informasi Outlets
+     </h1>
      <motion.button
-      whileHover={{scale: 1.05}}
-      whileTap={{scale: 0.95}}
       onClick={() => {
        setEditingOutlet(null);
        setIsFormOpen(true);
       }}
-      className="flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow hover:bg-gray-700 transition-colors">
-      <FiPlus /> Add Outlet
+      className="flex items-center gap-2 bg-onyx1 dark:bg-onyx2 text-white px-4 py-2 rounded-lg hover:bg-onyx2 dark:hover:bg-onyx2/90 transition-colors mb-6">
+      <FiPlus /> Tambah Outlet
      </motion.button>
     </div>
 
@@ -101,18 +100,18 @@ const OutletsLayout = () => {
       initial={{opacity: 0}}
       animate={{opacity: 1}}
       transition={{delay: 0.2}}
-      className="bg-white rounded-xl shadow overflow-hidden">
+      className="bg-white dark:bg-onyx1 rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-y-auto">
-       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-800 text-white">
+       <table className="w-full divide-y divide-gray-200 dark:divide-onyx1">
+        <thead className="bg-white dark:bg-onyx2">
          <tr>
           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
            Name
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+          <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
            Address
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+          <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
            Phone
           </th>
           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
@@ -120,7 +119,7 @@ const OutletsLayout = () => {
           </th>
          </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white dark:bg-onyx2 divide-y divide-gray-200 dark:divide-onyx1">
          {outlets.map((outlet) => (
           <motion.tr
            key={outlet.id}
@@ -130,18 +129,20 @@ const OutletsLayout = () => {
            className="hover:bg-gray-50">
            <td className="px-6 py-4 whitespace-nowrap">
             <div className="flex items-center">
-             <div className="text-sm font-medium text-gray-900">
+             <div className="text-sm font-medium  text-onyx1 dark:text-white">
               {outlet.name}
              </div>
             </div>
            </td>
-           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-500 line-clamp-1">
+           <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+            <div className="text-sm  text-onyx1 dark:text-white line-clamp-1">
              {outlet.address}
             </div>
            </td>
-           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-500">{outlet.phone}</div>
+           <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+            <div className="text-sm  text-onyx1 dark:text-white">
+             {outlet.phone}
+            </div>
            </td>
            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
             <div className="flex justify-end space-x-2">
@@ -149,7 +150,7 @@ const OutletsLayout = () => {
               whileHover={{scale: 1.1}}
               whileTap={{scale: 0.9}}
               onClick={() => handleEdit(outlet)}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-600 dark:text-gray-500 hover:text-gray-900 transition-colors"
               aria-label="Edit">
               <FiEdit2 />
              </motion.button>
@@ -157,7 +158,7 @@ const OutletsLayout = () => {
               whileHover={{scale: 1.1}}
               whileTap={{scale: 0.9}}
               onClick={() => handleDeleteClick(outlet.id)}
-              className="text-red-600 hover:text-red-900"
+              className="text-red-600 hover:text-red-900 transition-colors"
               aria-label="Delete">
               <FiTrash2 />
              </motion.button>

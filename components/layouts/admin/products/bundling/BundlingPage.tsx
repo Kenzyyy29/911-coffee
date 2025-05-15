@@ -195,7 +195,8 @@ const PinVerificationModal = ({
       <Button
        type="button"
        onClick={handleSubmit}
-       variant="primary">
+       variant="primary"
+       isLoading={isVerifying}>
        Verify
       </Button>
      </div>

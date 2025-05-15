@@ -5,15 +5,8 @@ import {useSession} from "next-auth/react";
 import {retrieveDataById} from "@/lib/utils/service";
 import {User} from "@/lib/utils/service";
 import {motion} from "framer-motion";
-import {
- FiEye,
- FiEyeOff,
- FiSave,
- FiUser,
- FiMail,
- FiPhone,
- FiLock,
-} from "react-icons/fi";
+import {FiSave, FiUser, FiMail, FiPhone, FiLock} from "react-icons/fi";
+import {FaSpinner} from "react-icons/fa";
 
 export default function AdminProfileSettings() {
  const {data: session} = useSession();
@@ -73,7 +66,6 @@ export default function AdminProfileSettings() {
   setError("");
   setSuccess("");
 
-  // Only validate passwords if either field has value
   if (formData.newPassword || formData.confirmPassword) {
    if (formData.newPassword !== formData.confirmPassword) {
     setError("New password and confirm password do not match");
@@ -94,7 +86,6 @@ export default function AdminProfileSettings() {
     body: JSON.stringify({
      userId: session?.user?.id,
      newPassword: formData.newPassword,
-     // Include other fields if needed
      fullname: formData.fullname,
      phone: formData.phone,
     }),
@@ -107,7 +98,6 @@ export default function AdminProfileSettings() {
    }
 
    setSuccess("Profile updated successfully");
-   // Clear password fields after successful update
    setFormData((prev) => ({
     ...prev,
     newPassword: "",
@@ -121,12 +111,8 @@ export default function AdminProfileSettings() {
 
  if (loading) {
   return (
-   <div className="flex justify-center items-center h-64">
-    <motion.div
-     animate={{rotate: 360}}
-     transition={{repeat: Infinity, duration: 1, ease: "linear"}}
-     className="w-10 h-10 border-4 border-black border-t-transparent rounded-full"
-    />
+   <div className="flex justify-center items-center h-[100dvh]">
+    <FaSpinner className="w-10 h-10 animate-spin" />
    </div>
   );
  }
@@ -143,178 +129,181 @@ export default function AdminProfileSettings() {
  }
 
  return (
-  <motion.div
-   initial={{opacity: 0, y: 20}}
-   animate={{opacity: 1, y: 0}}
-   transition={{duration: 0.5}}
-   className="w-full">
-   <motion.h1
-    initial={{x: -20, opacity: 0}}
-    animate={{x: 0, opacity: 1}}
-    transition={{delay: 0.2}}
-    className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
-    <FiUser className="mr-2" /> Profile Settings
-   </motion.h1>
+  <div className="h-[100dvh] p-4 md:p-8 bg-white dark:bg-onyx1">
+   <motion.div
+    initial={{opacity: 0, y: -20}}
+    animate={{opacity: 1, y: 0}}
+    transition={{duration: 0.3}}
+    className="max-w-6xl mx-auto rounded-lg">
+    <h1 className="text-2xl font-bold text-onyx1 dark:text-white mb-6">
+     Profile Settings
+    </h1>
 
-   {error && (
-    <motion.div
-     initial={{opacity: 0, y: -10}}
-     animate={{opacity: 1, y: 0}}
-     className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 flex items-center">
-     <FiLock className="mr-2" /> {error}
-    </motion.div>
-   )}
-
-   {success && (
-    <motion.div
-     initial={{opacity: 0, y: -10}}
-     animate={{opacity: 1, y: 0}}
-     className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 flex items-center">
-     <FiSave className="mr-2" /> {success}
-    </motion.div>
-   )}
-
-   <motion.form
-    onSubmit={handleSubmit}
-    className="space-y-6 bg-white rounded-xl shadow-md p-6"
-    initial={{opacity: 0}}
-    animate={{opacity: 1}}
-    transition={{delay: 0.4}}>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {error && (
      <motion.div
-      initial={{x: -20, opacity: 0}}
-      animate={{x: 0, opacity: 1}}
-      transition={{delay: 0.3}}>
-      <label
-       htmlFor="fullname"
-       className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-       <FiUser className="mr-2" /> Name
-      </label>
-      <div className="relative">
-       <input
-        type="text"
-        id="fullname"
-        name="fullname"
-        value={formData.fullname}
-        onChange={handleChange}
-        className="mt-1 w-full rounded-lg border-gray-300 shadow-sm p-3 border pl-10"
-        required
-       />
-       <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-      </div>
+      initial={{opacity: 0, y: -10}}
+      animate={{opacity: 1, y: 0}}
+      className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+      <p>{error}</p>
      </motion.div>
+    )}
 
+    {success && (
      <motion.div
-      initial={{x: 20, opacity: 0}}
-      animate={{x: 0, opacity: 1}}
-      transition={{delay: 0.3}}>
-      <label
-       htmlFor="email"
-       className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-       <FiMail className="mr-2" /> Email
-      </label>
-      <div className="relative">
-       <input
-        type="email"
-        id="email"
-        name="email"
-        value={formData.email}
-        disabled
-        className="mt-1 w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 p-3 border pl-10"
-       />
-       <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-      </div>
+      initial={{opacity: 0, y: -10}}
+      animate={{opacity: 1, y: 0}}
+      className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+      <p>{success}</p>
      </motion.div>
-
-     <motion.div
-      initial={{x: -20, opacity: 0}}
-      animate={{x: 0, opacity: 1}}
-      transition={{delay: 0.4}}>
-      <label
-       htmlFor="phone"
-       className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-       <FiPhone className="mr-2" /> Phone Number
-      </label>
-      <div className="relative">
-       <input
-        type="tel"
-        id="phone"
-        name="phone"
-        value={formData.phone}
-        onChange={handleChange}
-        className="mt-1 w-full rounded-lg border-gray-300 shadow-sm p-3 border pl-10"
-       />
-       <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-      </div>
-     </motion.div>
-    </div>
+    )}
 
     <motion.div
      initial={{opacity: 0}}
      animate={{opacity: 1}}
-     transition={{delay: 0.5}}
-     className="border-t border-gray-200 pt-6">
-     <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-      <FiLock className="mr-2" /> Change Password
-     </h2>
-     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <motion.div
-       initial={{y: 10, opacity: 0}}
-       animate={{y: 0, opacity: 1}}
-       transition={{delay: 0.7}}>
-       <label
-        htmlFor="newPassword"
-        className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-        <FiLock className="mr-2" /> New Password
-       </label>
-       <div className="relative">
-        <input
-         type={showNewPassword ? "text" : "password"}
-         id="newPassword"
-         name="newPassword"
-         value={formData.newPassword}
-         onChange={handleChange}
-         className="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black p-3 border pl-10 pr-10"
-         placeholder="Leave empty to keep current password"
-        />
-        <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        <button
-         type="button"
-         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-         onClick={() => setShowNewPassword(!showNewPassword)}>
-         {showNewPassword ? <FiEyeOff /> : <FiEye />}
-        </button>
-       </div>
-      </motion.div>
+     transition={{delay: 0.2}}
+     className="bg-white dark:bg-onyx2 rounded-xl shadow-sm overflow-hidden">
+     <div className="overflow-y-auto">
+      <table className="w-full divide-y divide-gray-200 dark:divide-onyx1">
+       <thead className="bg-white dark:bg-onyx2">
+        <tr>
+         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+          Field
+         </th>
+         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+          Value
+         </th>
+        </tr>
+       </thead>
+       <tbody className="bg-white dark:bg-onyx2 divide-y divide-gray-200 dark:divide-onyx1">
+        <motion.tr
+         initial={{opacity: 0}}
+         animate={{opacity: 1}}
+         transition={{duration: 0.3}}
+         className="hover:bg-gray-50 dark:hover:bg-onyx1">
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-onyx1 dark:text-white">
+           <FiUser className="inline mr-2" /> Name
+          </div>
+         </td>
+         <td className="px-6 py-4 whitespace-nowrap">
+          <input
+           type="text"
+           name="fullname"
+           value={formData.fullname}
+           onChange={handleChange}
+           disabled
+           className="w-full rounded-lg border-gray-300 shadow-sm p-2 border bg-gray-100 dark:bg-onyx2 dark:text-white"
+           required
+          />
+         </td>
+        </motion.tr>
 
-      <motion.div
-       initial={{y: 10, opacity: 0}}
-       animate={{y: 0, opacity: 1}}
-       transition={{delay: 0.8}}>
-       <label
-        htmlFor="confirmPassword"
-        className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-        <FiLock className="mr-2" /> Confirm New Password
-       </label>
-       <div className="relative">
-        <input
-         type={showConfirmPassword ? "text" : "password"}
-         id="confirmPassword"
-         name="confirmPassword"
-         value={formData.confirmPassword}
-         onChange={handleChange}
-         className="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black p-3 border pl-10 pr-10"
-         placeholder="Confirm new password"
-        />
-        <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        <button
-         type="button"
-         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-         onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-         {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-        </button>
-       </div>
-      </motion.div>
+        <motion.tr
+         initial={{opacity: 0}}
+         animate={{opacity: 1}}
+         transition={{duration: 0.4}}
+         className="hover:bg-gray-50 dark:hover:bg-onyx1">
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-onyx1 dark:text-white">
+           <FiMail className="inline mr-2" /> Email
+          </div>
+         </td>
+         <td className="px-6 py-4 whitespace-nowrap">
+          <input
+           type="email"
+           name="email"
+           value={formData.email}
+           disabled
+           className="w-full rounded-lg border-gray-300 shadow-sm p-2 border bg-gray-100 dark:bg-onyx2 dark:text-white"
+          />
+         </td>
+        </motion.tr>
+
+        <motion.tr
+         initial={{opacity: 0}}
+         animate={{opacity: 1}}
+         transition={{duration: 0.5}}
+         className="hover:bg-gray-50 dark:hover:bg-onyx1">
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-onyx1 dark:text-white">
+           <FiPhone className="inline mr-2" /> Phone Number
+          </div>
+         </td>
+         <td className="px-6 py-4 whitespace-nowrap">
+          <input
+           type="tel"
+           name="phone"
+           value={formData.phone}
+           onChange={handleChange}
+           disabled
+           className="w-full rounded-lg border-gray-300 shadow-sm p-2 border bg-gray-100 dark:bg-onyx2 dark:text-white"
+          />
+         </td>
+        </motion.tr>
+
+        <motion.tr
+         initial={{opacity: 0}}
+         animate={{opacity: 1}}
+         transition={{duration: 0.6}}
+         className="hover:bg-gray-50 dark:hover:bg-onyx1">
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-onyx1 dark:text-white">
+           <FiLock className="inline mr-2" /> New Password
+          </div>
+         </td>
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="relative">
+           <input
+            type={showNewPassword ? "text" : "password"}
+            name="newPassword"
+            value={formData.newPassword}
+            onChange={handleChange}
+            disabled
+            className="w-full rounded-lg border-gray-300 shadow-sm p-2 border bg-gray-100 dark:bg-onyx2 dark:text-white"
+            placeholder="••••••••"
+           />
+           {/* <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+            onClick={() => setShowNewPassword(!showNewPassword)}>
+            {showNewPassword ? <FiEyeOff /> : <FiEye />}
+           </button> */}
+          </div>
+         </td>
+        </motion.tr>
+
+        <motion.tr
+         initial={{opacity: 0}}
+         animate={{opacity: 1}}
+         transition={{duration: 0.7}}
+         className="hover:bg-gray-50 dark:hover:bg-onyx1">
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-onyx1 dark:text-white">
+           <FiLock className="inline mr-2" /> Confirm Password
+          </div>
+         </td>
+         <td className="px-6 py-4 whitespace-nowrap">
+          <div className="relative">
+           <input
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            disabled
+            className="w-full rounded-lg border-gray-300 shadow-sm p-2 border bg-gray-100 dark:bg-onyx2 dark:text-white"
+            placeholder="••••••••"
+           />
+           {/* <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+            {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+           </button> */}
+          </div>
+         </td>
+        </motion.tr>
+       </tbody>
+      </table>
      </div>
     </motion.div>
 
@@ -322,14 +311,15 @@ export default function AdminProfileSettings() {
      initial={{opacity: 0}}
      animate={{opacity: 1}}
      transition={{delay: 0.9}}
-     className="flex justify-end">
+     className="flex justify-end mt-6">
      <button
-      type="submit"
-      className="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-black hover:bg-black/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors duration-300 items-center">
+      type="button"
+      onClick={handleSubmit}
+      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-black hover:bg-black/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors duration-300 items-center">
       <FiSave className="mr-2" /> Save Changes
      </button>
     </motion.div>
-   </motion.form>
-  </motion.div>
+   </motion.div>
+  </div>
  );
 }

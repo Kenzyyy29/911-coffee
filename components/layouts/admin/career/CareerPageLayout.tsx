@@ -1,6 +1,6 @@
 "use client";
 import {motion} from "framer-motion";
-import {FiPlus, FiEdit2, FiTrash2, FiBriefcase} from "react-icons/fi";
+import {FiPlus, FiEdit2, FiTrash2} from "react-icons/fi";
 import {useCareer} from "@/lib/hooks/useCareer";
 import {useState} from "react";
 import AddCareer from "./AddCareer";
@@ -54,91 +54,83 @@ const CareerPageLayout = () => {
   return <div className="text-center py-8 text-red-500">Error: {error}</div>;
 
  return (
-  <div className="max-h-[100dvh]">
+  <div className="h-[100dvh] p-4 md:p-8 bg-white dark:bg-onyx1">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.3}}
-    className="max-w-6xl mx-auto">
+    className="max-w-6xl mx-auto rounded-lg">
     <div className="flex justify-between items-center mb-8">
-     <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-      <FiBriefcase className="mr-2" /> Career Management
+     <h1 className="text-2xl font-bold text-onyx1 dark:text-white">
+      Lowongan Pekerjaan
      </h1>
      <motion.button
-      whileHover={{scale: 1.05}}
-      whileTap={{scale: 0.95}}
       onClick={handleAdd}
-      className="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center">
-      <FiPlus className="mr-2" /> Add Career
+      className="flex items-center gap-2 bg-onyx1 dark:bg-onyx2 text-white px-4 py-2 rounded-lg hover:bg-onyx2 dark:hover:bg-onyx2/90 transition-colors">
+      <FiPlus /> Tambah Lowongan
      </motion.button>
     </div>
 
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-onyx2 rounded-xl shadow-sm overflow-hidden">
      <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-       <thead className="bg-gray-100">
+      <table className="w-full divide-y divide-gray-200 dark:divide-onyx1">
+       <thead className="bg-white dark:bg-onyx2">
         <tr>
-         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-onyx1 dark:text-white">
           Title
          </th>
-         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-          Outlet
-         </th>
-         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+         <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-onyx1 dark:text-white">
           Jenis
          </th>
-         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+         <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-onyx1 dark:text-white">
           Status
          </th>
-         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+         <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-onyx1 dark:text-white">
           Actions
          </th>
         </tr>
        </thead>
-       <tbody className="bg-white divide-y divide-gray-200">
+       <tbody className="bg-white dark:bg-onyx2 divide-y divide-gray-200 dark:divide-onyx1">
         {careers.map((career) => (
          <motion.tr
           key={career.id}
           initial={{opacity: 0}}
           animate={{opacity: 1}}
           transition={{duration: 0.3}}
-          className="hover:bg-gray-50">
-          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          className="hover:bg-gray-50 dark:hover:bg-onyx1">
+          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-onyx1 dark:text-white">
            {career.title}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-           {career.outlet}
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-onyx1 dark:text-white">
            {career.employmentType === "FULL_TIME" && "Full-time"}
            {career.employmentType === "PART_TIME" && "Part-time"}
            {career.employmentType === "CONTRACT" && "Kontrak"}
            {career.employmentType === "INTERNSHIP" && "Magang"}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm">
+          <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm">
            <span
             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
              career.isActive
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
             }`}>
             {career.isActive ? "Active" : "Inactive"}
            </span>
           </td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-           <div className="flex space-x-2">
+          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+           <div className="flex justify-end space-x-2">
             <motion.button
              whileHover={{scale: 1.1}}
              whileTap={{scale: 0.9}}
              onClick={() => handleEdit(career)}
-             className="text-gray-600 hover:text-gray-900">
+             className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
              <FiEdit2 />
             </motion.button>
             <motion.button
              whileHover={{scale: 1.1}}
              whileTap={{scale: 0.9}}
              onClick={() => handleDeleteClick(career.id!)}
-             className="text-gray-600 hover:text-red-600">
+             className="text-red-600 hover:text-red-900 dark:hover:text-red-400 transition-colors">
              <FiTrash2 />
             </motion.button>
            </div>
