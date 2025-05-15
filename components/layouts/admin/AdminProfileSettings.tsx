@@ -23,8 +23,8 @@ export default function AdminProfileSettings() {
   confirmPassword: "",
  });
 
- const [showNewPassword, setShowNewPassword] = useState(false);
- const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+//  const [showNewPassword, setShowNewPassword] = useState(false);
+//  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
  useEffect(() => {
   if (session?.user?.id) {
@@ -254,7 +254,7 @@ export default function AdminProfileSettings() {
          <td className="px-6 py-4 whitespace-nowrap">
           <div className="relative">
            <input
-            type={showNewPassword ? "text" : "password"}
+            // type={showNewPassword ? "text" : "password"}
             name="newPassword"
             value={formData.newPassword}
             onChange={handleChange}
@@ -285,7 +285,7 @@ export default function AdminProfileSettings() {
          <td className="px-6 py-4 whitespace-nowrap">
           <div className="relative">
            <input
-            type={showConfirmPassword ? "text" : "password"}
+            // type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
