@@ -19,6 +19,7 @@ import {Swiper, SwiperSlide} from "swiper/react";
 import {Navigation} from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import type {Swiper as SwiperType} from "swiper";
 
 const UserPromoPage = () => {
  const searchParams = useSearchParams();
@@ -26,7 +27,7 @@ const UserPromoPage = () => {
  const [searchTerm, setSearchTerm] = useState("");
  const {outlets, loading: outletsLoading} = useOutlets();
  const {promos, loading: promosLoading} = usePromo(selectedOutlet?.id || "");
- const swiperRefs = useRef<{[key: string]: any}>({});
+ const swiperRefs = useRef<{[key: string]: SwiperType | null}>({});
 
  const filteredPromos = promos
   .filter((promo) => {

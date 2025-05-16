@@ -23,6 +23,7 @@ import {Swiper, SwiperSlide} from "swiper/react";
 import {Navigation} from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import {Swiper as SwiperType} from "swiper";
 
 const MenuPage = () => {
  const searchParams = useSearchParams();
@@ -33,7 +34,7 @@ const MenuPage = () => {
  const {outlets, loading: outletsLoading} = useOutlets();
  const {menus, loading: menusLoading} = useMenu(selectedOutlet?.id || "");
  const {taxes} = useTaxes();
- const swiperRefs = useRef<{[key: string]: any}>({});
+ const swiperRefs = useRef<{[key: string]: SwiperType | null}>({});
 
  useEffect(() => {
   const outletId = searchParams.get("outlet");
@@ -318,8 +319,9 @@ const MenuPage = () => {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                    />
                   ) : (
-                   <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
+                   <div className="bg-white dark:bg-onyx2 h-full w-full flex flex-col gap-2 items-center justify-center rounded-lg">
                     <FaUtensils className="text-4xl text-gray-400 dark:text-gray-600" />
+                    <p>Maaf Gambar belum tersedia</p>
                    </div>
                   )}
                  </div>
@@ -401,6 +403,7 @@ const MenuPage = () => {
               ) : (
                <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
                 <FaUtensils className="text-4xl text-gray-400 dark:text-gray-600" />
+                <p>Maaf Gambar belum tersedia</p>
                </div>
               )}
              </div>
