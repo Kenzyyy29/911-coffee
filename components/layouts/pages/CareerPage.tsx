@@ -42,11 +42,11 @@ const CareerPage = () => {
  if (loading)
   return (
    <div className="min-h-screen flex items-center justify-center">
-    <motion.div
-     animate={{rotate: 360}}
-     transition={{repeat: Infinity, duration: 1, ease: "linear"}}
-     className="text-blue-600">
-     <FiLoader size={32} />
+    <motion.div className="text-onyx1 dark:text-white">
+     <FiLoader
+      size={32}
+      className="animate-spin"
+     />
     </motion.div>
    </div>
   );
@@ -70,34 +70,32 @@ const CareerPage = () => {
   );
 
  return (
-  <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div className="min-h-screen bg-white dark:bg-onyx1 py-12 px-4 sm:px-6 lg:px-8">
    <motion.div
     initial={{opacity: 0, y: 20}}
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.5}}
     className="max-w-6xl mx-auto">
-    <div className="text-center mb-12">
+    <div className="text-center mb-12 ">
      <motion.h1
       initial={{scale: 0.95}}
       animate={{scale: 1}}
       transition={{delay: 0.2}}
-      className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+      className="text-4xl font-bold text-gray-900 mb-4 flex flex-col md:flex-row items-center justify-center">
       <motion.span
        initial={{rotate: -30, y: -5}}
        animate={{rotate: 0, y: 0}}
        transition={{type: "spring", stiffness: 300}}
        className="inline-block mr-3">
-       <FiBriefcase className="text-blue-600" />
+       <FiBriefcase className="text-onyx1 dark:text-white" />
       </motion.span>
-      <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
-       Karir Bersama Kami
-      </span>
+      <span className="text-onyx1 dark:text-white">Karir Bersama Kami</span>
      </motion.h1>
      <motion.p
       initial={{opacity: 0}}
       animate={{opacity: 1}}
       transition={{delay: 0.4}}
-      className="text-lg text-gray-600 max-w-2xl mx-auto">
+      className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
       Temukan kesempatan karir yang sesuai dengan keahlian Anda dan bergabunglah
       dengan tim profesional kami
      </motion.p>
@@ -107,7 +105,7 @@ const CareerPage = () => {
      initial={{opacity: 0, y: 10}}
      animate={{opacity: 1, y: 0}}
      transition={{delay: 0.3}}
-     className="mb-8 bg-white p-4 rounded-xl shadow-sm">
+     className="mb-8 bg-white dark:bg-onyx1 p-4 rounded-xl shadow-sm">
      <div className="flex flex-col md:flex-row gap-4">
       <div className="relative flex-1">
        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -116,7 +114,7 @@ const CareerPage = () => {
        <input
         type="text"
         placeholder="Cari lowongan..."
-        className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-onyx1 dark:focus:ring-white focus:border-onyx1 dark:focus:border-white"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
        />
@@ -126,7 +124,7 @@ const CareerPage = () => {
         <FiFilter className="text-gray-400" />
        </div>
        <select
-        className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+        className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-onyx1 dark:focus:ring-white focus:border-onyx1 dark:focus:border-white appearance-none"
         value={employmentFilter}
         onChange={(e) => setEmploymentFilter(e.target.value)}>
         <option value="ALL">Semua Tipe</option>
@@ -146,15 +144,14 @@ const CareerPage = () => {
        initial={{opacity: 0, y: 20}}
        animate={{opacity: 1, y: 0}}
        transition={{duration: 0.3, delay: index * 0.05}}
-       whileHover={{scale: 1.01}}
-       className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-all">
+       className="bg-white dark:bg-onyx1 text-onyx1 dark:text-white rounded-xl shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-all">
        <div className="p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div className="flex flex-row justify-between items-start gap-4">
          <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-800 mb-1">
+          <h2 className="text-xl font-bold text-onyx1 dark:text-white mb-1">
            {career.title}
           </h2>
-          <div className="flex flex-wrap items-center text-gray-600 mb-2 gap-3">
+          <div className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 mb-2 gap-3">
            <span className="inline-flex items-center">
             <FiMapPin className="mr-1" />
             {career.outlet}
@@ -169,21 +166,21 @@ const CareerPage = () => {
           </div>
          </div>
          <motion.button
-          whileHover={{scale: 1.05}}
-          whileTap={{scale: 0.95}}
           onClick={() => handleViewDetail(career)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          className="flex items-center px-4 py-2 text-onyx1 dark:text-white rounded-lg hover:underline ">
           Lihat Detail <FiArrowRight className="ml-1" />
          </motion.button>
         </div>
 
-        <p className="text-gray-700 mt-3 mb-4 line-clamp-2">
+        <p className="text-onyx1 dark:text-white mt-3 mb-4 line-clamp-2">
          {career.description}
         </p>
 
         <div className="mt-4">
-         <h3 className="font-medium text-gray-900 mb-2">Persyaratan:</h3>
-         <ul className="list-disc list-inside space-y-1 text-gray-700">
+         <h3 className="font-medium text-onyx1 dark:text-white mb-2">
+          Persyaratan:
+         </h3>
+         <ul className="list-disc list-inside space-y-1 text-onyx1 dark:text-white">
           {career.requirements.slice(0, 3).map((req, i) => (
            <li key={i}>{req}</li>
           ))}
@@ -202,13 +199,13 @@ const CareerPage = () => {
       <motion.div
        initial={{opacity: 0}}
        animate={{opacity: 1}}
-       className="text-center py-12 bg-white rounded-xl shadow-sm">
+       className="text-center py-12 bg-white dark:bg-onyx1 rounded-xl shadow-sm">
        <div className="max-w-md mx-auto">
         <FiSearch
          size={48}
          className="mx-auto text-gray-400 mb-4"
         />
-        <h3 className="text-xl font-medium text-gray-900 mb-2">
+        <h3 className="text-xl font-medium text-onyx1 dark:text-white mb-2">
          Tidak ada lowongan yang ditemukan
         </h3>
         <p className="text-gray-500">

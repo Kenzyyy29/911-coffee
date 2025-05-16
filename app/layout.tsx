@@ -24,6 +24,7 @@ const disableNavbar = [
  "/menu",
  "/promo",
  "/bundling",
+ "/career",
 ];
 
 const disableFooter = [
@@ -33,7 +34,8 @@ const disableFooter = [
  "/unauthorized",
  "/menu",
  "/promo",
- "/bundling"
+ "/bundling",
+ "/career",
 ];
 
 export default function RootLayout({
