@@ -24,7 +24,7 @@ const DetailCareerModal = ({
 }: DetailCareerModalProps) => {
  if (!isOpen || !career) return null;
 
- const {push} = useRouter();
+ const router = useRouter();
 
  const getEmploymentTypeLabel = () => {
   switch (career.employmentType) {
@@ -162,7 +162,7 @@ const DetailCareerModal = ({
       className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row gap-3">
       <button
        onClick={() => {
-        push(
+        router.push(
          `/career/form?careerId=${career.id}&title=${encodeURIComponent(
           career.title
          )}`
