@@ -247,7 +247,13 @@ const EmployeeDashboard = () => {
           </td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-onyx1 dark:text-white">
            {application.createdAt &&
-            format(application.createdAt.toDate(), "dd MMM yyyy", {locale: id})}
+            format(
+             application.createdAt instanceof Date
+              ? application.createdAt
+              : application.createdAt.toDate(),
+             "dd MMM yyyy",
+             {locale: id}
+            )}
           </td>
           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
            <div className="flex justify-end space-x-2">
