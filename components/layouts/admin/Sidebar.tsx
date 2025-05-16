@@ -3,7 +3,7 @@ import {signOut} from "next-auth/react";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {motion, AnimatePresence} from "framer-motion";
-import {FaSignOutAlt, FaBox, FaStore, FaUser} from "react-icons/fa";
+import {FaSignOutAlt, FaBox, FaStore, FaUser, FaBriefcase} from "react-icons/fa";
 import {IoIosArrowDropright, IoIosArrowDropleft} from "react-icons/io";
 import {MdDashboard} from "react-icons/md";
 import {useState} from "react";
@@ -45,6 +45,11 @@ const adminLinks = [
   name: "Rekruitmen",
   path: "/admin/dashboard/career",
   icon: <FaUser />,
+ },
+ {
+  name: "Calon Karyawan",
+  path: "/admin/dashboard/employee",
+  icon: <FaBriefcase />,
  },
  {
   name: "Blog",

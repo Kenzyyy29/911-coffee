@@ -1,4 +1,5 @@
 export interface CareerApplication {
+ id?: string;
  name: string;
  address: string;
  age: number;
@@ -10,4 +11,5 @@ export interface CareerApplication {
  careerId: string;
  careerTitle: string;
  agreedToTerms: boolean;
+ createdAt?: Date | any;
 }

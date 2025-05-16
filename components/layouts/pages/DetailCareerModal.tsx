@@ -22,9 +22,9 @@ const DetailCareerModal = ({
  onClose,
  career,
 }: DetailCareerModalProps) => {
- if (!isOpen || !career) return null;
-
  const router = useRouter();
+
+ if (!isOpen || !career) return null;
 
  const getEmploymentTypeLabel = () => {
   switch (career.employmentType) {
