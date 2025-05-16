@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface CareerApplication {
  id?: string;
  name: string;
@@ -11,5 +13,5 @@ export interface CareerApplication {
  careerId: string;
  careerTitle: string;
  agreedToTerms: boolean;
- createdAt?: Date | any;
+ createdAt?: Date | Timestamp;
 }
