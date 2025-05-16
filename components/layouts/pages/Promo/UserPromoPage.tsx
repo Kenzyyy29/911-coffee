@@ -1,17 +1,8 @@
-// /UserPromoPage.tsx
 "use client";
 
-import {useState, useRef, useEffect} from "react";
-import {motion, PanInfo} from "framer-motion";
-import {
- FaSearch,
- FaSpinner,
- FaArrowLeft,
- FaTag,
- FaChevronLeft,
- FaChevronRight,
- FaStore,
-} from "react-icons/fa";
+import {useState, useEffect, useRef} from "react";
+import {motion} from "framer-motion";
+import {FaSearch, FaSpinner, FaArrowLeft, FaTag, FaStore} from "react-icons/fa";
 import {useOutlets} from "@/lib/hooks/useOutlets";
 import {usePromo} from "@/lib/hooks/usePromo";
 import {Outlet} from "@/lib/types/outlet";
@@ -24,10 +15,10 @@ import {
  categoryOrder,
  normalizeCategory,
 } from "@/lib/types/promo";
-
-type CategoryRefs = {
- [key: string]: HTMLDivElement | null;
-};
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Navigation} from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 
 const UserPromoPage = () => {
  const searchParams = useSearchParams();
@@ -35,9 +26,8 @@ const UserPromoPage = () => {
  const [searchTerm, setSearchTerm] = useState("");
  const {outlets, loading: outletsLoading} = useOutlets();
  const {promos, loading: promosLoading} = usePromo(selectedOutlet?.id || "");
- const carouselRefs = useRef<CategoryRefs>({});
+ const swiperRefs = useRef<{[key: string]: any}>({});
 
- // Filter and normalize promos
  const filteredPromos = promos
   .filter((promo) => {
    return (
@@ -50,7 +40,6 @@ const UserPromoPage = () => {
    category: normalizeCategory(promo.category),
   }));
 
- // Group promos by category
  const groupedPromos = categoryOrder.reduce((acc, category) => {
   const categoryPromos = filteredPromos.filter(
    (promo) => promo.category === category
@@ -65,7 +54,6 @@ const UserPromoPage = () => {
   return acc;
  }, [] as {category: string; promos: typeof filteredPromos; timeRange: string}[]);
 
- // Handle outlet selection
  useEffect(() => {
   const outletId = searchParams.get("outlet");
   if (outletId && outlets.length > 0) {
@@ -85,42 +73,6 @@ const UserPromoPage = () => {
  const handleBackToOutlets = () => {
   setSelectedOutlet(null);
   setSearchTerm("");
- };
-
- const handlePrev = (category: string) => {
-  const container = carouselRefs.current[category];
-  if (container) {
-   container.scrollBy({
-    left: -300,
-    behavior: "smooth",
-   });
-  }
- };
-
- const handleNext = (category: string) => {
-  const container = carouselRefs.current[category];
-  if (container) {
-   container.scrollBy({
-    left: 300,
-    behavior: "smooth",
-   });
-  }
- };
-
- const handleDragEnd = (
-  event: MouseEvent | TouchEvent | PointerEvent,
-  info: PanInfo,
-  category: string
- ) => {
-  if (info.offset.x > 50) {
-   handlePrev(category);
-  } else if (info.offset.x < -50) {
-   handleNext(category);
-  }
- };
-
- const setCarouselRef = (category: string) => (el: HTMLDivElement | null) => {
-  carouselRefs.current[category] = el;
  };
 
  return (
@@ -260,101 +212,117 @@ const UserPromoPage = () => {
         {groupedPromos.map(({category, promos: categoryPromos, timeRange}) => (
          <div
           key={category}
-          className="space-y-4">
-          <div className="flex justify-between items-center">
-           <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-            {category}{" "}
-            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-             ({timeRange})
-            </span>
-           </h2>
-           <div className="flex gap-2">
-            <button
-             onClick={() => handlePrev(category)}
-             className="p-1 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors"
-             aria-label={`Previous ${category} promos`}>
-             <FaChevronLeft />
-            </button>
-            <button
-             onClick={() => handleNext(category)}
-             className="p-1 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors"
-             aria-label={`Next ${category} promos`}>
-             <FaChevronRight />
-            </button>
-           </div>
-          </div>
+          className="space-y-4 relative">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+           {category}{" "}
+           <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+            ({timeRange})
+           </span>
+          </h2>
 
-          <motion.div
-           ref={setCarouselRef(category)}
-           drag="x"
-           dragConstraints={{left: 0, right: 0}}
-           onDragEnd={(e, info) => handleDragEnd(e, info as PanInfo, category)}
-           className="relative overflow-hidden">
-           <div
-            className="flex gap-6 pb-4"
-            style={{width: "max-content"}}>
+          <div className="relative">
+           <Swiper
+            modules={[Navigation]}
+            navigation={{
+             prevEl: `.prev-${category}`,
+             nextEl: `.next-${category}`,
+            }}
+            spaceBetween={24}
+            slidesPerView={1.2}
+            breakpoints={{
+             640: {
+              slidesPerView: 2.2,
+             },
+             768: {
+              slidesPerView: 2.5,
+             },
+             1024: {
+              slidesPerView: 3.2,
+             },
+            }}
+            onSwiper={(swiper) => {
+             swiperRefs.current[category] = swiper;
+            }}
+            className="px-2">
             {categoryPromos.map((promo) => (
-             <Link
-              key={promo.id}
-              href={`/promo/${promo.id}?outlet=${selectedOutlet.id}`}
-              passHref>
-              <motion.div
-               initial={{opacity: 0, y: 20}}
-               animate={{opacity: 1, y: 0}}
-               exit={{opacity: 0, scale: 0.9}}
-               transition={{duration: 0.3}}
-               whileHover={{y: -5}}
-               className="w-72 flex-shrink-0 bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-               <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
-                <div className="relative h-full w-full">
-                 {promo.imageUrl ? (
-                  <Image
-                   src={promo.imageUrl}
-                   alt={promo.name}
-                   fill
-                   className="object-contain"
-                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                 ) : (
-                  <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
-                   <FaTag className="text-4xl text-gray-400 dark:text-gray-600" />
-                  </div>
+             <SwiperSlide key={promo.id}>
+              <Link
+               href={`/promo/${promo.id}?outlet=${selectedOutlet.id}`}
+               passHref>
+               <motion.div
+                initial={{opacity: 0, y: 20}}
+                animate={{opacity: 1, y: 0}}
+                exit={{opacity: 0, scale: 0.9}}
+                transition={{duration: 0.3}}
+                whileHover={{y: -5}}
+                className="h-full bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
+                 <div className="relative h-full w-full">
+                  {promo.imageUrl ? (
+                   <Image
+                    src={promo.imageUrl}
+                    alt={promo.name}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                   />
+                  ) : (
+                   <div className="bg-white dark:bg-onyx2 h-full w-full flex items-center justify-center rounded-lg">
+                    <FaTag className="text-4xl text-gray-400 dark:text-gray-600" />
+                   </div>
+                  )}
+                 </div>
+                </div>
+                <div className="p-4 bg-white dark:bg-onyx2">
+                 <div className="flex justify-between items-start">
+                  <h3 className="font-bold text-lg text-onyx1 dark:text-white">
+                   {promo.name}
+                  </h3>
+                  <span className="font-bold text-onyx1 dark:text-white">
+                   {formatPrice(promo.price)}
+                  </span>
+                 </div>
+                 {promo.category && (
+                  <span className="inline-block mt-1 px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs rounded-full">
+                   {promo.category}
+                  </span>
                  )}
+                 <p className="text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
+                  {promo.description}
+                 </p>
+                 <div className="mt-4 flex justify-between items-center">
+                  <span
+                   className={`px-2 py-1 rounded text-xs font-medium ${
+                    promo.isActive
+                     ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                     : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                   }`}>
+                   {promo.isActive ? "Active" : "Inactive"}
+                  </span>
+                 </div>
                 </div>
-               </div>
-               <div className="p-4 bg-white dark:bg-onyx2">
-                <div className="flex justify-between items-start">
-                 <h3 className="font-bold text-lg text-onyx1 dark:text-white">
-                  {promo.name}
-                 </h3>
-                 <span className="font-bold text-onyx1 dark:text-white">
-                  {formatPrice(promo.price)}
-                 </span>
-                </div>
-                {promo.category && (
-                 <span className="inline-block mt-1 px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs rounded-full">
-                  {promo.category}
-                 </span>
-                )}
-                <p className="text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
-                 {promo.description}
-                </p>
-                <div className="mt-4 flex justify-between items-center">
-                 <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
-                   promo.isActive
-                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                  }`}>
-                  {promo.isActive ? "Active" : "Inactive"}
-                 </span>
-                </div>
-               </div>
-              </motion.div>
-             </Link>
+               </motion.div>
+              </Link>
+             </SwiperSlide>
             ))}
-           </div>
-          </motion.div>
+           </Swiper>
+
+           {/* Navigation buttons */}
+           {categoryPromos.length > 2 && (
+            <>
+             <button
+              className={`prev-${category} absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-onyx2 shadow-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors -ml-4`}
+              aria-label={`Previous ${category} promos`}>
+              &lt;
+             </button>
+             <button
+              className={`next-${category} absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-onyx2 shadow-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors -mr-4`}
+              aria-label={`Next ${category} promos`}>
+              &gt;
+             </button>
+            </>
+           )}
+          </div>
          </div>
         ))}
        </div>

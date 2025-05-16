@@ -1,15 +1,13 @@
 "use client";
 
 import {useState, useEffect, useRef} from "react";
-import {motion, AnimatePresence, PanInfo} from "framer-motion";
+import {motion, AnimatePresence} from "framer-motion";
 import {
  FaStore,
  FaUtensils,
  FaSearch,
  FaSpinner,
  FaArrowLeft,
- FaChevronLeft,
- FaChevronRight,
  FaFilter,
 } from "react-icons/fa";
 import {useOutlets} from "@/lib/hooks/useOutlets";
@@ -21,10 +19,10 @@ import Image from "next/image";
 import Link from "next/link";
 import {useSearchParams} from "next/navigation";
 import {formatPrice} from "@/lib/utils/formatPrice";
-
-type CategoryRefs = {
- [key: string]: HTMLDivElement | null;
-};
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Navigation} from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 
 const MenuPage = () => {
  const searchParams = useSearchParams();
@@ -35,9 +33,8 @@ const MenuPage = () => {
  const {outlets, loading: outletsLoading} = useOutlets();
  const {menus, loading: menusLoading} = useMenu(selectedOutlet?.id || "");
  const {taxes} = useTaxes();
- const carouselRefs = useRef<CategoryRefs>({});
+ const swiperRefs = useRef<{[key: string]: any}>({});
 
- // Check for outlet ID in URL params on initial load
  useEffect(() => {
   const outletId = searchParams.get("outlet");
   if (outletId && outlets.length > 0) {
@@ -46,14 +43,12 @@ const MenuPage = () => {
   }
  }, [outlets, searchParams]);
 
- // Calculate total price with taxes
  const calculateTotalPrice = (menu: Menu) => {
   if (!menu?.taxIds || menu.taxIds.length === 0) return menu?.price || 0;
 
   const applicableTaxes = taxes.filter((tax) => menu.taxIds.includes(tax.id));
   let totalPrice = menu.price;
 
-  // Apply each tax sequentially (compound)
   applicableTaxes.forEach((tax) => {
    totalPrice *= 1 + tax.rate / 100;
   });
@@ -61,7 +56,6 @@ const MenuPage = () => {
   return totalPrice;
  };
 
- // Get unique categories from menus
  const categories = [
   "All",
   ...new Set(
@@ -83,7 +77,6 @@ const MenuPage = () => {
   return matchesSearch && matchesCategory;
  });
 
- // Group menus by category when "All" is selected
  const groupedMenus = categories
   .filter((cat) => cat !== "All")
   .map((category) => ({
@@ -96,7 +89,6 @@ const MenuPage = () => {
   }))
   .filter((group) => group.menus.length > 0)
   .sort((a, b) => {
-   // Find the oldest menu in each category
    const oldestA = a.menus[0]?.createdAt || 0;
    const oldestB = b.menus[0]?.createdAt || 0;
    return new Date(oldestA).getTime() - new Date(oldestB).getTime();
@@ -108,43 +100,6 @@ const MenuPage = () => {
   setSelectedCategory("All");
  };
 
- const handlePrev = (category: string) => {
-  const container = carouselRefs.current[category];
-  if (container) {
-   container.scrollBy({
-    left: -300,
-    behavior: "smooth",
-   });
-  }
- };
-
- const handleNext = (category: string) => {
-  const container = carouselRefs.current[category];
-  if (container) {
-   container.scrollBy({
-    left: 300,
-    behavior: "smooth",
-   });
-  }
- };
-
- const handleDragEnd = (
-  event: MouseEvent | TouchEvent | PointerEvent,
-  info: PanInfo,
-  category: string
- ) => {
-  if (info.offset.x > 50) {
-   handlePrev(category);
-  } else if (info.offset.x < -50) {
-   handleNext(category);
-  }
- };
-
- const setCarouselRef = (category: string) => (el: HTMLDivElement | null) => {
-  carouselRefs.current[category] = el;
- };
-
- // Function to get outlet image path
  const getOutletImage = (outletId: string) => {
   try {
    return `/outlets/${outletId}.jpg`;
@@ -311,42 +266,38 @@ const MenuPage = () => {
         {groupedMenus.map(({category, menus: categoryMenus}) => (
          <div
           key={category}
-          className="space-y-4">
-          <div className="flex justify-between items-center">
-           <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-            {category}
-           </h2>
-           {categoryMenus.length > 2 && (
-            <div className="flex gap-2">
-             <button
-              onClick={() => handlePrev(category)}
-              className="p-1 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors"
-              aria-label={`Previous ${category} menus`}>
-              <FaChevronLeft />
-             </button>
-             <button
-              onClick={() => handleNext(category)}
-              className="p-1 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors"
-              aria-label={`Next ${category} menus`}>
-              <FaChevronRight />
-             </button>
-            </div>
-           )}
-          </div>
+          className="space-y-4 relative">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+           {category}
+          </h2>
 
-          <motion.div
-           ref={setCarouselRef(category)}
-           drag="x"
-           dragConstraints={{left: 0, right: 0}}
-           onDragEnd={(e, info) => handleDragEnd(e, info as PanInfo, category)}
-           className="relative overflow-hidden">
-           <div
-            className="flex gap-6 pb-4"
-            style={{width: "max-content"}}>
-            <AnimatePresence>
-             {categoryMenus.map((menu) => (
+          <div className="relative">
+           <Swiper
+            modules={[Navigation]}
+            navigation={{
+             prevEl: `.prev-${category}`,
+             nextEl: `.next-${category}`,
+            }}
+            spaceBetween={24}
+            slidesPerView={1.2}
+            breakpoints={{
+             640: {
+              slidesPerView: 2.2,
+             },
+             768: {
+              slidesPerView: 2.5,
+             },
+             1024: {
+              slidesPerView: 3.2,
+             },
+            }}
+            onSwiper={(swiper) => {
+             swiperRefs.current[category] = swiper;
+            }}
+            className="px-2">
+            {categoryMenus.map((menu) => (
+             <SwiperSlide key={menu.id}>
               <Link
-               key={menu.id}
                href={`/menu/${menu.id}?outlet=${selectedOutlet.id}`}
                passHref>
                <motion.div
@@ -355,7 +306,7 @@ const MenuPage = () => {
                 exit={{opacity: 0, scale: 0.9}}
                 transition={{duration: 0.3}}
                 whileHover={{y: -5}}
-                className="w-72 flex-shrink-0 bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                className="h-full bg-white dark:bg-onyx2 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative h-48 w-full bg-white dark:bg-onyx2 p-4">
                  <div className="relative h-full w-full">
                   {menu.imageUrl ? (
@@ -398,10 +349,26 @@ const MenuPage = () => {
                 </div>
                </motion.div>
               </Link>
-             ))}
-            </AnimatePresence>
-           </div>
-          </motion.div>
+             </SwiperSlide>
+            ))}
+           </Swiper>
+
+           {/* Navigation buttons */}
+           {categoryMenus.length > 2 && (
+            <>
+             <button
+              className={`prev-${category} absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-onyx2 shadow-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors -ml-4`}
+              aria-label={`Previous ${category} menus`}>
+              &lt;
+             </button>
+             <button
+              className={`next-${category} absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-onyx2 shadow-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-onyx3 transition-colors -mr-4`}
+              aria-label={`Next ${category} menus`}>
+              &gt;
+             </button>
+            </>
+           )}
+          </div>
          </div>
         ))}
        </div>
