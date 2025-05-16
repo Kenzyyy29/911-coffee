@@ -9,6 +9,7 @@ import {
  FiArrowLeft,
  FiPackage,
  FiX,
+ FiAlertTriangle,
 } from "react-icons/fi";
 import {useBundling} from "@/lib/hooks/useBundling";
 import {useOutlets} from "@/lib/hooks/useOutlets";
@@ -20,6 +21,9 @@ import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Checkbox from "@/components/ui/Checkbox";
+import {uploadImage} from "@/lib/utils/uploadImage";
+import FileUpload from "@/components/ui/FileUpload";
+import {Tax} from "@/lib/types/tax";
 
 interface AddBundlingProps {
  isOpen: boolean;
@@ -36,53 +40,112 @@ const AddBundling = ({
  taxes,
  outletId,
 }: AddBundlingProps) => {
- const [name, setName] = useState("");
- const [description, setDescription] = useState("");
- const [price, setPrice] = useState(0);
- const [selectedTaxIds, setSelectedTaxIds] = useState<string[]>([]);
- const [menuItems, setMenuItems] = useState<
-  {id: string; name: string; quantity: number}[]
- >([]);
+ const initialFormData = {
+  name: "",
+  description: "",
+  price: 0,
+  taxIds: [] as string[],
+  outletId: outletId,
+  imageUrl: "",
+  isAvailable: true,
+  menuItems: [] as {id: string; name: string; quantity: number}[],
+ };
+
+ const [formData, setFormData] = useState(initialFormData);
+ const [uploading, setUploading] = useState(false);
  const [newMenuItem, setNewMenuItem] = useState({name: "", quantity: 1});
- const [imageUrl, setImageUrl] = useState("");
- const [isAvailable, setIsAvailable] = useState(true);
+
+ const handleUpload = async (file: File | null) => {
+  if (!file) return;
+
+  try {
+   setUploading(true);
+   const blob = await uploadImage(file);
+   setFormData({
+    ...formData,
+    imageUrl: blob.url,
+   });
+  } catch (error) {
+   if (error instanceof Error) {
+    alert(error.message);
+   } else {
+    alert("Upload failed with unknown error");
+   }
+  } finally {
+   setUploading(false);
+  }
+ };
+
+ const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+ ) => {
+  const {name, value, type} = e.target;
+  const checked = (e.target as HTMLInputElement).checked;
+
+  setFormData({
+   ...formData,
+   [name]: type === "checkbox" ? checked : value,
+  });
+ };
+
+ const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const {value, checked} = e.target;
+  setFormData((prev) => {
+   if (checked) {
+    return {
+     ...prev,
+     taxIds: [...prev.taxIds, value],
+    };
+   } else {
+    return {
+     ...prev,
+     taxIds: prev.taxIds.filter((id) => id !== value),
+    };
+   }
+  });
+ };
 
  const handleAddMenuItem = () => {
   if (newMenuItem.name.trim() && newMenuItem.quantity > 0) {
    const newId = Date.now().toString();
-   setMenuItems([
-    ...menuItems,
-    {id: newId, name: newMenuItem.name, quantity: newMenuItem.quantity},
-   ]);
+   setFormData({
+    ...formData,
+    menuItems: [
+     ...formData.menuItems,
+     {id: newId, name: newMenuItem.name, quantity: newMenuItem.quantity},
+    ],
+   });
    setNewMenuItem({name: "", quantity: 1});
   }
  };
 
  const handleRemoveMenuItem = (id: string) => {
-  setMenuItems(menuItems.filter((item) => item.id !== id));
+  setFormData({
+   ...formData,
+   menuItems: formData.menuItems.filter((item) => item.id !== id),
+  });
  };
 
- const handleSubmit = () => {
-  if (!outletId) return;
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!formData.name || !formData.price) {
+   alert("Please fill all required fields");
+   return;
+  }
 
   onSubmit({
-   name,
-   description,
+   name: formData.name,
+   description: formData.description,
+   price: Number(formData.price),
+   taxIds: formData.taxIds,
    outletId: outletId,
-   price,
-   taxIds: selectedTaxIds,
-   menuItems, // Changed from menuIds to menuItems
-   imageUrl,
-   isAvailable,
+   imageUrl: formData.imageUrl || "",
+   menuItems: formData.menuItems,
+   isAvailable: Boolean(formData.isAvailable),
   });
 
-  setName("");
-  setDescription("");
-  setPrice(0);
-  setSelectedTaxIds([]);
-  setMenuItems([]);
-  setImageUrl("");
-  setIsAvailable(true);
+  setFormData(initialFormData);
  };
 
  return (
@@ -91,120 +154,401 @@ const AddBundling = ({
    onClose={onClose}
    title="Add New Bundling"
    maxWidth="xl">
-   <div className="space-y-4">
-    <Input
-     label="Name"
-     value={name}
-     onChange={(e) => setName(e.target.value)}
-    />
+   <form onSubmit={handleSubmit}>
+    <div className="space-y-4">
+     <Input
+      label="Name"
+      name="name"
+      value={formData.name}
+      onChange={handleChange}
+      required
+     />
 
-    <Textarea
-     label="Description"
-     value={description}
-     onChange={(e) => setDescription(e.target.value)}
-     rows={3}
-    />
+     <Textarea
+      label="Description"
+      name="description"
+      value={formData.description}
+      onChange={handleChange}
+      rows={3}
+     />
 
-    <Input
-     label="Price"
-     type="number"
-     value={price}
-     onChange={(e) => setPrice(Number(e.target.value))}
-    />
+     <Input
+      label="Price"
+      type="number"
+      name="price"
+      value={formData.price}
+      onChange={handleChange}
+      min="0"
+      step="0.01"
+      required
+     />
 
-    <div>
-     <label className="block text-sm font-medium text-gray-700 mb-1">
-      Taxes
-     </label>
-     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-      {taxes.map((tax) => (
-       <Checkbox
-        key={tax.id}
-        id={`tax-${tax.id}`}
-        checked={selectedTaxIds.includes(tax.id)}
-        onChange={(e) => {
-         if (e.target.checked) {
-          setSelectedTaxIds([...selectedTaxIds, tax.id]);
-         } else {
-          setSelectedTaxIds(selectedTaxIds.filter((id) => id !== tax.id));
-         }
-        }}
-        label={`${tax.name} (${tax.rate}%)`}
-       />
-      ))}
-     </div>
-    </div>
-
-    <div>
-     <label className="block text-sm font-medium text-gray-700 mb-1">
-      Menu Items
-     </label>
-     <div className="space-y-2">
-      {menuItems.map((item) => (
-       <div
-        key={item.id}
-        className="flex items-center gap-2">
-        <span className="flex-1">
-         {item.name} (Qty: {item.quantity})
-        </span>
-        <button
-         type="button"
-         onClick={() => handleRemoveMenuItem(item.id)}
-         className="text-red-500 hover:text-red-700">
-         Remove
-        </button>
-       </div>
-      ))}
-      <div className="flex gap-2 items-end">
-       <div className="flex-1">
-        <Input
-         label="Menu Item Name"
-         value={newMenuItem.name}
-         onChange={(e) =>
-          setNewMenuItem({...newMenuItem, name: e.target.value})
-         }
-         placeholder="Enter menu item name"
+     <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+       Taxes
+      </label>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+       {taxes.map((tax) => (
+        <Checkbox
+         key={tax.id}
+         id={`tax-${tax.id}`}
+         value={tax.id}
+         checked={formData.taxIds.includes(tax.id)}
+         onChange={handleTaxChange}
+         label={`${tax.name} (${tax.rate}%)`}
         />
-       </div>
-       <div className="w-24">
-        <Input
-         label="Quantity"
-         type="number"
-         min="1"
-         value={newMenuItem.quantity}
-         onChange={(e) =>
-          setNewMenuItem({
-           ...newMenuItem,
-           quantity: parseInt(e.target.value) || 1,
-          })
-         }
-        />
-       </div>
-       <button
-        type="button"
-        onClick={handleAddMenuItem}
-        className="mb-1 px-3 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">
-        Add
-       </button>
+       ))}
       </div>
      </div>
+
+     <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+       Menu Items
+      </label>
+      <div className="space-y-2">
+       {formData.menuItems.map((item) => (
+        <div
+         key={item.id}
+         className="flex items-center gap-2">
+         <span className="flex-1">
+          {item.name} (Qty: {item.quantity})
+         </span>
+         <button
+          type="button"
+          onClick={() => handleRemoveMenuItem(item.id)}
+          className="text-red-500 hover:text-red-700">
+          Remove
+         </button>
+        </div>
+       ))}
+       <div className="flex gap-2 items-end">
+        <div className="flex-1">
+         <Input
+          label="Menu Item Name"
+          value={newMenuItem.name}
+          onChange={(e) =>
+           setNewMenuItem({...newMenuItem, name: e.target.value})
+          }
+          placeholder="Enter menu item name"
+         />
+        </div>
+        <div className="w-24">
+         <Input
+          label="Quantity"
+          type="number"
+          min="1"
+          value={newMenuItem.quantity}
+          onChange={(e) =>
+           setNewMenuItem({
+            ...newMenuItem,
+            quantity: parseInt(e.target.value) || 1,
+           })
+          }
+         />
+        </div>
+        <button
+         type="button"
+         onClick={handleAddMenuItem}
+         className="mb-1 px-3 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">
+         Add
+        </button>
+       </div>
+      </div>
+     </div>
+
+     <FileUpload
+      label="Bundling Image"
+      onFileChange={async (file) => {
+       if (file) await handleUpload(file);
+      }}
+      uploading={uploading}
+      previewUrl={formData.imageUrl}
+     />
+
+     <Checkbox
+      name="isAvailable"
+      id="isAvailable"
+      checked={formData.isAvailable}
+      onChange={handleChange}
+      label="Available"
+     />
+
+     <div className="mt-6 flex justify-end space-x-3">
+      <Button
+       type="button"
+       onClick={onClose}
+       variant="outline">
+       Cancel
+      </Button>
+      <Button
+       type="submit"
+       variant="primary">
+       Save Bundling
+      </Button>
+     </div>
+    </div>
+   </form>
+  </Modal>
+ );
+};
+
+interface EditBundlingModalProps {
+ isOpen: boolean;
+ onClose: () => void;
+ onSubmit: (id: string, bundlingData: Partial<Bundling>) => void;
+ bundling: Bundling | null;
+ taxes: Tax[];
+}
+
+const EditBundlingModal = ({
+ isOpen,
+ onClose,
+ onSubmit,
+ bundling,
+ taxes,
+}: EditBundlingModalProps) => {
+ const [formData, setFormData] = useState({
+  name: bundling?.name || "",
+  description: bundling?.description || "",
+  price: bundling?.price || 0,
+  taxIds: bundling?.taxIds || [],
+  menuItems: bundling?.menuItems || [],
+  imageUrl: bundling?.imageUrl || "",
+  isAvailable: bundling?.isAvailable || false,
+ });
+
+ const [newMenuItem, setNewMenuItem] = useState({name: "", quantity: 1});
+ const [uploading, setUploading] = useState(false);
+
+ useEffect(() => {
+  if (bundling) {
+   setFormData({
+    name: bundling.name,
+    description: bundling.description,
+    price: bundling.price,
+    taxIds: bundling.taxIds,
+    menuItems: bundling.menuItems,
+    imageUrl: bundling.imageUrl,
+    isAvailable: bundling.isAvailable,
+   });
+  }
+ }, [bundling]);
+
+ const handleUpload = async (file: File | null) => {
+  if (!file) return;
+
+  try {
+   setUploading(true);
+   const blob = await uploadImage(file);
+   setFormData({
+    ...formData,
+    imageUrl: blob.url,
+   });
+  } catch (error) {
+   if (error instanceof Error) {
+    alert(error.message);
+   } else {
+    alert("Upload failed with unknown error");
+   }
+  } finally {
+   setUploading(false);
+  }
+ };
+
+ const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+ ) => {
+  const {name, value, type} = e.target;
+  const checked = (e.target as HTMLInputElement).checked;
+
+  setFormData({
+   ...formData,
+   [name]: type === "checkbox" ? checked : value,
+  });
+ };
+
+ const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const {value, checked} = e.target;
+  setFormData((prev) => {
+   if (checked) {
+    return {
+     ...prev,
+     taxIds: [...prev.taxIds, value],
+    };
+   } else {
+    return {
+     ...prev,
+     taxIds: prev.taxIds.filter((id) => id !== value),
+    };
+   }
+  });
+ };
+
+ const handleAddMenuItem = () => {
+  if (newMenuItem.name.trim() && newMenuItem.quantity > 0) {
+   const newId = Date.now().toString();
+   setFormData({
+    ...formData,
+    menuItems: [
+     ...formData.menuItems,
+     {id: newId, name: newMenuItem.name, quantity: newMenuItem.quantity},
+    ],
+   });
+   setNewMenuItem({name: "", quantity: 1});
+  }
+ };
+
+ const handleRemoveMenuItem = (id: string) => {
+  setFormData({
+   ...formData,
+   menuItems: formData.menuItems.filter((item) => item.id !== id),
+  });
+ };
+
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!bundling) return;
+
+  onSubmit(bundling.id, {
+   name: formData.name,
+   description: formData.description,
+   price: formData.price,
+   taxIds: formData.taxIds,
+   menuItems: formData.menuItems,
+   imageUrl: formData.imageUrl,
+   isAvailable: formData.isAvailable,
+  });
+ };
+
+ if (!isOpen || !bundling) return null;
+
+ return (
+  <Modal
+   isOpen={isOpen}
+   onClose={onClose}
+   title="Edit Bundling"
+   maxWidth="xl">
+   <form onSubmit={handleSubmit}>
+    <div className="space-y-4">
+     <Input
+      label="Name"
+      name="name"
+      value={formData.name}
+      onChange={handleChange}
+      required
+     />
+
+     <Textarea
+      label="Description"
+      name="description"
+      value={formData.description}
+      onChange={handleChange}
+      rows={3}
+     />
+
+     <Input
+      label="Price (IDR)"
+      type="number"
+      name="price"
+      value={formData.price}
+      onChange={handleChange}
+      min="0"
+      required
+     />
+
+     <div>
+      <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
+       Taxes
+      </label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+       {taxes.map((tax) => (
+        <Checkbox
+         key={tax.id}
+         id={`tax-${tax.id}`}
+         value={tax.id}
+         checked={formData.taxIds.includes(tax.id)}
+         onChange={handleTaxChange}
+         label={`${tax.name} (${tax.rate}%)`}
+        />
+       ))}
+      </div>
+     </div>
+
+     <div>
+      <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
+       Menu Items
+      </label>
+      <div className="space-y-2">
+       {formData.menuItems.map((item) => (
+        <div
+         key={item.id}
+         className="flex items-center gap-2">
+         <span className="flex-1">
+          {item.name} (Qty: {item.quantity})
+         </span>
+         <Button
+          type="button"
+          onClick={() => handleRemoveMenuItem(item.id)}
+          variant="ghost"
+          size="sm">
+          Remove
+         </Button>
+        </div>
+       ))}
+       <div className="flex gap-2 items-end">
+        <div className="flex-1">
+         <Input
+          type="text"
+          value={newMenuItem.name}
+          onChange={(e) =>
+           setNewMenuItem({...newMenuItem, name: e.target.value})
+          }
+          placeholder="Enter menu item name"
+         />
+        </div>
+        <div className="w-24">
+         <Input
+          type="number"
+          min="1"
+          value={newMenuItem.quantity}
+          onChange={(e) =>
+           setNewMenuItem({
+            ...newMenuItem,
+            quantity: parseInt(e.target.value) || 1,
+           })
+          }
+         />
+        </div>
+        <Button
+         type="button"
+         onClick={handleAddMenuItem}
+         variant="secondary"
+         className="mb-1">
+         Add
+        </Button>
+       </div>
+      </div>
+     </div>
+
+     <FileUpload
+      label="Bundling Image"
+      onFileChange={handleUpload}
+      uploading={uploading}
+      previewUrl={formData.imageUrl}
+      buttonText="Upload New Image"
+     />
+
+     <Checkbox
+      name="isAvailable"
+      id="isAvailable"
+      checked={formData.isAvailable}
+      onChange={handleChange}
+      label="Available for purchase"
+     />
     </div>
 
-    <Input
-     label="Image URL"
-     value={imageUrl}
-     onChange={(e) => setImageUrl(e.target.value)}
-     placeholder="https://example.com/image.jpg"
-    />
-
-    <Checkbox
-     id="isAvailable"
-     checked={isAvailable}
-     onChange={(e) => setIsAvailable(e.target.checked)}
-     label="Available"
-    />
-
-    <div className="mt-6 flex justify-end space-x-3">
+    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
      <Button
       type="button"
       onClick={onClose}
@@ -212,278 +556,22 @@ const AddBundling = ({
       Cancel
      </Button>
      <Button
-      type="button"
-      onClick={handleSubmit}
+      type="submit"
       variant="primary">
-      Save Bundling
+      Update Bundling
      </Button>
     </div>
-   </div>
+   </form>
   </Modal>
  );
-};
-
-interface EditBundlingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (id: string, bundlingData: Partial<Bundling>) => void;
-  bundling: Bundling | null;
-  taxes: { id: string; name: string; rate: number }[];
-}
-
-const EditBundlingModal = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  bundling,
-  taxes,
-}: EditBundlingModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
-  const [selectedTaxIds, setSelectedTaxIds] = useState<string[]>([]);
-  const [menuItems, setMenuItems] = useState<{id: string; name: string; quantity: number}[]>([]);
-  const [newMenuItem, setNewMenuItem] = useState({ name: "", quantity: 1 });
-  const [imageUrl, setImageUrl] = useState("");
-  const [isAvailable, setIsAvailable] = useState(true);
-
-  useEffect(() => {
-   if (bundling) {
-    setName(bundling.name);
-    setDescription(bundling.description);
-    setPrice(bundling.price);
-    setSelectedTaxIds(bundling.taxIds);
-    setMenuItems(bundling.menuItems); // langsung menggunakan menuItems
-    setImageUrl(bundling.imageUrl);
-    setIsAvailable(bundling.isAvailable);
-   }
-  }, [bundling]);
-
-  const handleSubmit = () => {
-   if (!bundling) return;
-
-   onSubmit(bundling.id, {
-    name,
-    description,
-    price,
-    taxIds: selectedTaxIds,
-    menuItems, // langsung menggunakan menuItems
-    imageUrl,
-    isAvailable,
-   });
-  };
-
-  const handleAddMenuItem = () => {
-    if (newMenuItem.name.trim() && newMenuItem.quantity > 0) {
-      const newId = Date.now().toString(); // Generate temporary ID
-      setMenuItems([
-        ...menuItems,
-        { id: newId, name: newMenuItem.name, quantity: newMenuItem.quantity },
-      ]);
-      setNewMenuItem({ name: "", quantity: 1 });
-    }
-  };
-
-  const handleRemoveMenuItem = (id: string) => {
-    setMenuItems(menuItems.filter((item) => item.id !== id));
-  };
-
-  if (!isOpen || !bundling) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">Edit Bundling</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <FiX size={24} />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price
-            </label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Taxes
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {taxes.map((tax) => (
-                <div key={tax.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`tax-${tax.id}`}
-                    checked={selectedTaxIds.includes(tax.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTaxIds([...selectedTaxIds, tax.id]);
-                      } else {
-                        setSelectedTaxIds(selectedTaxIds.filter((id) => id !== tax.id));
-                      }
-                    }}
-                    className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor={`tax-${tax.id}`}
-                    className="ml-2 text-sm text-gray-700"
-                  >
-                    {tax.name} ({tax.rate}%)
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Menu Items
-            </label>
-            <div className="space-y-2">
-              {menuItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-2">
-                  <span className="flex-1">
-                    {item.name} (Qty: {item.quantity})
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveMenuItem(item.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <div className="flex gap-2 items-end">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={newMenuItem.name}
-                    onChange={(e) =>
-                      setNewMenuItem({ ...newMenuItem, name: e.target.value })
-                    }
-                    placeholder="Enter menu item name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  />
-                </div>
-                <div className="w-24">
-                  <input
-                    type="number"
-                    min="1"
-                    value={newMenuItem.quantity}
-                    onChange={(e) =>
-                      setNewMenuItem({
-                        ...newMenuItem,
-                        quantity: parseInt(e.target.value) || 1,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddMenuItem}
-                  className="mb-1 px-3 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Image URL
-            </label>
-            <input
-              type="text"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isAvailable"
-              checked={isAvailable}
-              onChange={(e) => setIsAvailable(e.target.checked)}
-              className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isAvailable" className="ml-2 text-sm text-gray-700">
-              Available
-            </label>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-end space-x-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
-          >
-            Cancel
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
-          >
-            Update Bundling
-          </motion.button>
-        </div>
-      </motion.div>
-    </div>
-  );
 };
 
 interface DeleteBundlingModalProps {
  isOpen: boolean;
  onClose: () => void;
  onConfirm: () => void;
- bundling?: Bundling | null ;
+ bundling?: Bundling | null;
+ isLoading?: boolean;
 }
 
 const DeleteBundlingModal = ({
@@ -491,52 +579,51 @@ const DeleteBundlingModal = ({
  onClose,
  onConfirm,
  bundling,
+ isLoading,
 }: DeleteBundlingModalProps) => {
- if (!isOpen) return null;
-
  return (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-   <motion.div
-    initial={{opacity: 0, scale: 0.9}}
-    animate={{opacity: 1, scale: 1}}
-    exit={{opacity: 0, scale: 0.9}}
-    className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
-    <div className="flex justify-between items-center mb-4">
-     <h2 className="text-xl font-bold text-gray-800">Confirm Deletion</h2>
-     <button
-      onClick={onClose}
-      className="text-gray-500 hover:text-gray-700">
-      <FiX size={24} />
-     </button>
+  <Modal
+   isOpen={isOpen}
+   onClose={onClose}
+   title="Confirm Deletion"
+   maxWidth="sm">
+   <div className="space-y-4">
+    <div className="flex items-start">
+     <FiAlertTriangle className="text-red-500 text-2xl mr-2 mt-0.5 flex-shrink-0" />
+     <p className="text-gray-700 dark:text-gray-300">
+      Are you sure you want to delete the bundling
+      <span className="font-semibold">&quot;{bundling?.name}&quot;</span>? This
+      action cannot be undone.
+     </p>
     </div>
 
-    <p className="text-gray-700 mb-6">
-     Are you sure you want to delete the bundling
-     <span className="font-semibold">&quot;{bundling?.name}&quot;</span>? This action
-     cannot be undone.
-    </p>
-
-    <div className="flex justify-end space-x-3">
-     <motion.button
-      whileHover={{scale: 1.05}}
-      whileTap={{scale: 0.95}}
+    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+     <Button
+      type="button"
       onClick={onClose}
-      className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+      disabled={isLoading}
+      variant="outline">
       Cancel
-     </motion.button>
-     <motion.button
-      whileHover={{scale: 1.05}}
-      whileTap={{scale: 0.95}}
+     </Button>
+     <Button
+      type="button"
       onClick={onConfirm}
-      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-      Delete
-     </motion.button>
+      disabled={isLoading}
+      variant="primary">
+      {isLoading ? (
+       "Deleting..."
+      ) : (
+       <>
+        <FiTrash2 className="mr-2" />
+        Delete
+       </>
+      )}
+     </Button>
     </div>
-   </motion.div>
-  </div>
+   </div>
+  </Modal>
  );
 };
-
 
 interface PinVerificationModalProps {
  isOpen: boolean;
@@ -816,7 +903,6 @@ const BundlingPage = () => {
   setIsDeleteModalOpen(true);
  };
 
- // Function to calculate total price including all taxes
  const calculateTotalPrice = (bundling: Bundling) => {
   if (!bundling.taxIds || bundling.taxIds.length === 0) {
    return bundling.price;
@@ -829,7 +915,6 @@ const BundlingPage = () => {
   return bundling.price * (1 + totalTaxRate / 100);
  };
 
- // Function to get tax names for display
  const getTaxNames = (bundling: Bundling) => {
   if (!bundling.taxIds || bundling.taxIds.length === 0) {
    return "";
@@ -881,36 +966,33 @@ const BundlingPage = () => {
  }
 
  return (
-  <div className="max-h-[100dvh] overflow-y-auto p-4 md:p-6">
+  <div className="max-h-[100dvh] p-4 md:p-6">
    <motion.div
     initial={{opacity: 0, y: -20}}
     animate={{opacity: 1, y: 0}}
     className="max-w-7xl mx-auto">
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
      <button
-      onClick={() => setSelectedOutletId("")}
-      className="flex items-center text-gray-600 hover:text-gray-800">
+      onClick={() => setSelectedOutlet("")}
+      className="flex items-center text-onyx1 dark:text-white">
       <FiArrowLeft className="mr-2" />
-      Back to Outlets
+      Kembali ke Outlets
      </button>
      <motion.button
       onClick={() => setIsAddModalOpen(true)}
-      className="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+      className="flex items-center bg-onyx1 dark:bg-onyx2 text-white px-4 py-2 rounded-lg hover:bg-onyx2 dark:hover:bg-onyx2/90 transition-colors w-full sm:w-auto justify-center">
       <FiPlus className="mr-2" />
       Add Bundling
      </motion.button>
     </div>
 
     <div className="mb-6">
-     <h1 className="text-2xl font-bold text-gray-800">
+     <h1 className="text-2xl font-bold text-onyx1 dark:text-white text-center md:text-start">
       {currentOutlet?.name} Bundlings
      </h1>
-     <p className="text-gray-600">
-      Manage all bundling packages for this outlet
-     </p>
     </div>
 
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-onyx1 rounded-xl shadow-sm overflow-hidden">
      {loading ? (
       <div className="p-8 text-center text-gray-500">Loading bundlings...</div>
      ) : error ? (
@@ -921,39 +1003,39 @@ const BundlingPage = () => {
        <p>No bundlings found for this outlet</p>
        <button
         onClick={() => setIsAddModalOpen(true)}
-        className="mt-4 text-gray-800 underline hover:text-gray-600">
+        className="mt-4 text-gray-800 underline hover:text-gray-600 transition-colors">
         Create your first bundling
        </button>
       </div>
      ) : (
-      <div className="overflow-x-auto">
-       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <div className="overflow-y-auto max-h-[70dvh] md:max-h-[60dvh]">
+       <table className="w-full divide-y divide-gray-200 dark:divide-onyx1">
+        <thead className="bg-white dark:bg-onyx2">
          <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Image
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Name
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Included Menus
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Base Price
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-           Price After Tax
+          <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Price
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Status
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
            Actions
           </th>
          </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white dark:bg-onyx2 divide-y divide-gray-200 dark:divide-onyx1">
          {bundlings.map((bundling) => {
           const totalPrice = calculateTotalPrice(bundling);
           const taxNames = getTaxNames(bundling);
@@ -963,32 +1045,34 @@ const BundlingPage = () => {
             key={bundling.id}
             initial={{opacity: 0}}
             animate={{opacity: 1}}
-            className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap">
+            className="hover:bg-gray-50 dark:hover:bg-onyx1">
+            <td className="px-4 py-4 whitespace-nowrap">
              {bundling.imageUrl ? (
-              <Image
-               width={40}
-               height={40}
-               src={bundling.imageUrl}
-               alt={bundling.name}
-               className="h-10 w-10 rounded-md object-cover"
-              />
+              <div className="flex-shrink-0 h-10 w-10">
+               <Image
+                width={40}
+                height={40}
+                src={bundling.imageUrl}
+                alt={bundling.name}
+                className="h-10 w-10 rounded-full object-cover"
+               />
+              </div>
              ) : (
-              <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-onyx3 flex items-center justify-center">
                <FiPackage className="text-gray-400" />
               </div>
              )}
             </td>
-            <td className="px-6 py-4">
-             <div className="text-sm font-medium text-gray-900">
+            <td className="px-4 py-4">
+             <div className="text-sm font-medium text-onyx1 dark:text-white">
               {bundling.name}
              </div>
-             <div className="text-sm text-gray-500 mt-1">
+             <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {bundling.description}
              </div>
             </td>
-            <td className="px-6 py-4">
-             <div className="text-sm text-gray-900">
+            <td className="px-4 py-4">
+             <div className="text-sm text-onyx1 dark:text-white">
               {bundling.menuItems?.map((item) => (
                <div key={item.id}>
                 {item.name} (Qty: {item.quantity})
@@ -996,28 +1080,28 @@ const BundlingPage = () => {
               )) || "-"}
              </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-             <div className="text-sm text-gray-900">
+            <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap">
+             <div className="text-sm text-onyx1 dark:text-white">
               {new Intl.NumberFormat("id-ID", {
                style: "currency",
                currency: "IDR",
               }).format(bundling.price)}
              </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-             <div className="text-sm text-gray-900">
+            <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap">
+             <div className="text-sm font-medium text-onyx1 dark:text-white">
               {new Intl.NumberFormat("id-ID", {
                style: "currency",
                currency: "IDR",
               }).format(totalPrice)}
               {taxNames && (
-               <span className="text-xs text-gray-500 ml-1">
+               <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
                 (incl. {taxNames})
                </span>
               )}
              </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap">
              <span
               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                bundling.isAvailable
@@ -1027,17 +1111,21 @@ const BundlingPage = () => {
               {bundling.isAvailable ? "Available" : "Unavailable"}
              </span>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-             <button
-              onClick={() => openEditModal(bundling)}
-              className="text-gray-600 hover:text-gray-900 mr-4">
-              <FiEdit2 />
-             </button>
-             <button
-              onClick={() => openDeleteModal(bundling)}
-              className="text-red-600 hover:text-red-900">
-              <FiTrash2 />
-             </button>
+            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+             <div className="flex space-x-4">
+              <button
+               onClick={() => openEditModal(bundling)}
+               className="text-gray-600 dark:text-gray-500 hover:text-gray-900 transition-colors"
+               aria-label="Edit bundling">
+               <FiEdit2 />
+              </button>
+              <button
+               onClick={() => openDeleteModal(bundling)}
+               className="text-red-600 hover:text-red-900 transition-colors"
+               aria-label="Delete bundling">
+               <FiTrash2 />
+              </button>
+             </div>
             </td>
            </motion.tr>
           );
@@ -1070,7 +1158,7 @@ const BundlingPage = () => {
     isOpen={isDeleteModalOpen}
     onClose={() => setIsDeleteModalOpen(false)}
     onConfirm={handleDeleteBundling}
-    bundling={selectedBundling} // Kirim seluruh objek bundling
+    bundling={selectedBundling}
    />
   </div>
  );

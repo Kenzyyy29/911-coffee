@@ -228,8 +228,8 @@ const EditPromoModal = ({
   isActive: currentPromo.isActive,
   category: currentPromo.category as PromoCategory,
  });
+
  const [uploading, setUploading] = useState(false);
- const fileInputRef = useRef<HTMLInputElement>(null);
 
  useEffect(() => {
   if (currentPromo) {
@@ -245,8 +245,7 @@ const EditPromoModal = ({
   }
  }, [currentPromo, outletId]);
 
- const handleUpload = async () => {
-  const file = fileInputRef.current?.files?.[0];
+ const handleUpload = async (file: File | null) => {
   if (!file) return;
 
   try {
@@ -302,151 +301,89 @@ const EditPromoModal = ({
   onSubmit(promoData);
  };
 
- if (!isOpen) return null;
-
  return (
-  <motion.div
-   initial={{opacity: 0}}
-   animate={{opacity: 1}}
-   exit={{opacity: 0}}
-   className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-   <motion.div
-    initial={{scale: 0.9, y: 20}}
-    animate={{scale: 1, y: 0}}
-    className="bg-white rounded-xl shadow-xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
-    <div className="flex justify-between items-center border-b p-4">
-     <h2 className="text-xl font-semibold text-gray-800">Edit Promo</h2>
-     <button
-      onClick={onClose}
-      className="text-gray-500 hover:text-gray-700">
-      <FiX size={24} />
-     </button>
+  <Modal
+   isOpen={isOpen}
+   onClose={onClose}
+   title="Edit Promo"
+   maxWidth="lg">
+   <form onSubmit={handleSubmit}>
+    <div className="space-y-4">
+     <Input
+      label="Promo Name"
+      name="name"
+      value={formData.name}
+      onChange={handleChange}
+      required
+     />
+
+     <div>
+      <label className="block text-sm font-medium text-onyx1 dark:text-white mb-1">
+       Category *
+      </label>
+      <select
+       name="category"
+       value={formData.category}
+       onChange={handleChange}
+       required
+       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
+       <option value="sarapan & ngopi pagi">Sarapan & Ngopi Pagi</option>
+       <option value="makan siang">Makan Siang</option>
+       <option value="ngopi sore">Ngopi Sore</option>
+      </select>
+     </div>
+
+     <Textarea
+      label="Description"
+      name="description"
+      value={formData.description}
+      onChange={handleChange}
+      rows={3}
+     />
+
+     <Input
+      label="Price (IDR)"
+      type="number"
+      name="price"
+      value={formData.price}
+      onChange={handleChange}
+      min="0"
+      step="0.01"
+      required
+     />
+
+     <FileUpload
+      label="Promo Image"
+      onFileChange={handleUpload}
+      uploading={uploading}
+      previewUrl={formData.imageUrl}
+      buttonText="Upload New Image"
+     />
+
+     <Checkbox
+      name="isActive"
+      id="isActive"
+      checked={formData.isActive}
+      onChange={handleChange}
+      label="Active Promo"
+     />
     </div>
-    <form
-     onSubmit={handleSubmit}
-     className="p-6">
-     <div className="space-y-4">
-      <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Promo Name *
-       </label>
-       <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-       />
-      </div>
 
-      <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Category *
-       </label>
-       <select
-        name="category"
-        value={formData.category}
-        onChange={handleChange}
-        required
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500">
-        <option value="sarapan & ngopi pagi">Sarapan & Ngopi Pagi</option>
-        <option value="makan siang">Makan Siang</option>
-        <option value="ngopi sore">Ngopi Sore</option>
-       </select>
-      </div>
-
-      <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Description
-       </label>
-       <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        rows={3}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-       />
-      </div>
-
-      <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-        Price (IDR) *
-       </label>
-       <input
-        type="number"
-        name="price"
-        value={formData.price}
-        onChange={handleChange}
-        min="0"
-        step="0.01"
-        required
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-       />
-      </div>
-
-      <div>
-       <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleUpload}
-        accept="image/*"
-        className="hidden"
-       />
-       <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
-        className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-        <FiUpload className="mr-2" />
-        {uploading ? "Uploading..." : "Upload Image"}
-       </button>
-       {formData.imageUrl && (
-        <div className="mt-2">
-         <Image
-          src={formData.imageUrl}
-          alt="Preview"
-          width={320}
-          height={160}
-          className="max-w-full h-auto rounded-lg border border-gray-200"
-         />
-        </div>
-       )}
-      </div>
-
-      <div className="flex items-center">
-       <input
-        type="checkbox"
-        name="isActive"
-        id="isActive"
-        checked={formData.isActive}
-        onChange={handleChange}
-        className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-       />
-       <label
-        htmlFor="isActive"
-        className="ml-2 block text-sm text-gray-700">
-        Active Promo
-       </label>
-      </div>
-     </div>
-
-     <div className="mt-6 flex justify-end space-x-3">
-      <button
-       type="button"
-       onClick={onClose}
-       className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-       Cancel
-      </button>
-      <button
-       type="submit"
-       className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700">
-       Update Promo
-      </button>
-     </div>
-    </form>
-   </motion.div>
-  </motion.div>
+    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+     <Button
+      type="button"
+      onClick={onClose}
+      variant="outline">
+      Cancel
+     </Button>
+     <Button
+      type="submit"
+      variant="primary">
+      Update Promo
+     </Button>
+    </div>
+   </form>
+  </Modal>
  );
 };
 
@@ -465,66 +402,47 @@ const DeletePromoModal = ({
  promoName,
  isLoading,
 }: DeletePromoModalProps) => {
- if (!isOpen) return null;
-
  return (
-  <motion.div
-   initial={{opacity: 0}}
-   animate={{opacity: 1}}
-   exit={{opacity: 0}}
-   className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-   <motion.div
-    initial={{scale: 0.9, y: 20}}
-    animate={{scale: 1, y: 0}}
-    className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-    <div className="p-6">
-     <div className="flex justify-between items-start">
-      <div className="flex items-center">
-       <FiAlertTriangle className="text-red-500 text-2xl mr-2" />
-       <h3 className="text-lg font-medium text-gray-900">Delete Promo</h3>
-      </div>
-      <Button
-      type="button"
-       onClick={onClose}
-       className="text-gray-400 hover:text-gray-500">
-       <FiX className="text-xl" />
-      </Button>
-     </div>
-
-     <div className="mt-4">
-      <p className="text-gray-600">
-       Are you sure you want to delete{" "}
-       <span className="font-semibold">{promoName || "this promo"}</span>? This
-       action cannot be undone.
-      </p>
-     </div>
-
-     <div className="mt-6 flex justify-end space-x-3">
-      <Button
-       type="button"
-       onClick={onClose}
-       disabled={isLoading}
-       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50">
-       Cancel
-      </Button>
-      <Button
-       type="button"
-       onClick={onConfirm}
-       disabled={isLoading}
-       className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 flex items-center">
-       {isLoading ? (
-        "Deleting..."
-       ) : (
-        <>
-         <FiTrash2 className="mr-2" />
-         Delete
-        </>
-       )}
-      </Button>
-     </div>
+  <Modal
+   isOpen={isOpen}
+   onClose={onClose}
+   title="Delete Promo"
+   maxWidth="sm">
+   <div className="space-y-4">
+    <div className="flex items-start">
+     <FiAlertTriangle className="text-red-500 text-2xl mr-2 mt-0.5 flex-shrink-0" />
+     <p className="text-gray-700 dark:text-gray-300">
+      Are you sure you want to delete{" "}
+      <span className="font-semibold">{promoName || "this promo"}</span>? This
+      action cannot be undone.
+     </p>
     </div>
-   </motion.div>
-  </motion.div>
+
+    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+     <Button
+      type="button"
+      onClick={onClose}
+      disabled={isLoading}
+      variant="outline">
+      Cancel
+     </Button>
+     <Button
+      type="button"
+      onClick={onConfirm}
+      disabled={isLoading}
+      variant="primary">
+      {isLoading ? (
+       "Deleting..."
+      ) : (
+       <>
+        <FiTrash2 className="mr-2" />
+        Delete
+       </>
+      )}
+     </Button>
+    </div>
+   </div>
+  </Modal>
  );
 };
 
