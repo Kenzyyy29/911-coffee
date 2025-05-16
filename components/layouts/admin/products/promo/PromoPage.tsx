@@ -10,7 +10,6 @@ import {
  FiCoffee,
  FiArrowLeft,
  FiX,
- FiUpload,
  FiAlertTriangle,
 } from "react-icons/fi";
 import {useOutlets} from "@/lib/hooks/useOutlets";
