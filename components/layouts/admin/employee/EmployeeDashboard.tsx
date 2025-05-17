@@ -14,6 +14,7 @@ import {
 import {CareerApplication} from "@/lib/types/application";
 import {format} from "date-fns";
 import {id} from "date-fns/locale";
+import * as XLSX from "xlsx";
 
 interface DeleteModalProps {
  isOpen: boolean;
@@ -74,6 +75,40 @@ const EmployeeDashboard = () => {
  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+
+ const exportToExcel = () => {
+  // Now applications is in scope
+  const excelData = applications.map((app: CareerApplication) => ({
+   Nama: app.name,
+   Alamat: app.address,
+   Usia: app.age,
+   "Jenis Kelamin": app.gender,
+   WhatsApp: app.whatsapp,
+   Email: app.email,
+   Instagram: app.instagram,
+   "Posisi Dilamar": app.careerTitle,
+   "ID Posisi": app.careerId,
+   "Tanggal Melamar": app.createdAt
+    ? format(
+       app.createdAt instanceof Date ? app.createdAt : app.createdAt.toDate(),
+       "dd MMM yyyy",
+       {locale: id}
+      )
+    : "",
+   "Setuju Syarat": app.agreedToTerms ? "Ya" : "Tidak",
+   "CV URL": app.cvUrl,
+  }));
+
+  // Create worksheet
+  const ws = XLSX.utils.json_to_sheet(excelData);
+
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Pelamar");
+
+  // Generate Excel file and download
+  XLSX.writeFile(wb, `Data_Pelamar_${format(new Date(), "yyyyMMdd")}.xlsx`);
+ };
 
  useEffect(() => {
   const q = query(
@@ -179,13 +214,18 @@ const EmployeeDashboard = () => {
     animate={{opacity: 1, y: 0}}
     transition={{duration: 0.3}}
     className="max-w-6xl mx-auto rounded-lg">
-    <div className="flex justify-between items-center mb-8">
-     <h1 className="text-2xl font-bold text-onyx1 dark:text-white">
-      Daftar Pelamar
-     </h1>
+    <div className="flex items-center space-x-4 justify-between mb-4">
      <div className="text-sm text-gray-500 dark:text-gray-400">
       Total: {applications.length} pelamar
      </div>
+     <motion.button
+      whileHover={{scale: 1.05}}
+      whileTap={{scale: 0.95}}
+      onClick={exportToExcel}
+      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center gap-2">
+      <FiDownload size={16} />
+      Export Excel
+     </motion.button>
     </div>
 
     <div className="bg-white dark:bg-onyx2 rounded-xl shadow-sm overflow-hidden">
